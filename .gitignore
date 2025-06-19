@@ -10,6 +10,12 @@ yarn-error.log*
 lerna-debug.log*
 .pnpm-debug.log*
 
+# Ignore the specific Google credentials file
+
+
+# Also ignore the .env file we are about to create
+echo '.env' >> .gitignore
+
 # Diagnostic reports (https://nodejs.org/api/report.html)
 report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
 
