@@ -8,9 +8,22 @@
       <!-- Top bar -->
       <header class="bg-white shadow-sm lg:hidden">
         <div class="max-w-7xl mx-auto py-4 px-4 sm:px-6 lg:px-8">
-          <button @click="toggleSidebar" class="text-gray-500 focus:outline-none focus:text-gray-600">
-            <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+          <button
+            @click="toggleSidebar"
+            class="text-gray-500 focus:outline-none focus:text-gray-600"
+          >
+            <svg
+              class="h-6 w-6"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M4 6h16M4 12h16M4 18h16"
+              />
             </svg>
           </button>
         </div>
@@ -28,12 +41,12 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
-import Sidebar from '@/components/Navigation/SideNavBarComponent.vue'
+import { ref } from "vue";
+import Sidebar from "@/components/Navigation/SideNavBarComponent.vue";
 
-const sidebar = ref(null)
+const sidebar = ref(null);
 
 const toggleSidebar = () => {
-  sidebar.value.toggleSidebar()
-}
+  sidebar.value.toggleSidebar();
+};
 </script>

@@ -1,6 +1,7 @@
 <template>
   <!-- ORW form -->
-  <div> <!-- Wrap everything in a div if needed -->
+  <div>
+    <!-- Wrap everything in a div if needed -->
     <form @submit.prevent="openConfirmationModal">
       <div class="container">
         <div class="form-container">
@@ -9,15 +10,28 @@
           <input type="text" v-model="formData.orw" name="orw" readonly />
 
           <label>Referring from:</label>
-          <input type="text" v-model="formData.referred_site" name="referred_site" readonly />
+          <input
+            type="text"
+            v-model="formData.referred_site"
+            name="referred_site"
+            readonly
+          />
 
           <label for="date">Date:</label>
-          <input type="date" v-model="formData.date" id="dateInput" name="date" readonly />
+          <input
+            type="date"
+            v-model="formData.date"
+            id="dateInput"
+            name="date"
+            readonly
+          />
 
           <label>Month:</label>
           <select v-model="formData.form_month" name="form_month" required>
             <option value="">--Select Month--</option>
-            <option v-for="month in months" :key="month" :value="month">{{ month }}</option>
+            <option v-for="month in months" :key="month" :value="month">
+              {{ month }}
+            </option>
           </select>
 
           <table>
@@ -35,29 +49,77 @@
             <tbody>
               <tr>
                 <td>1</td>
-                <td><input type="text" v-model="formData.name" name="name" required /></td>
-                <td><input type="number" v-model="formData.mobile_no" name="mobile_no" /></td>
-                <td><input type="text" v-model="formData.cid_other" name="cid_other" max="8" /></td>
                 <td>
-                  <input type="text" v-model="formData.participant_uid" name="participant_uid" readonly
-                    style="margin-top: 40px" />
-                  <button type="button" class="generatebtn" @click="generateUID">Generate UID</button>
+                  <input
+                    type="text"
+                    v-model="formData.name"
+                    name="name"
+                    required
+                  />
+                </td>
+                <td>
+                  <input
+                    type="number"
+                    v-model="formData.mobile_no"
+                    name="mobile_no"
+                  />
+                </td>
+                <td>
+                  <input
+                    type="text"
+                    v-model="formData.cid_other"
+                    name="cid_other"
+                    max="8"
+                  />
+                </td>
+                <td>
+                  <input
+                    type="text"
+                    v-model="formData.participant_uid"
+                    name="participant_uid"
+                    readonly
+                    style="margin-top: 40px"
+                  />
+                  <button
+                    type="button"
+                    class="generatebtn"
+                    @click="generateUID"
+                  >
+                    Generate UID
+                  </button>
                   <span v-if="loading" class="loading-status">Loading...</span>
                 </td>
                 <td>
-                  <select v-model="formData.referral_prep_site" name="referral_prep_site" required>
+                  <select
+                    v-model="formData.referral_prep_site"
+                    name="referral_prep_site"
+                    required
+                  >
                     <option value="">--Select Site--</option>
-                    <option v-for="site in prepSites" :key="site" :value="site">{{ site }}</option>
+                    <option v-for="site in prepSites" :key="site" :value="site">
+                      {{ site }}
+                    </option>
                   </select>
                 </td>
-                <td><input type="date" v-model="formData.referral_date" name="referral_date" required /></td>
+                <td>
+                  <input
+                    type="date"
+                    v-model="formData.referral_date"
+                    name="referral_date"
+                    required
+                  />
+                </td>
               </tr>
             </tbody>
           </table>
 
           <!-- Review & Submit Button -->
-          <button type="submit" class="submit-btn" :disabled="isSubmitting || loading">
-            {{ isSubmitting ? 'Processing...' : 'Review & Submit' }}
+          <button
+            type="submit"
+            class="submit-btn"
+            :disabled="isSubmitting || loading"
+          >
+            {{ isSubmitting ? "Processing..." : "Review & Submit" }}
           </button>
         </div>
       </div>
@@ -73,68 +135,84 @@
         <p>{{ errorMessage }}</p>
       </div>
       <!-- Loading Indicator for actual submission -->
-      <div v-if="isSubmitting" class="submitting-indicator">Submitting... Please wait.</div>
+      <div v-if="isSubmitting" class="submitting-indicator">
+        Submitting... Please wait.
+      </div>
     </form>
 
     <!-- Use the Confirmation Modal Component -->
-    <ConfirmationModal v-if="showConfirmationModal" :formData="formData" :is-submitting="isSubmitting"
-      @confirm="confirmAndSubmit" @cancel="closeConfirmationModal" />
-
+    <ConfirmationModal
+      v-if="showConfirmationModal"
+      :formData="formData"
+      :is-submitting="isSubmitting"
+      @confirm="confirmAndSubmit"
+      @cancel="closeConfirmationModal"
+    />
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
-import axios from 'axios';
+import { ref, onMounted } from "vue";
+import axios from "axios";
 // Import the new modal component
-import ConfirmationModal from './form10_ConfirmationModal.vue'; // Adjust path if necessary
+import ConfirmationModal from "./form10_ConfirmationModal.vue"; // Adjust path if necessary
 
 // --- Refs and Reactive Data ---
 const formData = ref({
-  orw: '',
-  referred_site: '',
-  date: '',
-  form_month: '',
-  name: '',
-  mobile_no: '',
-  cid_other: '',
-  participant_uid: '',
-  referral_prep_site: '',
-  referral_date: '',
+  orw: "",
+  referred_site: "",
+  date: "",
+  form_month: "",
+  name: "",
+  mobile_no: "",
+  cid_other: "",
+  participant_uid: "",
+  referral_prep_site: "",
+  referral_date: "",
 });
 
-const successMessage = ref('');
-const errorMessage = ref('');
+const successMessage = ref("");
+const errorMessage = ref("");
 const isSubmitting = ref(false);
 const loading = ref(false); // For UID generation
 const showConfirmationModal = ref(false); // State to control modal visibility
 
 // --- Static Data ---
 const months = [
-  'January', 'February', 'March', 'April', 'May', 'June',
-  'July', 'August', 'September', 'October', 'November', 'December'
+  "January",
+  "February",
+  "March",
+  "April",
+  "May",
+  "June",
+  "July",
+  "August",
+  "September",
+  "October",
+  "November",
+  "December",
 ];
 
 const prepSites = [
-  'CHD/JDWNRH/Thimphu',
-  'HISC/Thimphu',
-  'Paro Hospital/Paro',
-  'Phuntsholing Hospital/Chukha',
-  'CRRH/Gelephu/Sarpang',
-  'HISC/Gelephu',
-  'Kunegarabten HISC',
-  'Lobesa HISC',
-  'Mongar Regional Hospital',
-  'Samtse HISC',
-  'Samdrup Jongkhar HISC',
-  'Trashigang Regional Hospital'
+  "CHD/JDWNRH/Thimphu",
+  "HISC/Thimphu",
+  "Paro Hospital/Paro",
+  "Phuntsholing Hospital/Chukha",
+  "CRRH/Gelephu/Sarpang",
+  "HISC/Gelephu",
+  "Kunegarabten HISC",
+  "Lobesa HISC",
+  "Mongar Regional Hospital",
+  "Samtse HISC",
+  "Samdrup Jongkhar HISC",
+  "Trashigang Regional Hospital",
 ];
 
 // --- Functions ---
 
 // Initialize date field to today's date
 function initializeDate() {
-  const today = new Date().toISOString().split('T')[0];
+  const today = new Date().toISOString().split("T")[0];
   formData.value.date = today;
 }
 
@@ -142,22 +220,23 @@ function initializeDate() {
 async function generateUID() {
   const loggedInUser = getLoggedInUser();
   if (!loggedInUser || !loggedInUser.prep_location) {
-    alert('No logged-in user found or prep_location is missing.');
+    alert("No logged-in user found or prep_location is missing.");
     return;
   }
 
   loading.value = true;
-  errorMessage.value = ''; // Clear previous errors
+  errorMessage.value = ""; // Clear previous errors
   try {
     const form10_url =
-      'https://docs.google.com/spreadsheets/d/e/2PACX-1vSfG6e5EIcHDaXopn9DxMZnTwVFGi5CiQxmKlEIPsd7uPtZiQIikYb46UdN78UhZlJfocCfl_s0hGGX/pub?output=csv';
+      "https://docs.google.com/spreadsheets/d/e/2PACX-1vSfG6e5EIcHDaXopn9DxMZnTwVFGi5CiQxmKlEIPsd7uPtZiQIikYb46UdN78UhZlJfocCfl_s0hGGX/pub?output=csv";
     // Use fetch with appropriate error handling for network/CORS issues
-    const response = await fetch(form10_url, { cache: 'no-cache' }); // Prevent caching issues
+    const response = await fetch(form10_url, { cache: "no-cache" }); // Prevent caching issues
     if (!response.ok) {
       // Provide more specific feedback based on status if possible
       let errorMsg = `HTTP error! Status: ${response.status}`;
       if (response.status === 0) {
-        errorMsg = "Network error or CORS issue fetching UID data. Check console and network tab.";
+        errorMsg =
+          "Network error or CORS issue fetching UID data. Check console and network tab.";
       } else if (response.status === 404) {
         errorMsg = "UID source sheet not found (404). Check the URL.";
       }
@@ -165,38 +244,44 @@ async function generateUID() {
     }
     const csvText = await response.text();
 
-    if (!csvText || typeof csvText !== 'string') {
-      throw new Error('Invalid CSV data received for UID generation.');
+    if (!csvText || typeof csvText !== "string") {
+      throw new Error("Invalid CSV data received for UID generation.");
     }
 
-    const sheetData = csvText.split('\n').map(row => row.split(',').map(cell => cell.trim())); // Trim whitespace from cells
+    const sheetData = csvText
+      .split("\n")
+      .map((row) => row.split(",").map((cell) => cell.trim())); // Trim whitespace from cells
 
     if (!Array.isArray(sheetData) || sheetData.length === 0) {
-      throw new Error('Could not parse CSV data for UID generation.');
+      throw new Error("Could not parse CSV data for UID generation.");
     }
 
     const locationMap = {
-      'CHD/JDWNRH/Thimphu': 'CJTH',
-      'HISC/Thimphu': 'HIST',
-      'Paro Hospital/Paro': 'PAR',
-      'Phuntsholing Hospital/Chukha': 'PHU',
-      'CRRH/Gelephu/Sarpang': 'CGS',
-      'HISC/Gelephu': 'HISG',
-      'Thimphu': 'THI',
-      'Kunegarabten HISC': 'KRH',
-      'Lobesa HISC': 'LBH',
-      'Mongar Regional Hospital': 'MRH',
-      'Samtse HISC': 'SAH',
-      'Samdrup Jongkhar HISC': 'SJH',
-      'Trashigang Regional Hospital': 'TRH'
+      "CHD/JDWNRH/Thimphu": "CJTH",
+      "HISC/Thimphu": "HIST",
+      "Paro Hospital/Paro": "PAR",
+      "Phuntsholing Hospital/Chukha": "PHU",
+      "CRRH/Gelephu/Sarpang": "CGS",
+      "HISC/Gelephu": "HISG",
+      Thimphu: "THI",
+      "Kunegarabten HISC": "KRH",
+      "Lobesa HISC": "LBH",
+      "Mongar Regional Hospital": "MRH",
+      "Samtse HISC": "SAH",
+      "Samdrup Jongkhar HISC": "SJH",
+      "Trashigang Regional Hospital": "TRH",
       // Make sure this mapping is intended/correct
     };
 
     const prepLocationCode = locationMap[loggedInUser.prep_location];
     if (!prepLocationCode) {
       // Log the problematic location
-      console.warn(`No location code mapping found for: ${loggedInUser.prep_location}`);
-      alert(`Invalid prep_location code mapping for "${loggedInUser.prep_location}". Cannot generate UID.`);
+      console.warn(
+        `No location code mapping found for: ${loggedInUser.prep_location}`,
+      );
+      alert(
+        `Invalid prep_location code mapping for "${loggedInUser.prep_location}". Cannot generate UID.`,
+      );
       loading.value = false;
       return;
     }
@@ -205,39 +290,46 @@ async function generateUID() {
     const uidColumnIndex = 1; // Adjust if UID is in a different column
     const existingUids = sheetData
       .slice(1) // Skip header row if present
-      .map(row => (row && row.length > uidColumnIndex ? row[uidColumnIndex] : null))
-      .filter(uid => uid && typeof uid === 'string' && uid.startsWith(prepLocationCode));
+      .map((row) =>
+        row && row.length > uidColumnIndex ? row[uidColumnIndex] : null,
+      )
+      .filter(
+        (uid) =>
+          uid && typeof uid === "string" && uid.startsWith(prepLocationCode),
+      );
 
     let highestNum = 0;
     if (existingUids.length > 0) {
-      const numericParts = existingUids.map(uid => {
-        const numStr = uid.substring(prepLocationCode.length);
-        const num = parseInt(numStr, 10);
-        return isNaN(num) ? 0 : num; // Handle potential parsing errors (e.g., "CJTHABCD")
-      }).filter(num => num !== 0); // Filter out any zeros from parsing errors if needed
+      const numericParts = existingUids
+        .map((uid) => {
+          const numStr = uid.substring(prepLocationCode.length);
+          const num = parseInt(numStr, 10);
+          return isNaN(num) ? 0 : num; // Handle potential parsing errors (e.g., "CJTHABCD")
+        })
+        .filter((num) => num !== 0); // Filter out any zeros from parsing errors if needed
 
       if (numericParts.length > 0) {
         highestNum = Math.max(...numericParts);
       }
     }
 
-    formData.value.participant_uid = prepLocationCode + (highestNum + 1).toString().padStart(4, '0');
+    formData.value.participant_uid =
+      prepLocationCode + (highestNum + 1).toString().padStart(4, "0");
   } catch (error) {
-    console.error('Error generating UID:', error);
+    console.error("Error generating UID:", error);
     errorMessage.value = `Error generating UID: ${error.message}. Please check the Google Sheet URL, permissions, and your network connection. If the issue persists, try generating manually or contact support.`;
-    formData.value.participant_uid = ''; // Clear potentially wrong UID
+    formData.value.participant_uid = ""; // Clear potentially wrong UID
   } finally {
     loading.value = false;
   }
 }
 
-
 // --- Modal Control ---
 const openConfirmationModal = (event) => {
   const form = event.target;
   if (form.checkValidity()) {
-    errorMessage.value = '';
-    successMessage.value = '';
+    errorMessage.value = "";
+    successMessage.value = "";
     showConfirmationModal.value = true; // Show the imported modal
   } else {
     errorMessage.value = "Please fill in all required fields.";
@@ -258,38 +350,43 @@ const confirmAndSubmit = async () => {
 const submitForm = async () => {
   if (isSubmitting.value) return;
 
-  const url = 'https://script.google.com/macros/s/AKfycbxRCVxQc7f23IADj0pHx3rd_x2AT5rqgY-3TycFX1YLZTabZSauKKzE5NKYQrLL0N4GKw/exec';
+  const url =
+    "https://script.google.com/macros/s/AKfycbxRCVxQc7f23IADj0pHx3rd_x2AT5rqgY-3TycFX1YLZTabZSauKKzE5NKYQrLL0N4GKw/exec";
 
   isSubmitting.value = true;
-  successMessage.value = '';
-  errorMessage.value = '';
+  successMessage.value = "";
+  errorMessage.value = "";
 
   try {
     const dataToSubmit = { ...formData.value };
     const formDataSerialized = new URLSearchParams(dataToSubmit).toString();
 
     const response = await axios.post(url, formDataSerialized, {
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
     });
 
     // Basic success check (customize if your script returns specific success/error structure)
     if (response.status === 200 && response.data) {
       // You might want to check response.data for a specific success message or structure
-      successMessage.value = typeof response.data === 'string' ? response.data : 'Form submitted successfully!';
+      successMessage.value =
+        typeof response.data === "string"
+          ? response.data
+          : "Form submitted successfully!";
       clearForm();
     } else {
       // Handle cases where status is 200 but data indicates an error
-      throw new Error(response.data || 'Submission failed with status ' + response.status);
+      throw new Error(
+        response.data || "Submission failed with status " + response.status,
+      );
     }
-
   } catch (error) {
-    errorMessage.value = `Submission Error: ${error.message || 'Please try again.'}`;
-    console.error('Error submitting form:', error);
+    errorMessage.value = `Submission Error: ${error.message || "Please try again."}`;
+    console.error("Error submitting form:", error);
     if (error.response) {
       console.error("Error Response Data:", error.response.data);
       errorMessage.value += ` (Server Response: ${error.response.status})`;
     } else if (error.request) {
-      errorMessage.value += ' (No response from server). Check network.';
+      errorMessage.value += " (No response from server). Check network.";
     }
   } finally {
     isSubmitting.value = false;
@@ -305,14 +402,14 @@ const clearForm = () => {
   formData.value = {
     orw: preservedOrw,
     referred_site: preservedSite,
-    date: '',
-    form_month: '',
-    name: '',
-    mobile_no: '',
-    cid_other: '',
-    participant_uid: '',
-    referral_prep_site: '',
-    referral_date: '',
+    date: "",
+    form_month: "",
+    name: "",
+    mobile_no: "",
+    cid_other: "",
+    participant_uid: "",
+    referral_prep_site: "",
+    referral_date: "",
   };
   initializeDate();
 };
@@ -320,7 +417,7 @@ const clearForm = () => {
 // Fetch logged-in user information
 function getLoggedInUser() {
   try {
-    const user = localStorage.getItem('loggedInUser');
+    const user = localStorage.getItem("loggedInUser");
     return user ? JSON.parse(user) : null;
   } catch (e) {
     console.error("Error parsing loggedInUser from localStorage:", e);
@@ -332,11 +429,11 @@ function getLoggedInUser() {
 onMounted(() => {
   const loggedInUser = getLoggedInUser();
   if (loggedInUser) {
-    formData.value.orw = loggedInUser.fullname || 'N/A';
-    formData.value.referred_site = loggedInUser.prep_location || 'N/A';
+    formData.value.orw = loggedInUser.fullname || "N/A";
+    formData.value.referred_site = loggedInUser.prep_location || "N/A";
   } else {
-    formData.value.orw = 'User Not Found';
-    formData.value.referred_site = 'Location Not Found';
+    formData.value.orw = "User Not Found";
+    formData.value.referred_site = "Location Not Found";
     // Optionally show an error message to the user if login info is critical
     // errorMessage.value = "Could not load user information. Some fields may be incorrect.";
   }
