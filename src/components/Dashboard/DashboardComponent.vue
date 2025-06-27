@@ -168,7 +168,7 @@ import BarChart from "../DashboardGraph/BarChart.vue";
 import LineChart from "../DashboardGraph/LineChart.vue";
 import DonutChart from "../DashboardGraph/DonutChart.vue";
 import BarChartLarge from "../DashboardGraph/BarChartLarge.vue";
-import BarChartHorizontal from "../DashboardGraph/BarCHartHorizontal.vue";
+import BarChartHorizontal from "../DashboardGraph/BarChartHorizontal.vue";
 import BarChartExit from "../DashboardGraph/BarExitchart.vue";
 
 // Filter state
@@ -220,7 +220,7 @@ const updateLocations = () => {
     const locationIndex = allRows.value[0].indexOf("Referral to PrEP site");
     if (locationIndex !== -1) {
       const uniqueLocations = new Set(
-        allRows.value.slice(1).map((row) => row[locationIndex]),
+        allRows.value.slice(1).map((row) => row[locationIndex])
       );
       locations.value = Array.from(uniqueLocations).sort();
     }
@@ -264,7 +264,7 @@ const applyFilters = () => {
 
 const findColumnIndex = (headers, columnName) => {
   return headers.findIndex(
-    (header) => header.trim().toLowerCase() === columnName.trim().toLowerCase(),
+    (header) => header.trim().toLowerCase() === columnName.trim().toLowerCase()
   );
 };
 
@@ -498,14 +498,14 @@ const lineChartData = computed(() => {
 
   // Sort dates to ensure chronological order
   const sortedDates = Object.keys(dateKpGroupCounts).sort(
-    (a, b) => new Date(a) - new Date(b),
+    (a, b) => new Date(a) - new Date(b)
   );
 
   // Find all unique KP groups in the data
   const kpGroups = new Set();
   sortedDates.forEach((date) => {
     Object.keys(dateKpGroupCounts[date]).forEach((kpGroup) =>
-      kpGroups.add(kpGroup),
+      kpGroups.add(kpGroup)
     );
   });
 

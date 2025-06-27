@@ -29,8 +29,9 @@ export default defineConfig({
 rewrite: (path) =>
 path.replace(
   /^\/api/,
-  '/macros/s/AKfycbygm7icstqZWiYm1Up-XJV-TBvEpHg7-KJvd1x9U0p_skjxzfrVX2_h5mPxq6bCFagoNQ/exec'
+  '/macros/s/AKfycbwQKgI5z1bEucJQN8EirH3aJDGl7wIDwK7yapC9qZVQGT0gv7aQPGwp4ujfv71B8v-Ozw/exec'
 ),
+
 
 
         configure: (proxy) => {

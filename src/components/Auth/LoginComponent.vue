@@ -120,10 +120,12 @@
 <script setup>
 import { ref } from "vue";
 import Swal from "sweetalert2";
+import { useRouter } from "vue-router";
 
 const username = ref("");
 const password = ref("");
 const errorMessage = ref("");
+const router = useRouter();
 
 const handleSubmit = async () => {
   errorMessage.value = "";
@@ -139,7 +141,8 @@ const handleSubmit = async () => {
 
   const result = await res.json();
 
-  if (result.status === "success") {
+  if (result.success === true) {
+    // ✅ use `success` instead of `status`
     const user = result.user;
     localStorage.setItem("loggedInUser", JSON.stringify(user));
 
@@ -149,10 +152,8 @@ const handleSubmit = async () => {
       icon: "success",
       timer: 1500,
       showConfirmButton: false,
-      willClose: () => {
-        window.location.href =
-          user.role === "L4" ? "/dashboard/forms" : "/dashboard";
-      },
+    }).then(() => {
+      router.push(user.role === "L4" ? "/dashboard/forms" : "/dashboard");
     });
   } else {
     errorMessage.value = result.message;
