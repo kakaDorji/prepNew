@@ -1,4 +1,5 @@
 <template>
+  ``
   <!-- ORW form -->
   <div>
     <!-- Wrap everything in a div if needed -->
@@ -154,8 +155,11 @@
 <script setup>
 import { ref, onMounted } from "vue";
 import axios from "axios";
+// import { prepSites } from "../location/prepSite";
+
 // Import the new modal component
 import ConfirmationModal from "./form10_ConfirmationModal.vue"; // Adjust path if necessary
+import { prepSites } from "../location/prepSite";
 
 // --- Refs and Reactive Data ---
 const formData = ref({
@@ -172,6 +176,7 @@ const formData = ref({
 });
 
 const successMessage = ref("");
+
 const errorMessage = ref("");
 const isSubmitting = ref(false);
 const loading = ref(false); // For UID generation
@@ -193,20 +198,23 @@ const months = [
   "December",
 ];
 
-const prepSites = [
-  "CHD/JDWNRH/Thimphu",
-  "HISC/Thimphu",
-  "Paro Hospital/Paro",
-  "Phuntsholing Hospital/Chukha",
-  "CRRH/Gelephu/Sarpang",
-  "HISC/Gelephu",
-  "Kunegarabten HISC",
-  "Lobesa HISC",
-  "Mongar Regional Hospital",
-  "Samtse HISC",
-  "Samdrup Jongkhar HISC",
-  "Trashigang Regional Hospital",
-];
+// const prepSites = [
+//   "CHD/JDWNRH/Thimphu",
+//   "HISC/Thimphu",
+//   "Paro Hospital/Paro",
+//   "Gelephu HISC centers",
+//   "Phuetsholing HISC",
+//   "Phuntsholing Hospital/Chukha",
+//   "CRRH/Gelephu/Sarpang",
+//   "HISC/Gelephu",
+//   " GRRH",
+//   "Kunegarabten HISC",
+//   "Lobesa HISC",
+//   "Mongar Regional Hospital",
+//   "Samtse HISC",
+//   "Samdrup Jongkhar HISC",
+//   "Trashigang Regional Hospital",
+// ];
 
 // --- Functions ---
 
@@ -256,6 +264,25 @@ async function generateUID() {
       throw new Error("Could not parse CSV data for UID generation.");
     }
 
+    // const locationMap = {
+    //   "CHD/JDWNRH/Thimphu": "CJTH",
+    //   "HISC/Thimphu": "HIST",
+    //   "Paro Hospital/Paro": "PAR",
+    //   "Phuentsholing Hospital/Chukha": "PHU",
+    //   "CRRH/Gelephu/Sarpang": "CGS",
+    //   "HISC/Gelephu": "HISG",
+    //   Thimphu: "THI",
+    //   "Kunegarabten HISC": "KRH",
+    //   "Lobesa HISC": "LBH",
+    //   "Mongar Regional Hospital": "MRH",
+    //   "Samtse HISC": "SAH",
+    //   "Samdrup Jongkhar HISC": "SJH",
+    //   "Trashigang Regional Hospital": "TRH",
+    //   // Make sure this mapping is intended/correct
+    // };
+
+    // In your <script setup>
+
     const locationMap = {
       "CHD/JDWNRH/Thimphu": "CJTH",
       "HISC/Thimphu": "HIST",
@@ -270,17 +297,20 @@ async function generateUID() {
       "Samtse HISC": "SAH",
       "Samdrup Jongkhar HISC": "SJH",
       "Trashigang Regional Hospital": "TRH",
-      // Make sure this mapping is intended/correct
+      // --- ADD THIS LINE ---
+      "Phuentsholing HISC": "PHISC",
+      HQ: "HQ",
     };
+    const prepSite = Object.keys(locationMap);
 
     const prepLocationCode = locationMap[loggedInUser.prep_location];
     if (!prepLocationCode) {
       // Log the problematic location
       console.warn(
-        `No location code mapping found for: ${loggedInUser.prep_location}`,
+        `No location code mapping found for: ${loggedInUser.prep_location}`
       );
       alert(
-        `Invalid prep_location code mapping for "${loggedInUser.prep_location}". Cannot generate UID.`,
+        `Invalid prep_location code mapping for "${loggedInUser.prep_location}". Cannot generate UID.`
       );
       loading.value = false;
       return;
@@ -291,11 +321,11 @@ async function generateUID() {
     const existingUids = sheetData
       .slice(1) // Skip header row if present
       .map((row) =>
-        row && row.length > uidColumnIndex ? row[uidColumnIndex] : null,
+        row && row.length > uidColumnIndex ? row[uidColumnIndex] : null
       )
       .filter(
         (uid) =>
-          uid && typeof uid === "string" && uid.startsWith(prepLocationCode),
+          uid && typeof uid === "string" && uid.startsWith(prepLocationCode)
       );
 
     let highestNum = 0;
@@ -376,7 +406,7 @@ const submitForm = async () => {
     } else {
       // Handle cases where status is 200 but data indicates an error
       throw new Error(
-        response.data || "Submission failed with status " + response.status,
+        response.data || "Submission failed with status " + response.status
       );
     }
   } catch (error) {

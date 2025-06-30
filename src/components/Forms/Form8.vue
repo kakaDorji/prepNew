@@ -71,7 +71,7 @@
             />
             MSM</label
           >
-          <label
+          <!-- <label
             style="
               display: inline-flex;
               align-items: center;
@@ -98,8 +98,8 @@
               value="TGW"
             />
             TGW</label
-          >
-          <label
+          > -->
+          <!-- <label
             style="
               display: inline-flex;
               align-items: center;
@@ -112,6 +112,21 @@
               value="TGM"
             />
             TGM</label
+          > -->
+
+          <label
+            style="
+              display: inline-flex;
+              align-items: center;
+              font-weight: normal;
+            "
+            ><input
+              type="radio"
+              v-model="formData.kp_group"
+              name="kp_group"
+              value="TGQ"
+            />
+            TGQ</label
           >
         </div>
 
@@ -123,15 +138,9 @@
           required
         >
           <option value="" disabled>Select a PrEP site</option>
-          <option value="CHD/JDWNRH/Thimphu">CHD/JDWNRH/ Thimphu</option>
-          <option value="HISC/Thimphu">HISC/Thimphu</option>
-          <option value="Paro Hospital/Paro">Paro Hospital/ Paro</option>
-          <option value="Phuntsholing Hospital/Chukha">
-            Phuntsholing hospital/Chukha
+          <option v-for="site in prepSites">
+            {{ site }}
           </option>
-          <option value="HISC/Phuntsholing">HISC /Phuntsholing</option>
-          <option value="CRRH/Gelephu/Sarpang">CRRH /Gelephu / Sarpang</option>
-          <option value="HISC/Gelephu">HISC/ Gelephu</option>
         </select>
 
         <label style="margin-top: 1rem">Instructions:</label>
@@ -825,6 +834,7 @@ import { ref, onMounted, watch, computed } from "vue";
 import axios from "axios";
 // Import the NEW modal component
 import Form8_ConfirmationModal from "./Form8_ConfirmationModal.vue"; // Adjust path if needed
+import { prepSites } from "../location/prepSite";
 
 // --- Configuration ---
 const GOOGLE_SCRIPT_URL =
@@ -902,7 +912,7 @@ const fetchCsvData = async () => {
     csvData = csvText
       .split("\n")
       .map((row) =>
-        row.split(",").map((cell) => cell.trim().replace(/^"|"$/g, "")),
+        row.split(",").map((cell) => cell.trim().replace(/^"|"$/g, ""))
       );
     console.log("CSV Data Loaded for Form 8");
     statusMessage.value = "Validation data loaded.";

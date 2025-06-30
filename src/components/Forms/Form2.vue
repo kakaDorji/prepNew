@@ -32,13 +32,9 @@
           name="prep_site"
           required
         >
-          <option value="CHD/JDWNRH/Thimphu">CHD/JDWNRH/Thimphu</option>
-          <option value="HISC/Thimphu">HISC/Thimphu</option>
-          <option value="Paro Hospital/Paro">Paro Hospital/Paro</option>
-          <option value="Phuntsholing Hospital/Chukha">
-            Phuntsholing Hospital/Chukha
+          <option v-for="site in prepSites" :key="site" :value="site">
+            {{ site }}
           </option>
-          <option value="CRRH/Gelephu/Sarpang">CRRH/Gelephu/Sarpang</option>
         </select>
         <!-- Date -->
         <label for="dateInput">Date:</label>
@@ -2291,7 +2287,8 @@
         </div>
 
         <label
-          >6.3 Have you ever visited HISC Thimphu in the last 12 months?</label
+          >6.3 Have you ever visited HISC or any other hospitals in the last 12
+          months?</label
         >
         <div style="display: flex; gap: 20px; margin-bottom: 1rem">
           <label
@@ -2328,8 +2325,12 @@
           v-if="formData.visited_hisc_thimphu === 'Yes'"
           class="conditional-section"
         >
-          <label
+          <!-- <label
             >6.3.b What were the reasons for your visit to HISC Thimphu?</label
+          > -->
+          <label
+            >6.3 In the last 12 months, have you ever visited a hospital or HISC
+            for sexual health services?</label
           >
           <input
             type="text"
@@ -3036,74 +3037,83 @@
             No response</label
           >
         </div>
+        <!-- make changes here -->
+        <!-- 8.4 Question (conditionally shown) -->
 
-        <label
-          >8.4 Whom did you inform the last time you were forced to have sex
-          against your will? (Multiple responses possible)</label
+        <div
+          v-if="
+            formData.forced_intercourse === 'Yes, only once' ||
+            formData.forced_intercourse === 'Yes, multiple times'
+          "
         >
-        <div class="checkbox-group-vertical">
-          <label
-            ><input
-              type="checkbox"
-              v-model="formData.informed_person"
-              value="Did not tell anyone"
+          <label>
+            8.4 Whom did you inform the last time you were forced to have sex
+            against your will? (Multiple responses possible)
+          </label>
+          <div class="checkbox-group-vertical">
+            <label>
+              <input
+                type="checkbox"
+                v-model="formData.informed_person"
+                value="Did not tell anyone"
+              />
+              Did not tell anyone
+            </label>
+            <label>
+              <input
+                type="checkbox"
+                v-model="formData.informed_person"
+                value="Fellow MSM, TG, FSW"
+              />
+              Fellow MSM, TG, FSW
+            </label>
+            <label>
+              <input
+                type="checkbox"
+                v-model="formData.informed_person"
+                value="Friend/Relative/Family Member who is not MSM/TG/FSW"
+              />
+              Friend / Relative / Family Member who is not MSM/TG/FSW
+            </label>
+            <label>
+              <input
+                type="checkbox"
+                v-model="formData.informed_person"
+                value="NGO/CSO worker"
+              />
+              NGO/CSO worker
+            </label>
+            <label>
+              <input
+                type="checkbox"
+                v-model="formData.informed_person"
+                value="Police"
+              />
+              Police
+            </label>
+            <label>
+              <input
+                type="checkbox"
+                v-model="formData.informed_person"
+                value="I don’t remember"
+              />
+              I Don’t remember
+            </label>
+            <label>
+              <input
+                type="checkbox"
+                v-model="formData.informed_person"
+                value="Others"
+              />
+              Others
+            </label>
+            <input
+              type="text"
+              v-if="formData.informed_person.includes('Others')"
+              v-model="formData.other_informed"
+              placeholder="Specify other persons informed"
             />
-            Did not tell anyone</label
-          >
-          <label
-            ><input
-              type="checkbox"
-              v-model="formData.informed_person"
-              value="Fellow MSM, TG, FSW"
-            />
-            Fellow MSM, TG, FSW</label
-          >
-          <label
-            ><input
-              type="checkbox"
-              v-model="formData.informed_person"
-              value="Friend/Relative/Family Member who is not MSM/TG/FSW"
-            />
-            Friend / Relative / Family Member who is not MSM/TG/FSW</label
-          >
-          <label
-            ><input
-              type="checkbox"
-              v-model="formData.informed_person"
-              value="NGO/CSO worker"
-            />
-            NGO/CSO worker</label
-          >
-          <label
-            ><input
-              type="checkbox"
-              v-model="formData.informed_person"
-              value="Police"
-            />
-            Police</label
-          >
-          <label
-            ><input
-              type="checkbox"
-              v-model="formData.informed_person"
-              value="I don’t remember"
-            />
-            I Don’t remember</label
-          >
-          <label
-            ><input
-              type="checkbox"
-              v-model="formData.informed_person"
-              value="Others"
-            />
-            Others</label
-          >
-          <input
-            type="text"
-            v-if="formData.informed_person.includes('Others')"
-            v-model="formData.other_informed"
-            placeholder="Specify other persons informed"
-          />
+          </div>
         </div>
       </div>
 
@@ -3161,7 +3171,7 @@ import { ref, onMounted, watch } from "vue";
 import axios from "axios";
 // Import the modal component (assuming reuse)
 import Form2_ConfirmationModal from "./Form2_ConfirmationModal.vue"; // Adjust path if needed
-
+import { prepSites } from "../location/prepSite";
 // --- Configuration ---
 const GOOGLE_SCRIPT_URL =
   "https://script.google.com/macros/s/AKfycbzIluNtj1MbiDhBsyOSYDaX_nZfmupCjKz2De1m-IqAZyqQepHH9QLoNvqBsa2v0hsn/exec"; // Replace with your Form 2 Script URL
@@ -3174,7 +3184,8 @@ const SUBMIT_SUCCESS_DELAY = 2500;
 const formData = ref({
   // Initialize all fields from Form 2 template
   participant_uid: "",
-  prep_site: "CHD/JDWNRH/Thimphu", // Default
+  //prep_site: "CHD/JDWNRH/Thimphu", // Default
+  prep_site: "",
   date: "",
   interviewer_name: "",
   designation: "",
@@ -3305,7 +3316,7 @@ async function fetchCsvData() {
     csvData = csvText
       .split("\n")
       .map((row) =>
-        row.split(",").map((cell) => cell.trim().replace(/^"|"$/g, "")),
+        row.split(",").map((cell) => cell.trim().replace(/^"|"$/g, ""))
       );
     console.log("CSV Data Loaded for Form 2");
     statusMessage.value = "Validation data loaded. Please enter UID.";
@@ -3383,7 +3394,7 @@ watch(
   () => formData.value.participant_uid,
   (newUid) => {
     validateUidOnInput(newUid);
-  },
+  }
 );
 
 // --- Modal Control ---
@@ -3458,7 +3469,7 @@ const confirmAndSubmit = async () => {
         isReviewModalVisible.value = false;
         setFinalMessage(
           response.data || "Form 2 submitted successfully!",
-          "success",
+          "success"
         );
         clearForm();
         statusMessage.value = "";

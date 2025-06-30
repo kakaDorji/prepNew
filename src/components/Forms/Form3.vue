@@ -696,7 +696,7 @@
         <label style="margin-top: 1rem"
           >If yes to any of the items above, is there a report of a possible
           recent HIV exposure (e.g. condomless sex/injecting drug use) in the
-          past 15 days?</label
+          past 14 days?</label
         >
         <div style="display: flex; gap: 20px; margin-bottom: 1rem">
           <label
@@ -1732,7 +1732,7 @@ const fetchCsvData = async () => {
     csvData = csvText
       .split("\n")
       .map((row) =>
-        row.split(",").map((cell) => cell.trim().replace(/^"|"$/g, "")),
+        row.split(",").map((cell) => cell.trim().replace(/^"|"$/g, ""))
       );
     console.log("CSV Data Loaded for Form 3");
     statusMessage.value = "Validation data loaded. Please enter UID.";
@@ -1848,7 +1848,7 @@ const confirmAndSubmit = async () => {
         isReviewModalVisible.value = false;
         setFinalMessage(
           response.data.message || "Form submitted successfully!",
-          "success",
+          "success"
         );
         clearForm(); // Clear form data after successful submission
         statusMessage.value = "";

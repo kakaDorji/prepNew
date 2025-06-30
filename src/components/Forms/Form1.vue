@@ -86,43 +86,10 @@
             <input
               type="radio"
               v-model="formData.kpo_group"
-              value="TGW"
+              value="TGQ"
               name="kpo_group"
             />
-            TGW
-          </label>
-          <label
-            style="display: inline-flex; align-items: center; margin-bottom: 0"
-          >
-            <input
-              type="radio"
-              v-model="formData.kpo_group"
-              value="TGM"
-              name="kpo_group"
-            />
-            TGM
-          </label>
-          <label
-            style="display: inline-flex; align-items: center; margin-bottom: 0"
-          >
-            <input
-              type="radio"
-              v-model="formData.kpo_group"
-              value="Male"
-              name="kpo_group"
-            />
-            Male
-          </label>
-          <label
-            style="display: inline-flex; align-items: center; margin-bottom: 0"
-          >
-            <input
-              type="radio"
-              v-model="formData.kpo_group"
-              value="Female"
-              name="kpo_group"
-            />
-            Female
+            TGQ
           </label>
         </div>
 
@@ -133,13 +100,9 @@
           name="prep_site"
           required
         >
-          <option value="CHD/JDWNRH/Thimphu">CHD/JDWNRH/Thimphu</option>
-          <option value="HISC/Thimphu">HISC/Thimphu</option>
-          <option value="Paro Hospital/Paro">Paro Hospital/Paro</option>
-          <option value="Phuntsholing Hospital/Chukha">
-            Phuntsholing Hospital/Chukha
+          <option v-for="site in prepSites" :key="site" :value="site">
+            {{ site }}
           </option>
-          <option value="CRRH/Gelephu/Sarpang">CRRH/Gelephu/Sarpang</option>
         </select>
 
         <!-- Demographic Assessment -->
@@ -673,6 +636,7 @@
 <script setup>
 import { ref, onMounted, watch } from "vue";
 import axios from "axios";
+import { prepSites } from "../location/prepSite";
 // Import the modal component
 import Form1_ConfirmationModal from "./Form1_ConfirmationModal.vue"; // Adjust path if needed
 
@@ -756,7 +720,7 @@ async function fetchCsvData() {
     }
     const csvText = await response.text();
     csvData = csvText.split("\n").map(
-      (row) => row.split(",").map((cell) => cell.trim().replace(/^"|"$/g, "")), // Trim whitespace and quotes
+      (row) => row.split(",").map((cell) => cell.trim().replace(/^"|"$/g, "")) // Trim whitespace and quotes
     );
     console.log("CSV Data Loaded");
     statusMessage.value = "Validation data loaded. Please enter UID.";
@@ -836,7 +800,7 @@ watch(
   () => formData.value.participant_uid,
   (newUid) => {
     validateUidOnInput(newUid);
-  },
+  }
 );
 
 // Age validation
@@ -902,7 +866,7 @@ const confirmAndSubmit = async () => {
         isReviewModalVisible.value = false; // Close modal
         setFinalMessage(
           response.data.message || "Form submitted successfully!",
-          "success",
+          "success"
         ); // Set final message
         clearForm(); // Reset the form fields
         // Reset UID validation state

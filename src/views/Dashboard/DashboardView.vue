@@ -31,7 +31,7 @@
 
       <!-- Main content area -->
       <main class="flex-1 overflow-x-hidden overflow-y-auto bg-gray-100">
-        <div class="flex flex-col h-full max-w-8xl mx-auto px-6 py-8">
+        <div class="flex flex-col h-full max-w-8xl mx-auto px-2 py-2">
           <!-- Dynamically render components based on route -->
           <router-view />
         </div>

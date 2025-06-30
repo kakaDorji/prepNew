@@ -36,16 +36,9 @@
           v-model="formData.prep_site"
           required
         >
-          <option value="" disabled>Select a PrEP site</option>
-          <option value="CHD/JDWNRH/Thimphu">CHD/JDWNRH/ Thimphu</option>
-          <option value="HISC/Thimphu">HISC/Thimphu</option>
-          <option value="Paro Hospital/Paro">Paro Hospital/ Paro</option>
-          <option value="Phuntsholing Hospital/Chukha">
-            Phuntsholing hospital/Chukha
+          <option v-for="site in prepSites">
+            {{ site }}
           </option>
-          <option value="HISC/Phuntsholing">HISC /Phuntsholing</option>
-          <option value="CRRH/Gelephu/Sarpang">CRRH /Gelephu / Sarpang</option>
-          <option value="HISC/Gelephu">HISC/ Gelephu</option>
         </select>
 
         <label for="dateInput">DATE:</label>
@@ -706,6 +699,7 @@ import { ref, onMounted, watch } from "vue";
 import axios from "axios";
 // Import the NEW modal component
 import Form5_ConfirmationModal from "./Form5_ConfirmationModal.vue"; // Adjust path if needed
+import { prepSites } from "../location/prepSite";
 
 // --- Configuration ---
 const GOOGLE_SCRIPT_URL =
@@ -788,7 +782,7 @@ const fetchCsvData = async () => {
     csvData = csvText
       .split("\n")
       .map((row) =>
-        row.split(",").map((cell) => cell.trim().replace(/^"|"$/g, "")),
+        row.split(",").map((cell) => cell.trim().replace(/^"|"$/g, ""))
       );
     console.log("CSV Data Loaded for Form 5");
     statusMessage.value = "Validation data loaded. Please enter UID.";

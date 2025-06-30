@@ -140,21 +140,19 @@ const handleSubmit = async () => {
   });
 
   const result = await res.json();
-
   if (result.success === true) {
-    // ✅ use `success` instead of `status`
-    const user = result.user;
-    localStorage.setItem("loggedInUser", JSON.stringify(user));
-
-    Swal.fire({
+    localStorage.setItem("authToken", result.token);
+    localStorage.setItem("loggedInUser", JSON.stringify(result.user));
+    // Store role if needed
+    await Swal.fire({
       title: "Success!",
       text: "Redirecting...",
       icon: "success",
       timer: 1500,
       showConfirmButton: false,
-    }).then(() => {
-      router.push(user.role === "L4" ? "/dashboard/forms" : "/dashboard");
     });
+
+    router.push(result.user.role === "L4" ? "/dashboard/forms" : "/dashboard");
   } else {
     errorMessage.value = result.message;
   }

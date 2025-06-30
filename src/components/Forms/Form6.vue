@@ -40,15 +40,9 @@
           required
         >
           <option value="" disabled>Select a PrEP site</option>
-          <option value="CHD/JDWNRH/Thimphu">CHD/JDWNRH/ Thimphu</option>
-          <option value="HISC/Thimphu">HISC/Thimphu</option>
-          <option value="Paro Hospital/Paro">Paro Hospital/ Paro</option>
-          <option value="Phuntsholing Hospital/Chukha">
-            Phuntsholing hospital/Chukha
+          <option v-for="site in prepSites">
+            {{ site }}
           </option>
-          <option value="HISC/Phuntsholing">HISC /Phuntsholing</option>
-          <option value="CRRH/Gelephu/Sarpang">CRRH /Gelephu / Sarpang</option>
-          <option value="HISC/Gelephu">HISC/ Gelephu</option>
         </select>
 
         <p
@@ -3850,6 +3844,7 @@
 import { ref, onMounted, watch, computed } from "vue";
 import axios from "axios"; // Or use fetch if preferred
 import Form6_ConfirmationModal from "./Form6_ConfirmationModal.vue";
+import { prepSites } from "../location/prepSite";
 
 // --- Configuration ---
 const GOOGLE_SCRIPT_URL =
@@ -4032,13 +4027,13 @@ const hasAnalPartners = computed(
   () =>
     (formData.value.steady_anal_partners ?? 0) > 0 ||
     (formData.value.casual_anal_partners ?? 0) > 0 ||
-    (formData.value.transactional_anal_partners ?? 0) > 0,
+    (formData.value.transactional_anal_partners ?? 0) > 0
 );
 const hasVaginalPartners = computed(
   () =>
     (formData.value.steady_vaginal_partners ?? 0) > 0 ||
     (formData.value.casual_vaginal_partners ?? 0) > 0 ||
-    (formData.value.transactional_vaginal_partners ?? 0) > 0,
+    (formData.value.transactional_vaginal_partners ?? 0) > 0
 );
 
 // --- Functions ---
@@ -4057,7 +4052,7 @@ const fetchCsvData = async () => {
     csvData = csvText
       .split("\n")
       .map((row) =>
-        row.split(",").map((cell) => cell.trim().replace(/^"|"$/g, "")),
+        row.split(",").map((cell) => cell.trim().replace(/^"|"$/g, ""))
       );
     console.log("CSV Data Loaded for Form 6");
     statusMessage.value = "Validation data loaded.";

@@ -28,13 +28,9 @@
           name="prep_site"
           required
         >
-          <option value="CHD/JDWNRH/Thimphu">CHD/JDWNRH/Thimphu</option>
-          <option value="HISC/Thimphu">HISC/Thimphu</option>
-          <option value="Paro Hospital/Paro">Paro Hospital/Paro</option>
-          <option value="Phuntsholing Hospital/Chukha">
-            Phuntsholing Hospital/Chukha
+          <option v-for="site in prepSites">
+            {{ site }}
           </option>
-          <option value="CRRH/Gelephu/Sarpang">CRRH/Gelephu/Sarpang</option>
         </select>
 
         <label for="dateInput">Date:</label>
@@ -3683,6 +3679,7 @@
 
 <script setup>
 import { ref, onMounted, watch, computed } from "vue"; // Added computed
+import { prepSites } from "../location/prepSite";
 import axios from "axios";
 // Import the NEW modal component
 import Form4_ConfirmationModal from "./Form4_ConfirmationModal.vue"; // Adjust path if needed
@@ -3867,7 +3864,7 @@ const hasVaginalPartners = computed(() => {
 });
 // Computed property to check if the visit type is 'End of M1'
 const isMonthOneVisit = computed(
-  () => formData.value.type_of_visit === "End of M1",
+  () => formData.value.type_of_visit === "End of M1"
 );
 
 // --- Functions ---
@@ -3887,7 +3884,7 @@ const fetchCsvData = async () => {
     csvData = csvText
       .split("\n")
       .map((row) =>
-        row.split(",").map((cell) => cell.trim().replace(/^"|"$/g, "")),
+        row.split(",").map((cell) => cell.trim().replace(/^"|"$/g, ""))
       );
     console.log("CSV Data Loaded for Form 4");
     statusMessage.value = "Validation data loaded. Please enter UID.";
