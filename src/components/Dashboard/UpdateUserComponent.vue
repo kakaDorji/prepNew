@@ -212,8 +212,6 @@
 import { ref, onMounted, computed } from "vue";
 import axios from "axios";
 
-const API_PREFIX = "/api";
-
 const users = ref([]);
 const originalUsers = ref({});
 const searchTerm = ref("");
@@ -232,14 +230,16 @@ async function fetchUsers() {
   isLoading.value = true;
   errorMessage.value = "";
   try {
-    const response = await axios.post(API_PREFIX, { action: "getUsers" });
+    const response = await axios.post("/api", {
+      action: "getUsers",
+    });
     const data = response.data;
 
     if (data.success && data.users && Array.isArray(data.users)) {
       users.value = data.users.map((user) => ({ ...user, isEditing: false }));
     } else {
       throw new Error(
-        data.message || "Failed to fetch users or unexpected data format.",
+        data.message || "Failed to fetch users or unexpected data format."
       );
     }
   } catch (error) {
@@ -323,7 +323,7 @@ const confirmDelete = async () => {
 
     if (response.data.success) {
       users.value = users.value.filter(
-        (u) => u.rowindex !== userToDelete.value.rowindex,
+        (u) => u.rowindex !== userToDelete.value.rowindex
       );
       successMessage.value = "User deleted successfully!";
       setTimeout(() => {
@@ -353,8 +353,8 @@ const filteredUsers = computed(() =>
       (user.username &&
         user.username.toLowerCase().includes(searchTerm.value.toLowerCase())) ||
       (user.fullname &&
-        user.fullname.toLowerCase().includes(searchTerm.value.toLowerCase())),
-  ),
+        user.fullname.toLowerCase().includes(searchTerm.value.toLowerCase()))
+  )
 );
 
 const paginatedUsers = computed(() => {
