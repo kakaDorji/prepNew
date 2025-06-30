@@ -2,23 +2,13 @@
 <template>
   <teleport to="body">
     <div class="modal-overlay" @click.self="emitCancel">
-      <div
-        class="modal-content enhanced-modal"
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="modal-title-form9"
-      >
+      <div class="modal-content enhanced-modal" role="dialog" aria-modal="true" aria-labelledby="modal-title-form9">
         <!-- Modal Header -->
         <div class="modal-header">
           <h2 id="modal-title-form9">
             <i class="fas fa-tablets"></i> Review Drug Distribution Details
           </h2>
-          <button
-            @click="emitCancel"
-            class="modal-close-btn"
-            aria-label="Close modal"
-            :disabled="isSubmitting"
-          >
+          <button @click="emitCancel" class="modal-close-btn" aria-label="Close modal" :disabled="isSubmitting">
             ×
           </button>
         </div>
@@ -34,42 +24,32 @@
             <!-- Section: Basic Info -->
             <h4 class="details-section-title">Basic Information</h4>
             <div class="detail-item highlight">
-              <span class="detail-label"
-                ><i class="fas fa-fingerprint"></i> Participant UID:</span
-              >
+              <span class="detail-label"><i class="fas fa-fingerprint"></i> Participant UID:</span>
               <span class="detail-value value-strong">{{
                 formData.participant_uid || "N/A"
               }}</span>
             </div>
             <div class="detail-item">
-              <span class="detail-label"
-                ><i class="fas fa-user-nurse"></i> Person Dispensing:</span
-              >
+              <span class="detail-label"><i class="fas fa-user-nurse"></i> Person Dispensing:</span>
               <span class="detail-value">{{
                 formData.person_dispensing || "N/A"
               }}</span>
             </div>
             <div class="detail-item">
-              <span class="detail-label"
-                ><i class="fas fa-user-friends"></i> ORW Following Up:</span
-              >
+              <span class="detail-label"><i class="fas fa-user-friends"></i> ORW Following Up:</span>
               <span class="detail-value">{{
                 formData.orw_followup || "N/A"
               }}</span>
             </div>
             <div class="detail-item">
-              <span class="detail-label"
-                ><i class="fas fa-user"></i> Client Receiving:</span
-              >
+              <span class="detail-label"><i class="fas fa-user"></i> Client Receiving:</span>
               <span class="detail-value">{{
                 formData.client_receiving || "N/A"
               }}</span>
             </div>
             <div class="detail-item">
-              <span class="detail-label"
-                ><i class="fas fa-calendar-check"></i> Medication For
-                Month:</span
-              >
+              <span class="detail-label"><i class="fas fa-calendar-check"></i> Medication For
+                Month:</span>
               <span class="detail-value">{{
                 formData.medication || "Not Selected"
               }}</span>
@@ -81,50 +61,38 @@
                 Details for {{ formData.medication }}
               </h4>
               <div class="detail-item">
-                <span class="detail-label"
-                  ><i class="fas fa-calendar-day"></i> Date Dispensed:</span
-                >
+                <span class="detail-label"><i class="fas fa-calendar-day"></i> Date Dispensed:</span>
                 <span class="detail-value">{{
                   getMonthData("date") || "N/A"
                 }}</span>
               </div>
               <div class="detail-item">
-                <span class="detail-label"
-                  ><i class="fas fa-prescription-bottle-alt"></i> Bottles
-                  Dispensed (Lot/Batch):</span
-                >
+                <span class="detail-label"><i class="fas fa-prescription-bottle-alt"></i> Bottles
+                  Dispensed (Lot/Batch):</span>
                 <span class="detail-value">{{
                   getMonthData("bottles") || "N/A"
                 }}</span>
               </div>
               <div class="detail-item">
-                <span class="detail-label"
-                  ><i class="fas fa-calendar-times"></i> Next Due Date:</span
-                >
+                <span class="detail-label"><i class="fas fa-calendar-times"></i> Next Due Date:</span>
                 <span class="detail-value">{{
                   getMonthData("due_date") || "N/A"
                 }}</span>
               </div>
               <div class="detail-item">
-                <span class="detail-label"
-                  ><i class="fas fa-signature"></i> Dispenser Signature:</span
-                >
+                <span class="detail-label"><i class="fas fa-signature"></i> Dispenser Signature:</span>
                 <span class="detail-value">{{
                   getMonthData("dispensing_sign") || "N/A"
                 }}</span>
               </div>
               <div class="detail-item">
-                <span class="detail-label"
-                  ><i class="fas fa-signature"></i> Recipient Signature:</span
-                >
+                <span class="detail-label"><i class="fas fa-signature"></i> Recipient Signature:</span>
                 <span class="detail-value">{{
                   getMonthData("recipient_sign") || "N/A"
                 }}</span>
               </div>
               <div class="detail-item full-width">
-                <span class="detail-label"
-                  ><i class="fas fa-comment-dots"></i> Remarks:</span
-                >
+                <span class="detail-label"><i class="fas fa-comment-dots"></i> Remarks:</span>
                 <span class="detail-value pre-wrap">{{
                   getMonthData("remarks") || "None"
                 }}</span>
@@ -132,9 +100,7 @@
             </template>
             <div v-else class="detail-item full-width">
               <span class="detail-label">Month Details:</span>
-              <span class="detail-value"
-                >Please select a medication month first.</span
-              >
+              <span class="detail-value">Please select a medication month first.</span>
             </div>
           </div>
           <div v-else class="loading-placeholder">
@@ -154,25 +120,15 @@
 
         <!-- Modal Footer -->
         <div class="modal-footer">
-          <button
-            @click="emitCancel"
-            class="modal-cancel-btn"
-            :disabled="isSubmitting"
-          >
+          <button @click="emitCancel" class="modal-cancel-btn" :disabled="isSubmitting">
             <i class="fas fa-times"></i> Edit Data
           </button>
-          <button
-            @click="emitConfirm"
-            class="submit-btn modal-confirm-btn"
-            :disabled="isSubmitting || !formData.medication"
-          >
+          <button @click="emitConfirm" class="submit-btn modal-confirm-btn"
+            :disabled="isSubmitting || !formData.medication">
             <!-- Disable if no month selected -->
             <i class="fas fa-paper-plane"></i>
             {{ isSubmitting ? "Submitting..." : "Confirm & Submit" }}
-            <i
-              v-if="isSubmitting"
-              class="fas fa-spinner fa-spin submit-spinner"
-            ></i>
+            <i v-if="isSubmitting" class="fas fa-spinner fa-spin submit-spinner"></i>
           </button>
         </div>
       </div>
@@ -228,6 +184,7 @@ const emitCancel = () => {
   padding: 15px;
   transition: opacity 0.3s ease;
 }
+
 .modal-content.enhanced-modal {
   background-color: #fff;
   border-radius: 8px;
@@ -244,10 +201,12 @@ const emitCancel = () => {
     transform 0.3s ease,
     opacity 0.3s ease;
 }
+
 .modal-overlay:has(.enhanced-modal) .enhanced-modal {
   transform: scale(1);
   opacity: 1;
 }
+
 .modal-header {
   display: flex;
   justify-content: space-between;
@@ -258,16 +217,19 @@ const emitCancel = () => {
   border-top-left-radius: 8px;
   border-top-right-radius: 8px;
 }
+
 .modal-header h2 {
   margin: 0;
   font-size: 1.4rem;
   color: #343a40;
   font-weight: 600;
 }
+
 .modal-header h2 i {
   margin-right: 10px;
   color: #3498db;
 }
+
 .modal-close-btn {
   background: none;
   border: none;
@@ -278,25 +240,30 @@ const emitCancel = () => {
   padding: 0 5px;
   line-height: 1;
 }
+
 .modal-close-btn:hover:not(:disabled) {
   color: #343a40;
 }
+
 .modal-close-btn:disabled {
   opacity: 0.5;
   cursor: not-allowed;
 }
+
 .modal-body {
   padding: 20px 25px;
   overflow-y: auto;
   flex-grow: 1;
   background-color: #ffffff;
 }
+
 .modal-instruction {
   margin-bottom: 20px;
   color: #495057;
   font-size: 0.95rem;
   text-align: center;
 }
+
 .details-section-title {
   font-size: 1.1rem;
   color: #3498db;
@@ -306,9 +273,11 @@ const emitCancel = () => {
   border-bottom: 2px solid #e9ecef;
   font-weight: 600;
 }
+
 .details-section-title:first-of-type {
   margin-top: 0;
 }
+
 .details-subsection-title {
   font-size: 1rem;
   font-weight: 600;
@@ -326,9 +295,11 @@ const emitCancel = () => {
   grid-template-columns: auto 1fr;
   gap: 8px 15px;
 }
+
 .detail-item {
   display: contents;
 }
+
 .detail-label {
   font-weight: 500;
   color: #495057;
@@ -339,6 +310,7 @@ const emitCancel = () => {
   white-space: nowrap;
   padding-right: 10px;
 }
+
 .detail-label i {
   margin-right: 8px;
   color: #6c757d;
@@ -346,6 +318,7 @@ const emitCancel = () => {
   text-align: center;
   flex-shrink: 0;
 }
+
 .detail-value {
   color: #212529;
   font-size: 0.95rem;
@@ -356,38 +329,47 @@ const emitCancel = () => {
   grid-column: 2;
   line-height: 1.4;
 }
+
 .detail-value.pre-wrap {
   white-space: pre-wrap;
 }
-.modal-details-grid > h4,
-.modal-details-grid > h5 {
+
+.modal-details-grid>h4,
+.modal-details-grid>h5 {
   grid-column: 1 / -1;
 }
+
 .detail-item.full-width .detail-label {
   grid-column: 1 / -1;
   margin-bottom: 5px;
   white-space: normal;
 }
+
 .detail-item.full-width .detail-value {
   grid-column: 1 / -1;
   padding: 8px;
   font-size: 0.9rem;
 }
+
 .detail-value.list-value {
   font-style: italic;
   color: #555;
 }
+
 .detail-item.highlight .detail-label {
   color: #0056b3;
 }
+
 .detail-item.highlight .detail-value {
   font-weight: bold;
   color: #0056b3;
   background-color: #e7f1ff;
 }
+
 .value-strong {
   font-weight: bold;
 }
+
 .modal-feedback {
   padding: 10px 15px;
   margin-top: 20px;
@@ -396,19 +378,23 @@ const emitCancel = () => {
   display: flex;
   align-items: center;
 }
+
 .modal-feedback i {
   margin-right: 10px;
 }
+
 .success-message {
   background-color: #d1e7dd;
   color: #0f5132;
   border: 1px solid #badbcc;
 }
+
 .error-message {
   background-color: #f8d7da;
   color: #842029;
   border: 1px solid #f5c2c7;
 }
+
 .modal-footer {
   display: flex;
   justify-content: flex-end;
@@ -419,6 +405,7 @@ const emitCancel = () => {
   border-bottom-left-radius: 8px;
   border-bottom-right-radius: 8px;
 }
+
 .modal-confirm-btn,
 .modal-cancel-btn {
   padding: 0.6rem 1.2rem;
@@ -434,28 +421,35 @@ const emitCancel = () => {
   justify-content: center;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
+
 .modal-confirm-btn:hover:not(:disabled),
 .modal-cancel-btn:hover:not(:disabled) {
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
 }
+
 .modal-confirm-btn i,
 .modal-cancel-btn i {
   margin-right: 6px;
 }
+
 .modal-confirm-btn {
   background-color: #3498db;
   color: #fff;
 }
+
 .modal-confirm-btn:hover:not(:disabled) {
   background-color: #2980b9;
 }
+
 .modal-cancel-btn {
   background-color: #e74c3c;
   color: white;
 }
+
 .modal-cancel-btn:hover:not(:disabled) {
   background-color: #c0392b;
 }
+
 .modal-confirm-btn:disabled,
 .modal-cancel-btn:disabled {
   background-color: #bdc3c7;
@@ -463,26 +457,31 @@ const emitCancel = () => {
   opacity: 0.7;
   box-shadow: none;
 }
+
 .submit-spinner {
   margin-left: 8px;
 }
+
 .loading-placeholder {
   text-align: center;
   padding: 40px 20px;
   color: #666;
   font-size: 1.1rem;
 }
+
 .loading-placeholder i {
   margin-right: 8px;
   font-size: 1.3rem;
 }
 
 @media (max-width: 750px) {
+
   /* Adjust breakpoint */
   .modal-details-grid {
     grid-template-columns: 1fr;
     gap: 5px 0;
   }
+
   .detail-label {
     grid-column: 1;
     margin-bottom: 2px;
@@ -490,26 +489,32 @@ const emitCancel = () => {
     white-space: normal;
     padding-right: 0;
   }
+
   .detail-value {
     grid-column: 1;
     padding-left: 10px;
     margin-bottom: 8px;
   }
+
   .detail-item.full-width .detail-label {
     margin-bottom: 5px;
   }
+
   .detail-item.full-width .detail-value {
     padding-left: 10px;
     margin-bottom: 8px;
   }
+
   .modal-footer {
     flex-direction: column-reverse;
     gap: 8px;
   }
+
   .modal-confirm-btn,
   .modal-cancel-btn {
     width: 100%;
   }
+
   .modal-header h2 {
     font-size: 1.2rem;
   }
