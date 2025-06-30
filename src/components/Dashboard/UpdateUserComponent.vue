@@ -203,7 +203,7 @@ const saveChanges = async (user) => {
   successMessage.value = "";
   errorMessage.value = "";
   try {
-    const response = await axios.post(API_PREFIX, {
+    const response = await axios.post('/api', {
       action: "updateUser",
       username: user.username,
       fullname: user.fullname,
@@ -245,7 +245,7 @@ const confirmDelete = async () => {
   successMessage.value = "";
   errorMessage.value = "";
   try {
-    const response = await axios.post(API_PREFIX, {
+    const response = await axios.post('/api', {
       action: "deleteUser",
       rowindex: userToDelete.value.rowindex,
     });
