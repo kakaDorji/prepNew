@@ -5,114 +5,41 @@
     <div class="container">
       <!-- Container 1: Basic Info & Setup -->
       <div class="form-container">
-        <label for="person-dispensing"
-          >Name of the person dispensing PrEP:</label
-        >
-        <input
-          type="text"
-          v-model="formData.person_dispensing"
-          id="person-dispensing"
-          name="person_dispensing"
-          readonly
-        />
+        <label for="person-dispensing">Name of the person dispensing PrEP:</label>
+        <input type="text" v-model="formData.person_dispensing" id="person-dispensing" name="person_dispensing"
+          readonly />
 
-        <label for="orw-follow-up"
-          >Name of the Outreach Worker following up with Client:</label
-        >
-        <input
-          type="text"
-          v-model="formData.orw_followup"
-          id="orw-follow-up"
-          name="orw_followup"
-          required
-        />
+        <label for="orw-follow-up">Name of the Outreach Worker following up with Client:</label>
+        <input type="text" v-model="formData.orw_followup" id="orw-follow-up" name="orw_followup" required />
 
         <label for="client-receiving">Name of the client receiving PrEP:</label>
-        <input
-          type="text"
-          v-model="formData.client_receiving"
-          id="client-receiving"
-          name="client_receiving"
-          readonly
-        />
+        <input type="text" v-model="formData.client_receiving" id="client-receiving" name="client_receiving" readonly />
 
         <label for="participant_uid">Participant UID:</label>
-        <input
-          type="text"
-          v-model="formData.participant_uid"
-          id="participant_uid"
-          name="participant_uid"
-          required
-          pattern="[A-Za-z0-9]{5,}"
-          title="Minimum 5 Alphanumeric characters only"
-        />
+        <input type="text" v-model="formData.participant_uid" id="participant_uid" name="participant_uid" required
+          pattern="[A-Za-z0-9]{5,}" title="Minimum 5 Alphanumeric characters only" />
         <div v-if="statusMessage" id="status-message" :class="statusClass">
           {{ statusMessage }}
         </div>
-        <span v-if="isCheckingUid" class="uid-spinner"
-          ><i class="fas fa-spinner fa-spin"></i> Checking...</span
-        >
+        <span v-if="isCheckingUid" class="uid-spinner"><i class="fas fa-spinner fa-spin"></i> Checking...</span>
 
         <label>Medic taking for:</label>
-        <div
-          class="radio-group-vertical"
-          style="border: none; padding: 0; background: none"
-        >
-          <label
-            ><input
-              type="radio"
-              v-model="formData.medication"
-              name="medication_month"
-              value="M1"
-              required
-              @change="updateSignatures"
-            />
-            Month 1 - As prescribed</label
-          >
-          <label
-            ><input
-              type="radio"
-              v-model="formData.medication"
-              name="medication_month"
-              value="M3"
-              required
-              @change="updateSignatures"
-            />
-            Month 3 - As prescribed</label
-          >
-          <label
-            ><input
-              type="radio"
-              v-model="formData.medication"
-              name="medication_month"
-              value="M6"
-              required
-              @change="updateSignatures"
-            />
-            Month 6 - As prescribed</label
-          >
-          <label
-            ><input
-              type="radio"
-              v-model="formData.medication"
-              name="medication_month"
-              value="M9"
-              required
-              @change="updateSignatures"
-            />
-            Month 9 - As prescribed</label
-          >
-          <label
-            ><input
-              type="radio"
-              v-model="formData.medication"
-              name="medication_month"
-              value="M12"
-              required
-              @change="updateSignatures"
-            />
-            Month 12 - As prescribed</label
-          >
+        <div class="radio-group-vertical" style="border: none; padding: 0; background: none">
+          <label><input type="radio" v-model="formData.medication" name="medication_month" value="M1" required
+              @change="updateSignatures" />
+            Month 1 - As prescribed</label>
+          <label><input type="radio" v-model="formData.medication" name="medication_month" value="M3" required
+              @change="updateSignatures" />
+            Month 3 - As prescribed</label>
+          <label><input type="radio" v-model="formData.medication" name="medication_month" value="M6" required
+              @change="updateSignatures" />
+            Month 6 - As prescribed</label>
+          <label><input type="radio" v-model="formData.medication" name="medication_month" value="M9" required
+              @change="updateSignatures" />
+            Month 9 - As prescribed</label>
+          <label><input type="radio" v-model="formData.medication" name="medication_month" value="M12" required
+              @change="updateSignatures" />
+            Month 12 - As prescribed</label>
         </div>
       </div>
 
@@ -140,33 +67,16 @@
                   <input type="date" v-model="formData.date_month1" required />
                 </td>
                 <td>
-                  <input
-                    type="text"
-                    v-model="formData.bottles_month1"
-                    placeholder="e.g., 1 (AB123)"
-                    required
-                  />
+                  <input type="text" v-model="formData.bottles_month1" placeholder="e.g., 1 (AB123)" required />
                 </td>
                 <td>
-                  <input
-                    type="date"
-                    v-model="formData.due_date_month1"
-                    required
-                  />
+                  <input type="date" v-model="formData.due_date_month1" required />
                 </td>
                 <td>
-                  <input
-                    type="text"
-                    v-model="formData.dispensing_sign_month1"
-                    readonly
-                  />
+                  <input type="text" v-model="formData.dispensing_sign_month1" readonly />
                 </td>
                 <td>
-                  <input
-                    type="text"
-                    v-model="formData.recipient_sign_month1"
-                    readonly
-                  />
+                  <input type="text" v-model="formData.recipient_sign_month1" readonly />
                 </td>
                 <td><input type="text" v-model="formData.remarks_month1" /></td>
               </tr>
@@ -177,33 +87,16 @@
                   <input type="date" v-model="formData.date_month3" required />
                 </td>
                 <td>
-                  <input
-                    type="text"
-                    v-model="formData.bottles_month3"
-                    placeholder="e.g., 1 (CD456)"
-                    required
-                  />
+                  <input type="text" v-model="formData.bottles_month3" placeholder="e.g., 1 (CD456)" required />
                 </td>
                 <td>
-                  <input
-                    type="date"
-                    v-model="formData.due_date_month3"
-                    required
-                  />
+                  <input type="date" v-model="formData.due_date_month3" required />
                 </td>
                 <td>
-                  <input
-                    type="text"
-                    v-model="formData.dispensing_sign_month3"
-                    readonly
-                  />
+                  <input type="text" v-model="formData.dispensing_sign_month3" readonly />
                 </td>
                 <td>
-                  <input
-                    type="text"
-                    v-model="formData.recipient_sign_month3"
-                    readonly
-                  />
+                  <input type="text" v-model="formData.recipient_sign_month3" readonly />
                 </td>
                 <td><input type="text" v-model="formData.remarks_month3" /></td>
               </tr>
@@ -214,33 +107,16 @@
                   <input type="date" v-model="formData.date_month6" required />
                 </td>
                 <td>
-                  <input
-                    type="text"
-                    v-model="formData.bottles_month6"
-                    placeholder="e.g., 1 (EF789)"
-                    required
-                  />
+                  <input type="text" v-model="formData.bottles_month6" placeholder="e.g., 1 (EF789)" required />
                 </td>
                 <td>
-                  <input
-                    type="date"
-                    v-model="formData.due_date_month6"
-                    required
-                  />
+                  <input type="date" v-model="formData.due_date_month6" required />
                 </td>
                 <td>
-                  <input
-                    type="text"
-                    v-model="formData.dispensing_sign_month6"
-                    readonly
-                  />
+                  <input type="text" v-model="formData.dispensing_sign_month6" readonly />
                 </td>
                 <td>
-                  <input
-                    type="text"
-                    v-model="formData.recipient_sign_month6"
-                    readonly
-                  />
+                  <input type="text" v-model="formData.recipient_sign_month6" readonly />
                 </td>
                 <td><input type="text" v-model="formData.remarks_month6" /></td>
               </tr>
@@ -251,33 +127,16 @@
                   <input type="date" v-model="formData.date_month9" required />
                 </td>
                 <td>
-                  <input
-                    type="text"
-                    v-model="formData.bottles_month9"
-                    placeholder="e.g., 1 (GH012)"
-                    required
-                  />
+                  <input type="text" v-model="formData.bottles_month9" placeholder="e.g., 1 (GH012)" required />
                 </td>
                 <td>
-                  <input
-                    type="date"
-                    v-model="formData.due_date_month9"
-                    required
-                  />
+                  <input type="date" v-model="formData.due_date_month9" required />
                 </td>
                 <td>
-                  <input
-                    type="text"
-                    v-model="formData.dispensing_sign_month9"
-                    readonly
-                  />
+                  <input type="text" v-model="formData.dispensing_sign_month9" readonly />
                 </td>
                 <td>
-                  <input
-                    type="text"
-                    v-model="formData.recipient_sign_month9"
-                    readonly
-                  />
+                  <input type="text" v-model="formData.recipient_sign_month9" readonly />
                 </td>
                 <td><input type="text" v-model="formData.remarks_month9" /></td>
               </tr>
@@ -288,33 +147,16 @@
                   <input type="date" v-model="formData.date_month12" required />
                 </td>
                 <td>
-                  <input
-                    type="text"
-                    v-model="formData.bottles_month12"
-                    placeholder="e.g., 1 (IJ345)"
-                    required
-                  />
+                  <input type="text" v-model="formData.bottles_month12" placeholder="e.g., 1 (IJ345)" required />
                 </td>
                 <td>
-                  <input
-                    type="date"
-                    v-model="formData.due_date_month12"
-                    required
-                  />
+                  <input type="date" v-model="formData.due_date_month12" required />
                 </td>
                 <td>
-                  <input
-                    type="text"
-                    v-model="formData.dispensing_sign_month12"
-                    readonly
-                  />
+                  <input type="text" v-model="formData.dispensing_sign_month12" readonly />
                 </td>
                 <td>
-                  <input
-                    type="text"
-                    v-model="formData.recipient_sign_month12"
-                    readonly
-                  />
+                  <input type="text" v-model="formData.recipient_sign_month12" readonly />
                 </td>
                 <td>
                   <input type="text" v-model="formData.remarks_month12" />
@@ -322,10 +164,7 @@
               </tr>
               <!-- Placeholder if no month selected -->
               <tr v-if="!formData.medication">
-                <td
-                  colspan="7"
-                  style="text-align: center; font-style: italic; color: grey"
-                >
+                <td colspan="7" style="text-align: center; font-style: italic; color: grey">
                   Select a Medication Month above to enter details
                 </td>
               </tr>
@@ -384,11 +223,7 @@
       </div>
 
       <!-- Submit Button -->
-      <button
-        type="submit"
-        class="submit-btn"
-        :disabled="submitDisabled || isSubmitting || !formData.medication"
-      >
+      <button type="submit" class="submit-btn" :disabled="submitDisabled || isSubmitting || !formData.medication">
         <!-- Disable if no month selected -->
         {{ isSubmitting ? "Submitting..." : "Review Data" }}
         <!-- Changed Text -->
@@ -398,28 +233,15 @@
   </form>
 
   <!-- Confirmation Modal -->
-  <Form9_ConfirmationModal
-    v-if="isReviewModalVisible"
-    :formData="formData"
-    :isSubmitting="isSubmitting"
-    :successMessage="modalSuccessMessage"
-    :errorMessage="modalErrorMessage"
-    @confirm="confirmAndSubmit"
-    @cancel="cancelReview"
-  />
+  <Form9_ConfirmationModal v-if="isReviewModalVisible" :formData="formData" :isSubmitting="isSubmitting"
+    :successMessage="modalSuccessMessage" :errorMessage="modalErrorMessage" @confirm="confirmAndSubmit"
+    @cancel="cancelReview" />
 
   <!-- Final Messages outside modal -->
-  <div
-    v-if="!isReviewModalVisible && finalSubmitMessage"
-    :class="finalSubmitClass"
-    class="final-message"
-  >
+  <div v-if="!isReviewModalVisible && finalSubmitMessage" :class="finalSubmitClass" class="final-message">
     <p>{{ finalSubmitMessage }}</p>
   </div>
-  <div
-    v-if="!isReviewModalVisible && !finalSubmitMessage"
-    style="text-align: center; margin-top: 20px"
-  >
+  <div v-if="!isReviewModalVisible && !finalSubmitMessage" style="text-align: center; margin-top: 20px">
     <h4 class="section-title" style="margin-bottom: 1rem; font-size: 1.2rem">
       Thank you for your time.
     </h4>
@@ -429,10 +251,7 @@
     <div v-if="errorMessage && !finalSubmitMessage" class="error-message">
       <p>{{ errorMessage }}</p>
     </div>
-    <div
-      v-if="isSubmitting && !isReviewModalVisible"
-      class="submitting-indicator"
-    >
+    <div v-if="isSubmitting && !isReviewModalVisible" class="submitting-indicator">
       Submitting...
     </div>
   </div>
@@ -847,11 +666,13 @@ onMounted(() => {
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   margin-bottom: 2rem;
 }
+
 label {
   display: block;
   margin-bottom: 5px;
   font-weight: bold;
 }
+
 input,
 select,
 textarea {
@@ -863,6 +684,7 @@ textarea {
   box-sizing: border-box;
   font-size: 0.95rem;
 }
+
 input:focus,
 select:focus,
 textarea:focus {
@@ -870,32 +692,38 @@ textarea:focus {
   outline: none;
   box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
 }
+
 input[readonly] {
   background-color: #f8f9fa;
   cursor: not-allowed;
 }
+
 input[type="radio"],
 input[type="checkbox"] {
   width: auto;
   margin-right: 8px;
   vertical-align: middle;
 }
-label > input[type="radio"],
-label > input[type="checkbox"] {
+
+label>input[type="radio"],
+label>input[type="checkbox"] {
   margin-bottom: 0;
 }
+
 .radio-group-vertical {
   display: flex;
   flex-direction: column;
   gap: 8px;
   margin-bottom: 15px;
 }
+
 .radio-group-vertical label {
   font-weight: normal;
   display: inline-flex;
   align-items: center;
   margin-bottom: 0;
 }
+
 .section-title {
   font-size: 1.5rem;
   color: #3498db;
@@ -904,9 +732,11 @@ label > input[type="checkbox"] {
   padding-bottom: 5px;
   border-bottom: 1px solid #eee;
 }
+
 .section-title:first-of-type {
   margin-top: 0;
 }
+
 .submit-btn {
   background-color: #3498db;
   color: #fff;
@@ -922,14 +752,17 @@ label > input[type="checkbox"] {
   margin-left: auto;
   margin-right: auto;
 }
+
 .submit-btn:hover:not(:disabled) {
   background-color: #2980b9;
 }
+
 .submit-btn:disabled {
   background-color: #bdc3c7;
   cursor: not-allowed;
   opacity: 0.7;
 }
+
 #status-message {
   margin-top: -10px;
   margin-bottom: 15px;
@@ -939,31 +772,37 @@ label > input[type="checkbox"] {
   border-width: 1px;
   border-style: solid;
 }
+
 #status-message.success {
   background-color: #dff0d8;
   color: #3c763d;
   border-color: #d6e9c6;
 }
+
 #status-message.error {
   background-color: #f2dede;
   color: #a94442;
   border-color: #ebccd1;
 }
+
 .uid-spinner {
   margin-left: 10px;
   color: #3498db;
   font-size: 0.9em;
 }
+
 .table-responsive {
   overflow-x: auto;
   margin-bottom: 1rem;
 }
+
 table {
   border-collapse: collapse;
   width: 100%;
   margin-bottom: 1rem;
   font-size: 0.9rem;
 }
+
 th,
 td {
   border: 1px solid #ccc;
@@ -971,25 +810,30 @@ td {
   text-align: left;
   vertical-align: middle;
 }
+
 th {
   background-color: #f2f2f2;
   font-weight: bold;
   text-align: center;
 }
+
 td input[type="radio"],
 td input[type="checkbox"] {
   display: block;
   margin: 0 auto;
 }
+
 .yes-no-radio {
   display: flex;
   justify-content: center;
   gap: 15px;
 }
+
 .yes-no-radio label {
   margin-bottom: 0;
   font-weight: normal;
 }
+
 td input[type="text"],
 td input[type="date"] {
   width: 95%;
@@ -997,6 +841,7 @@ td input[type="date"] {
   margin-bottom: 0;
   font-size: 0.9rem;
 }
+
 ul {
   padding-left: 20px;
   margin-top: 0.5rem;
@@ -1004,27 +849,32 @@ ul {
   font-size: 0.9em;
   color: #444;
 }
+
 ul li {
   margin-bottom: 5px;
 }
+
 .success-message {
   color: green;
   text-align: center;
   font-weight: bold;
   margin-top: 15px;
 }
+
 .error-message {
   color: red;
   text-align: center;
   font-weight: bold;
   margin-top: 15px;
 }
+
 .submitting-indicator {
   margin-top: 20px;
   text-align: center;
   font-size: 1.2rem;
   color: #3498db;
 }
+
 .final-message {
   max-width: 700px;
   margin: 20px auto;
@@ -1033,11 +883,13 @@ ul li {
   text-align: center;
   font-weight: 500;
 }
+
 .final-message.success-final {
   background-color: #d1e7dd;
   color: #0f5132;
   border: 1px solid #badbcc;
 }
+
 .final-message.error-final {
   background-color: #f8d7da;
   color: #842029;

@@ -71,10 +71,9 @@ path.replace(
         manualChunks: {
           vue: ['vue', 'vue-router', 'pinia'],
           vendor: ['axios', 'lodash'],
-          gapi: ['google-api-client'] // If you're using Google API client
+          
         },
-        // Ensure proper chunking for Google APIs
-        external: ['google-apps-script']
+       
       }
     },
 

@@ -1,0 +1,12 @@
+# This is a Netlify configuration file.
+
+# This section sets up the "proxy" rule.
+[[redirects]]
+  # When the website asks for "/api"...
+  from = "/api/*"
+  
+  # ...secretly send the request to this Google Script URL.
+  to = "https://script.google.com/macros/s/AKfycbxx8yOQUelenBU5QM1nMBFwLeJj-xYvVkfggzXSd845o6OcmmomFwZCE_8hyKyHrRxHwQ/exec"
+  
+  # This makes it a proxy. The user's browser never sees the Google URL.
+  status = 200

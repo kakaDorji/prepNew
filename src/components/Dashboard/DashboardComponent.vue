@@ -3,57 +3,28 @@
     <!-- Filters -->
     <div class="mb-6 flex flex-wrap gap-4">
       <div class="flex-1 min-w-[200px]">
-        <label
-          for="start-date"
-          class="block text-lg font-medium text-gray-100 mb-1"
-          >Start Date</label
-        >
-        <input
-          type="date"
-          id="start-date"
-          v-model="startDate"
-          class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
-        />
+        <label for="start-date" class="block text-lg font-medium text-gray-100 mb-1">Start Date</label>
+        <input type="date" id="start-date" v-model="startDate"
+          class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50" />
       </div>
       <div class="flex-1 min-w-[200px]">
-        <label
-          for="end-date"
-          class="block text-lg font-medium text-gray-100 mb-1"
-          >End Date</label
-        >
-        <input
-          type="date"
-          id="end-date"
-          v-model="endDate"
-          class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
-        />
+        <label for="end-date" class="block text-lg font-medium text-gray-100 mb-1">End Date</label>
+        <input type="date" id="end-date" v-model="endDate"
+          class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50" />
       </div>
       <div class="flex-1 min-w-[200px]">
-        <label
-          for="location"
-          class="block text-lg font-medium text-gray-100 mb-1"
-          >PrEP Site</label
-        >
-        <select
-          id="location"
-          v-model="selectedLocation"
-          class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
-        >
+        <label for="location" class="block text-lg font-medium text-gray-100 mb-1">PrEP Site</label>
+        <select id="location" v-model="selectedLocation"
+          class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
           <option value="">All Sites</option>
-          <option
-            v-for="location in locations"
-            :key="location"
-            :value="location"
-          >
+          <option v-for="location in locations" :key="location" :value="location">
             {{ location }}
           </option>
         </select>
       </div>
       <div class="flex items-end">
-        <button
-          @click="applyFilters"
-          class="bg-blue-800 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
-        >
+        <button @click="applyFilters"
+          class="bg-blue-800 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">
           Apply Filters
         </button>
       </div>
@@ -63,22 +34,12 @@
     <div v-if="dataLoaded">
       <!-- Header Stats -->
       <div class="grid grid-cols-3 gap-4 mb-4">
-        <header-stat
-          v-for="(stat, index) in headerStatsData"
-          :key="index"
-          :title="stat.title"
-          :value="stat.value"
-        />
+        <header-stat v-for="(stat, index) in headerStatsData" :key="index" :title="stat.title" :value="stat.value" />
       </div>
 
       <!-- KPI Cards -->
       <div class="grid grid-cols-5 gap-4 mb-4 text-center">
-        <kpi-card
-          v-for="(kpi, index) in kpiData"
-          :key="index"
-          :title="kpi.title"
-          :value="kpi.value"
-        />
+        <kpi-card v-for="(kpi, index) in kpiData" :key="index" :title="kpi.title" :value="kpi.value" />
       </div>
 
       <!-- Charts Section -->
@@ -90,60 +51,32 @@
 
       <!-- Donut Charts -->
       <div class="grid grid-cols-5 gap-4 mb-4">
-        <donut-chart
-          v-for="(data, index) in donutChartsData.slice(0, 5)"
-          :key="index"
-          :data="data"
-          :class="'bg-slate-200'"
-        />
+        <donut-chart v-for="(data, index) in donutChartsData.slice(0, 5)" :key="index" :data="data"
+          :class="'bg-slate-200'" />
       </div>
       <div class="grid grid-cols-5 gap-4 mb-4">
-        <donut-chart
-          v-for="(data, index) in donutChartsData.slice(5, 10)"
-          :key="index"
-          :data="data"
-          :class="'bg-slate-200'"
-        />
+        <donut-chart v-for="(data, index) in donutChartsData.slice(5, 10)" :key="index" :data="data"
+          :class="'bg-slate-200'" />
       </div>
       <div class="grid grid-cols-2 gap-4 mb-4">
-        <donut-chart
-          v-for="(data, index) in donutChartsData.slice(10, 12)"
-          :key="index"
-          :data="data"
-          :class="'bg-slate-200'"
-        />
+        <donut-chart v-for="(data, index) in donutChartsData.slice(10, 12)" :key="index" :data="data"
+          :class="'bg-slate-200'" />
       </div>
       <div class="grid grid-cols-2 gap-4 mb-4">
-        <donut-chart
-          v-for="(data, index) in donutChartsData.slice(12, 14)"
-          :key="index"
-          :data="data"
-          :class="'bg-slate-200'"
-        />
+        <donut-chart v-for="(data, index) in donutChartsData.slice(12, 14)" :key="index" :data="data"
+          :class="'bg-slate-200'" />
       </div>
       <div class="grid grid-cols-3 gap-4 mb-4">
-        <donut-chart
-          v-for="(data, index) in donutChartsData.slice(14, 17)"
-          :key="index"
-          :data="data"
-          :class="'bg-slate-200'"
-        />
+        <donut-chart v-for="(data, index) in donutChartsData.slice(14, 17)" :key="index" :data="data"
+          :class="'bg-slate-200'" />
       </div>
       <div class="grid grid-cols-3 gap-4 mb-4">
-        <donut-chart
-          v-for="(data, index) in donutChartsData.slice(17, 20)"
-          :key="index"
-          :data="data"
-          :class="'bg-slate-200'"
-        />
+        <donut-chart v-for="(data, index) in donutChartsData.slice(17, 20)" :key="index" :data="data"
+          :class="'bg-slate-200'" />
       </div>
       <div class="grid grid-cols-3 gap-4 mb-4">
-        <donut-chart
-          v-for="(data, index) in donutChartsData.slice(20, 23)"
-          :key="index"
-          :data="data"
-          :class="'bg-slate-200'"
-        />
+        <donut-chart v-for="(data, index) in donutChartsData.slice(20, 23)" :key="index" :data="data"
+          :class="'bg-slate-200'" />
       </div>
 
       <!-- Large Bar Chart -->
