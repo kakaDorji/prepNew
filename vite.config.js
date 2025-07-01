@@ -29,7 +29,7 @@ export default defineConfig({
 rewrite: (path) =>
 path.replace(
   /^\/api/,
-  '/macros/s/AKfycbxx8yOQUelenBU5QM1nMBFwLeJj-xYvVkfggzXSd845o6OcmmomFwZCE_8hyKyHrRxHwQ/exec'
+  '/macros/s/AKfycbyXElaDXYk1Hkw2oXjx4s2IM2546FaBWW9Mhwoh7fShYPu3Mvkq0IWI1BKvJiv1bGA-XA/exec'
 ),
 
 
