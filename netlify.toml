@@ -1,12 +1,20 @@
-# This is a Netlify configuration file.
+# =========================
+# Netlify Configuration
+# =========================
 
-# This section sets up the "proxy" rule.
+[build]
+  command = "bun run build"
+  publish = "dist"
+
+# Proxy /api/* to your Google Apps Script
 [[redirects]]
-  # When the website asks for "/api"...
   from = "/api/*"
-  
-  # ...secretly send the request to this Google Script URL.
-  to = "https://script.google.com/macros/s/AKfycbxx8yOQUelenBU5QM1nMBFwLeJj-xYvVkfggzXSd845o6OcmmomFwZCE_8hyKyHrRxHwQ/exec"
-  
-  # This makes it a proxy. The user's browser never sees the Google URL.
+  to = "https://script.google.com/macros/s/AKfycbyXElaDXYk1Hkw2oXjx4s2IM2546FaBWW9Mhwoh7fShYPu3Mvkq0IWI1BKvJiv1bGA-XA/exec"
+  status = 200
+  force = true
+
+#  Support Vue router (history mode)
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
   status = 200
