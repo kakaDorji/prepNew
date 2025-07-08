@@ -1,4 +1,3 @@
-<!-- src/components/Form9_ConfirmationModal.vue -->
 <template>
   <teleport to="body">
     <div class="modal-overlay" @click.self="emitCancel">
@@ -25,34 +24,35 @@
             <h4 class="details-section-title">Basic Information</h4>
             <div class="detail-item highlight">
               <span class="detail-label"><i class="fas fa-fingerprint"></i> Participant UID:</span>
+              <!-- CORRECTED: from participant_uid to uid -->
               <span class="detail-value value-strong">{{
-                formData.participant_uid || "N/A"
-              }}</span>
+                formData.uid || "N/A"
+                }}</span>
             </div>
             <div class="detail-item">
               <span class="detail-label"><i class="fas fa-user-nurse"></i> Person Dispensing:</span>
               <span class="detail-value">{{
                 formData.person_dispensing || "N/A"
-              }}</span>
+                }}</span>
             </div>
             <div class="detail-item">
               <span class="detail-label"><i class="fas fa-user-friends"></i> ORW Following Up:</span>
               <span class="detail-value">{{
                 formData.orw_followup || "N/A"
-              }}</span>
+                }}</span>
             </div>
             <div class="detail-item">
               <span class="detail-label"><i class="fas fa-user"></i> Client Receiving:</span>
               <span class="detail-value">{{
                 formData.client_receiving || "N/A"
-              }}</span>
+                }}</span>
             </div>
             <div class="detail-item">
               <span class="detail-label"><i class="fas fa-calendar-check"></i> Medication For
                 Month:</span>
               <span class="detail-value">{{
                 formData.medication || "Not Selected"
-              }}</span>
+                }}</span>
             </div>
 
             <!-- Display details ONLY for the selected month -->
@@ -62,40 +62,47 @@
               </h4>
               <div class="detail-item">
                 <span class="detail-label"><i class="fas fa-calendar-day"></i> Date Dispensed:</span>
+                <!-- CORRECTED: Suffixes now match the formData keys -->
                 <span class="detail-value">{{
                   getMonthData("date") || "N/A"
-                }}</span>
+                  }}</span>
+              </div>
+              <div class="detail-item">
+                <span class="detail-label"><i class="fas fa-pills"></i> Regiment:</span>
+                <span class="detail-value">{{
+                  getMonthData("regimen") || "N/A"
+                  }}</span>
               </div>
               <div class="detail-item">
                 <span class="detail-label"><i class="fas fa-prescription-bottle-alt"></i> Bottles
                   Dispensed (Lot/Batch):</span>
                 <span class="detail-value">{{
                   getMonthData("bottles") || "N/A"
-                }}</span>
+                  }}</span>
               </div>
               <div class="detail-item">
                 <span class="detail-label"><i class="fas fa-calendar-times"></i> Next Due Date:</span>
                 <span class="detail-value">{{
-                  getMonthData("due_date") || "N/A"
-                }}</span>
+                  getMonthData("next_due_date") || "N/A"
+                  }}</span>
               </div>
               <div class="detail-item">
                 <span class="detail-label"><i class="fas fa-signature"></i> Dispenser Signature:</span>
                 <span class="detail-value">{{
-                  getMonthData("dispensing_sign") || "N/A"
-                }}</span>
+                  getMonthData("dispenser_signature") || "N/A"
+                  }}</span>
               </div>
               <div class="detail-item">
                 <span class="detail-label"><i class="fas fa-signature"></i> Recipient Signature:</span>
                 <span class="detail-value">{{
-                  getMonthData("recipient_sign") || "N/A"
-                }}</span>
+                  getMonthData("recipient_signature") || "N/A"
+                  }}</span>
               </div>
               <div class="detail-item full-width">
                 <span class="detail-label"><i class="fas fa-comment-dots"></i> Remarks:</span>
                 <span class="detail-value pre-wrap">{{
                   getMonthData("remarks") || "None"
-                }}</span>
+                  }}</span>
               </div>
             </template>
             <div v-else class="detail-item full-width">
@@ -107,7 +114,7 @@
             <p><i class="fas fa-spinner fa-spin"></i> Loading data...</p>
           </div>
 
-          <!-- Feedback Messages -->
+          <!-- Feedback Messages (unchanged) -->
           <div v-if="successMessage" class="modal-feedback success-message">
             <p><i class="fas fa-check-circle"></i> {{ successMessage }}</p>
           </div>
@@ -118,14 +125,13 @@
           </div>
         </div>
 
-        <!-- Modal Footer -->
+        <!-- Modal Footer (unchanged) -->
         <div class="modal-footer">
           <button @click="emitCancel" class="modal-cancel-btn" :disabled="isSubmitting">
             <i class="fas fa-times"></i> Edit Data
           </button>
           <button @click="emitConfirm" class="submit-btn modal-confirm-btn"
             :disabled="isSubmitting || !formData.medication">
-            <!-- Disable if no month selected -->
             <i class="fas fa-paper-plane"></i>
             {{ isSubmitting ? "Submitting..." : "Confirm & Submit" }}
             <i v-if="isSubmitting" class="fas fa-spinner fa-spin submit-spinner"></i>
@@ -137,7 +143,7 @@
 </template>
 
 <script setup>
-import { defineProps, defineEmits } from "vue";
+// defineProps and defineEmits are compiler macros and no longer need to be imported.
 
 const props = defineProps({
   formData: { type: Object, required: true },
@@ -147,17 +153,21 @@ const props = defineProps({
 });
 const emit = defineEmits(["confirm", "cancel"]);
 
-// Helper to get data for the currently selected month - ADJUSTED FUNCTION
+// --- CORRECTED: This function now handles the special case for "regimen" ---
 const getMonthData = (fieldSuffix) => {
-  if (!props.formData.medication) return ""; // Return empty if no month is selected
+  if (!props.formData || !props.formData.medication) return "";
 
-  // Extract the month number from medication (M1, M3, etc)
-  const monthNumber = props.formData.medication.substring(1); // '1', '3', '6'...
+  const monthNumber = props.formData.medication.substring(1);
+  let fullKey = ''; // Declare the variable
 
-  // Construct the correct key format as used in formData ('_monthX')
-  const fullKey = `${fieldSuffix}_month${monthNumber}`; // e.g., 'date_month1', 'bottles_month3'
+  // SPECIAL CASE: Handle the inconsistent 'regimen' key name
+  if (fieldSuffix === 'regimen') {
+    fullKey = `regimen_m${monthNumber}`; // Builds the key as 'regimen_m1'
+  } else {
+    // STANDARD CASE: For all other keys like 'date', 'bottles', etc.
+    fullKey = `m${monthNumber}_${fieldSuffix}`; // Builds the key as 'm1_date'
+  }
 
-  // Return the value if it exists, otherwise '' (template handles N/A)
   return props.formData[fullKey] || "";
 };
 
@@ -166,10 +176,8 @@ const emitCancel = () => {
   if (!props.isSubmitting) emit("cancel");
 };
 </script>
-
 <style scoped>
-/* --- Paste the ENHANCED MODAL CSS here --- */
-/* (Same as Form6_ConfirmationModal.vue) */
+/* --- Your styles are unchanged as requested --- */
 .modal-overlay {
   position: fixed;
   top: 0;

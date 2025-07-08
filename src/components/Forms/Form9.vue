@@ -13,9 +13,8 @@
         <label for="client-receiving">Name of the client receiving PrEP:</label>
         <input type="text" v-model="formData.client_receiving" id="client-receiving" readonly>
 
-        <!-- CHANGED v-model to 'uid' -->
         <label for="uid">Participant UID:</label>
-        <input type="text" v-model="formData.participant_uid" id="uid" required pattern="[A-Za-z0-9]{5,}"
+        <input type="text" v-model="formData.uid" id="uid" required pattern="[A-Za-z0-9]{5,}"
           title="Minimum 5 Alphanumeric characters only" />
         <div v-if="statusMessage" id="status-message" :class="statusClass">{{ statusMessage }}</div>
         <span v-if="isCheckingUid" class="uid-spinner"><i class="fas fa-spinner fa-spin"></i> Checking...</span>
@@ -47,108 +46,104 @@
                 <th># bottle/s dispensed (lot/batch#)</th>
                 <th>Next Due Date</th>
                 <th>Dispenser Signature</th>
-                <th> Regiment</th>
+                <th>Regiment</th>
                 <th>Recipient Signature</th>
                 <th>Remarks</th>
               </tr>
             </thead>
             <tbody>
-              <!-- UPDATED ALL v-modelS below -->
               <!-- Month 1 -->
               <tr v-if="formData.medication === 'M1'">
                 <td>Month 1</td>
-                <td><input type="date" v-model="formData.date_month1" required></td>
-                <td><input type="text" v-model="formData.bottles_month1" placeholder="e.g., 1 (AB123)" required></td>
-                <td><input type="date" v-model="formData.due_date_month1" required></td>
-                <td><input type="text" v-model="formData.dispensing_sign_month1" readonly></td>
+                <td><input type="date" v-model="formData.m1_date" required></td>
+                <td><input type="text" v-model="formData.m1_bottles" placeholder="e.g., 1 (AB123)" required></td>
+                <td><input type="date" v-model="formData.m1_next_due_date" required></td>
+                <td><input type="text" v-model="formData.m1_dispenser_signature" readonly></td>
                 <td>
-                  <select v-model="formData.regimen_month1" required>
+                  <select v-model="formData.regimen_m1" required>
                     <option value="">Select</option>
                     <option value="Daily PrEP">Daily PrEP</option>
                     <option value="ED-PrEP">ED-PrEP</option>
                   </select>
                 </td>
-                <td><input type="text" v-model="formData.recipient_sign_month1" readonly></td>
-                <td><input type="text" v-model="formData.remarks_month1"></td>
+                <td><input type="text" v-model="formData.m1_recipient_signature" readonly></td>
+                <td><input type="text" v-model="formData.m1_remarks"></td>
               </tr>
 
-              <!-- CORRECTED: Month 3 -->
+              <!-- Month 3 -->
               <tr v-if="formData.medication === 'M3'">
                 <td>Month 3</td>
-                <td><input type="date" v-model="formData.date_month3" required></td>
-                <td><input type="text" v-model="formData.bottles_month3" placeholder="e.g., 1 (CD456)" required></td>
-                <td><input type="date" v-model="formData.due_date_month3" required></td>
-                <td><input type="text" v-model="formData.dispensing_sign_month3" readonly></td>
+                <td><input type="date" v-model="formData.m3_date" required></td>
+                <td><input type="text" v-model="formData.m3_bottles" placeholder="e.g., 1 (CD456)" required></td>
+                <td><input type="date" v-model="formData.m3_next_due_date" required></td>
+                <td><input type="text" v-model="formData.m3_dispenser_signature" readonly></td>
                 <td>
-                  <select v-model="formData.regimen_month3" required>
+                  <select v-model="formData.regimen_m3" required>
                     <option value="">Select</option>
                     <option value="Daily PrEP">Daily PrEP</option>
                     <option value="ED-PrEP">ED-PrEP</option>
                   </select>
                 </td>
-                <td><input type="text" v-model="formData.recipient_sign_month3" readonly></td>
-                <td><input type="text" v-model="formData.remarks_month3"></td>
+                <td><input type="text" v-model="formData.m3_recipient_signature" readonly></td>
+                <td><input type="text" v-model="formData.m3_remarks"></td>
               </tr>
 
-
-              <!-- CORRECTED: Month 6 -->
+              <!-- Month 6 -->
               <tr v-if="formData.medication === 'M6'">
                 <td>Month 6</td>
-                <td><input type="date" v-model="formData.date_month6" required></td>
-                <td><input type="text" v-model="formData.bottles_month6" placeholder="e.g., 1 (EF789)" required></td>
-                <td><input type="date" v-model="formData.due_date_month6" required></td>
-                <td><input type="text" v-model="formData.dispensing_sign_month6" readonly></td>
+                <td><input type="date" v-model="formData.m6_date" required></td>
+                <td><input type="text" v-model="formData.m6_bottles" placeholder="e.g., 1 (EF789)" required></td>
+                <td><input type="date" v-model="formData.m6_next_due_date" required></td>
+                <td><input type="text" v-model="formData.m6_dispenser_signature" readonly></td>
                 <td>
-                  <select v-model="formData.regimen_month6" required>
+                  <select v-model="formData.regimen_m6" required>
                     <option value="">Select</option>
                     <option value="Daily PrEP">Daily PrEP</option>
                     <option value="ED-PrEP">ED-PrEP</option>
                   </select>
                 </td>
-                <td><input type="text" v-model="formData.recipient_sign_month6" readonly></td>
-                <td><input type="text" v-model="formData.remarks_month6"></td>
+                <td><input type="text" v-model="formData.m6_recipient_signature" readonly></td>
+                <td><input type="text" v-model="formData.m6_remarks"></td>
               </tr>
 
-
-              <!-- CORRECTED: Month 9 -->
+              <!-- Month 9 -->
               <tr v-if="formData.medication === 'M9'">
                 <td>Month 9</td>
-                <td><input type="date" v-model="formData.date_month9" required></td>
-                <td><input type="text" v-model="formData.bottles_month9" placeholder="e.g., 1 (GH012)" required></td>
-                <td><input type="date" v-model="formData.due_date_month9" required></td>
-                <td><input type="text" v-model="formData.dispensing_sign_month9" readonly></td>
+                <td><input type="date" v-model="formData.m9_date" required></td>
+                <td><input type="text" v-model="formData.m9_bottles" placeholder="e.g., 1 (GH012)" required></td>
+                <td><input type="date" v-model="formData.m9_next_due_date" required></td>
+                <td><input type="text" v-model="formData.m9_dispenser_signature" readonly></td>
                 <td>
-                  <select v-model="formData.regimen_month9" required>
+                  <select v-model="formData.regimen_m9" required>
                     <option value="">Select</option>
                     <option value="Daily PrEP">Daily PrEP</option>
                     <option value="ED-PrEP">ED-PrEP</option>
                   </select>
                 </td>
-                <td><input type="text" v-model="formData.recipient_sign_month9" readonly></td>
-                <td><input type="text" v-model="formData.remarks_month9"></td>
+                <td><input type="text" v-model="formData.m9_recipient_signature" readonly></td>
+                <td><input type="text" v-model="formData.m9_remarks"></td>
               </tr>
 
-
-              <!-- CORRECTED: Month 12 -->
+              <!-- Month 12 -->
               <tr v-if="formData.medication === 'M12'">
                 <td>Month 12</td>
-                <td><input type="date" v-model="formData.date_month12" required></td>
-                <td><input type="text" v-model="formData.bottles_month12" placeholder="e.g., 1 (IJ345)" required></td>
-                <td><input type="date" v-model="formData.due_date_month12" required></td>
-                <td><input type="text" v-model="formData.dispensing_sign_month12" readonly></td>
+                <td><input type="date" v-model="formData.m12_date" required></td>
+                <td><input type="text" v-model="formData.m12_bottles" placeholder="e.g., 1 (IJ345)" required></td>
+                <td><input type="date" v-model="formData.m12_next_due_date" required></td>
+                <td><input type="text" v-model="formData.m12_dispenser_signature" readonly></td>
                 <td>
-                  <select v-model="formData.regimen_month12" required>
+                  <select v-model="formData.regimen_m12" required>
                     <option value="">Select</option>
                     <option value="Daily PrEP">Daily PrEP</option>
                     <option value="ED-PrEP">ED-PrEP</option>
                   </select>
                 </td>
-                <td><input type="text" v-model="formData.recipient_sign_month12" readonly></td>
-                <td><input type="text" v-model="formData.remarks_month12"></td>
+                <td><input type="text" v-model="formData.m12_recipient_signature" readonly></td>
+                <td><input type="text" v-model="formData.m12_remarks"></td>
               </tr>
 
               <tr v-if="!formData.medication">
-                <td colspan="7" style="text-align: center; font-style: italic; color: grey;">Select a Medication Month
+                <td colspan="8" style="text-align: center; font-style: italic; color: grey;">Select a Medication Month
                   above to enter details</td>
               </tr>
             </tbody>
@@ -176,56 +171,48 @@ const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbw7q0hOBNlSci
 const CSV_DATA_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSfG6e5EIcHDaXopn9DxMZnTwVFGi5CiQxmKlEIPsd7uPtZiQIikYb46UdN78UhZlJfocCfl_s0hGGX/pub?output=csv";
 const UID_MIN_LENGTH = 5;
 
-// --- UPDATED formData TO MATCH YOUR GOOGLE SHEET ---
+// --- CORRECTED formData TO MATCH YOUR GOOGLE SHEET ---
 const formData = ref({
   person_dispensing: '',
   orw_followup: '',
   client_receiving: '',
-  participant_uid: '', // <-- RENAMED from participant_uid
+  uid: '',
   medication: '',
-
-
-  // Month 1 Fields
-  date_month1: '',
-  bottles_month1: '',
-  due_date_month1: '',
-  dispensing_sign_month1: '',
-  recipient_sign_month1: '',
-  remarks_month1: '',
-
-  // Month 3 Fields
-
-  date_month3: '',
-  bottles_month3: '',
-  due_date_month3: '',
-  dispensing_sign_month3: '',
-  recipient_sign_month3: '',
-  remarks_month3: '',
-
-  // Month 6 Fields
-  date_month6: '',
-  bottles_month6: '',
-  due_date_month6: '',
-  dispensing_sign_month6: '',
-  recipient_sign_month6: '',
-  remarks_month6: '',
-
-  // Month 9 Fields
-
-  date_month9: '',
-  bottles_month9: '',
-  due_date_month9: '',
-  dispensing_sign_month9: '',
-  recipient_sign_month9: '',
-  remarks_month9: '',
-  // Month 12 Fields
-
-  date_month12: '',
-  bottles_month12: '',
-  due_date_month12: '',
-  dispensing_sign_month12: '',
-  recipient_sign_month12: '',
-  remarks_month12: '',
+  m1_date: '',
+  regimen_m1: '',
+  m1_bottles: '',
+  m1_next_due_date: '',
+  m1_dispenser_signature: '',
+  m1_recipient_signature: '',
+  m1_remarks: '',
+  m3_date: '',
+  regimen_m3: '',
+  m3_bottles: '',
+  m3_next_due_date: '',
+  m3_dispenser_signature: '',
+  m3_recipient_signature: '',
+  m3_remarks: '',
+  m6_date: '',
+  regimen_m6: '',
+  m6_bottles: '',
+  m6_next_due_date: '',
+  m6_dispenser_signature: '',
+  m6_recipient_signature: '',
+  m6_remarks: '',
+  m9_date: '',
+  regimen_m9: '',
+  m9_bottles: '',
+  m9_next_due_date: '',
+  m9_dispenser_signature: '',
+  m9_recipient_signature: '',
+  m9_remarks: '',
+  m12_date: '',
+  regimen_m12: '',
+  m12_bottles: '',
+  m12_next_due_date: '',
+  m12_dispenser_signature: '',
+  m12_recipient_signature: '',
+  m12_remarks: '',
 });
 
 // Feedback & Control State
@@ -239,30 +226,25 @@ const modalSuccessMessage = ref('');
 const modalErrorMessage = ref('');
 let csvData = [];
 
-// --- UPDATED SIGNATURE LOGIC ---
+// --- CORRECTED: Signature logic now creates the right key names ---
 const updateSignatures = () => {
-  if (!formData.value.medication) return;
-
-  // 'M1' -> '1', 'M3' -> '3'
-  const monthNumber = formData.value.medication.substring(1);
-
-  // Use the CORRECT UID property
-  const uid = formData.value.participant_uid;
+  if (!formData.value.medication || !formData.value.uid) return;
+  const monthNumber = formData.value.medication.substring(1); // 'M1' -> '1'
+  const uid = formData.value.uid;
   const dispenser = formData.value.person_dispensing;
-
-  // Construct the CORRECT keys like 'recipient_sign_month1'
-  formData.value[`recipient_sign_month${monthNumber}`] = uid;
-  formData.value[`dispensing_sign_month${monthNumber}`] = dispenser;
+  formData.value[`m${monthNumber}_recipient_signature`] = uid;
+  formData.value[`m${monthNumber}_dispenser_signature`] = dispenser;
   formData.value.client_receiving = uid;
-
-  // Also update the date with the CORRECT key
-  // This only runs if the date is empty, allowing you to change it later.
-  if (!formData.value[`date_month${monthNumber}`]) {
-    formData.value[`date_month${monthNumber}`] = new Date().toISOString().split('T')[0];
+  if (!formData.value[`m${monthNumber}_date`]) {
+    formData.value[`m${monthNumber}_date`] = new Date().toISOString().split('T')[0];
   }
 };
 
-watch(() => formData.value.participant_uid, updateSignatures);
+// --- CORRECTED: Watchers now observe the new 'uid' property ---
+watch(() => formData.value.uid, (newUid) => {
+  updateSignatures();
+  validateUidOnInput(newUid);
+});
 watch(() => formData.value.person_dispensing, updateSignatures);
 watch(() => formData.value.medication, updateSignatures);
 
@@ -274,12 +256,14 @@ const fetchCsvData = async () => {
     const csvText = await response.text();
     csvData = csvText.split('\n').map(row => row.split(',').map(cell => cell.trim().replace(/^"|"$/g, '')));
     statusMessage.value = 'Validation data loaded.';
+    if (formData.value.uid) {
+      validateUidOnInput(formData.value.uid);
+    }
   } catch (error) {
     statusMessage.value = 'Error loading validation data.';
     statusClass.value = 'error';
   } finally {
     isCheckingUid.value = false;
-    validateUidOnInput(formData.value.uid);
   }
 };
 
@@ -289,7 +273,6 @@ const validateUid = (uid) => {
   return csvData.slice(1).some(row => row.length > 1 && row[1]?.toLowerCase() === normalizedUid);
 };
 
-// UPDATED to use 'uid'
 const validateUidOnInput = (newUid) => {
   if (!newUid) {
     statusMessage.value = '';
@@ -312,8 +295,6 @@ const validateUidOnInput = (newUid) => {
   }
 };
 
-watch(() => formData.value.participant_uid, validateUidOnInput);
-
 const showReviewModal = () => { isReviewModalVisible.value = true; };
 const cancelReview = () => { isReviewModalVisible.value = false; };
 
@@ -326,7 +307,6 @@ const confirmAndSubmit = async () => {
     const response = await axios.post(GOOGLE_SCRIPT_URL, formDataSerialized);
     if (response.data.status === 'success') {
       modalSuccessMessage.value = response.data.message;
-      // You can add your clearForm logic here inside a setTimeout
     } else {
       modalErrorMessage.value = response.data.message;
     }
@@ -351,12 +331,9 @@ onMounted(() => {
     formData.value.person_dispensing = loggedInUser.fullname || '';
   }
 });
-
 </script>
 
-<style>
-/* Your existing styles are fine */
-</style>
+<!-- ============================ YOUR ORIGINAL CSS STYLES (UNCHANGED) ============================ -->
 <style>
 /* Keep all original styles */
 .form-container {

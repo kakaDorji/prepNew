@@ -1,29 +1,19 @@
 <template>
-  <div
-    class="bg-gradient-to-br from-indigo-900 to-blue-300 mb-20px p-6 font-sans"
-  >
+  <!-- clinical form data -->
+  <div class="bg-gradient-to-br from-indigo-900 to-blue-300 mb-20px p-6 font-sans">
     <!-- Title -->
     <h1 class="text-4xl font-bold mb-8 text-gray-100 text-center">
       PrEP Forms
     </h1>
 
     <!-- Main Cards Grid -->
-    <div
-      class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
-    >
-      <div
-        v-for="(card, index) in mainCards"
-        :key="index"
-        :class="{ 'md:col-span-2 md:row-span-2': card.isJumbo }"
-      >
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+      <div v-for="(card, index) in mainCards" :key="index" :class="{ 'md:col-span-2 md:row-span-2': card.isJumbo }">
         <div
           class="bg-white rounded-2xl shadow-lg overflow-hidden h-full flex flex-col transition-all duration-300 hover:shadow-xl transform hover:-translate-y-1 cursor-pointer"
-          @click="openModal(card)"
-        >
+          @click="openModal(card)">
           <!-- Card Header with Gradient -->
-          <div
-            class="bg-gradient-to-r from-indigo-900 to-blue-800 text-white p-6"
-          >
+          <div class="bg-gradient-to-r from-indigo-900 to-blue-800 text-white p-6">
             <h3 class="text-xl font-semibold">{{ card.title }}</h3>
           </div>
           <!-- Card Content -->
@@ -33,8 +23,7 @@
           <!-- Button Section -->
           <div class="bg-gray-50 p-4">
             <button
-              class="w-full py-2 bg-indigo-800 text-white rounded-lg hover:bg-indigo-500 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:ring-opacity-50 transform hover:scale-105"
-            >
+              class="w-full py-2 bg-indigo-800 text-white rounded-lg hover:bg-indigo-500 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:ring-opacity-50 transform hover:scale-105">
               Fill Up
             </button>
           </div>
@@ -51,12 +40,9 @@
         <div v-for="(card, index) in additionalCards" :key="index">
           <div
             class="bg-white rounded-2xl shadow-lg overflow-hidden flex flex-col transition-all duration-300 hover:shadow-xl transform hover:-translate-y-1 cursor-pointer"
-            @click="openModal(card)"
-          >
+            @click="openModal(card)">
             <!-- Gradient for Additional Cards -->
-            <div
-              class="bg-gradient-to-r from-rose-500 to-pink-600 text-white p-6"
-            >
+            <div class="bg-gradient-to-r from-rose-500 to-pink-600 text-white p-6">
               <h3 class="text-xl font-semibold">{{ card.title }}</h3>
             </div>
             <div class="p-6">
@@ -70,52 +56,30 @@
     <!-- Modal -->
     <TransitionRoot appear :show="isModalOpen" as="div">
       <Dialog as="div" @close="closeModal" class="relative z-50">
-        <TransitionChild
-          enter="duration-300 ease-out"
-          enter-from="opacity-0"
-          enter-to="opacity-100"
-          leave="duration-200 ease-in"
-          leave-from="opacity-100"
-          leave-to="opacity-0"
-        >
+        <TransitionChild enter="duration-300 ease-out" enter-from="opacity-0" enter-to="opacity-100"
+          leave="duration-200 ease-in" leave-from="opacity-100" leave-to="opacity-0">
           <div class="fixed inset-0 bg-black bg-opacity-25 backdrop-blur-sm" />
         </TransitionChild>
 
         <div class="fixed inset-0 overflow-y-auto">
-          <div
-            class="flex min-h-full items-center justify-center p-4 text-center"
-          >
-            <TransitionChild
-              enter="duration-300 ease-out"
-              enter-from="opacity-0 scale-95"
-              enter-to="opacity-100 scale-100"
-              leave="duration-200 ease-in"
-              leave-from="opacity-100 scale-100"
-              leave-to="opacity-0 scale-95"
-            >
+          <div class="flex min-h-full items-center justify-center p-4 text-center">
+            <TransitionChild enter="duration-300 ease-out" enter-from="opacity-0 scale-95"
+              enter-to="opacity-100 scale-100" leave="duration-200 ease-in" leave-from="opacity-100 scale-100"
+              leave-to="opacity-0 scale-95">
               <DialogPanel
-                class="w-full max-w-7xl transform overflow-hidden rounded-2xl bg-white p-6 text-left align-middle shadow-xl transition-all"
-              >
-                <DialogTitle
-                  as="h3"
-                  class="text-2xl font-bold leading-6 text-gray-900 mb-4"
-                >
+                class="w-full max-w-7xl transform overflow-hidden rounded-2xl bg-white p-6 text-left align-middle shadow-xl transition-all">
+                <DialogTitle as="h3" class="text-2xl font-bold leading-6 text-gray-900 mb-4">
                   {{ selectedCard.title }}
                 </DialogTitle>
 
                 <!-- Dynamic form component rendering -->
-                <component
-                  :is="selectedComponent"
-                  v-if="selectedComponent"
-                ></component>
+                <component :is="selectedComponent" v-if="selectedComponent"></component>
 
                 <!-- Modal controls -->
                 <div class="mt-6">
-                  <button
-                    type="button"
+                  <button type="button"
                     class="px-4 py-2 bg-cyan-600 text-white rounded-lg hover:bg-cyan-700 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:ring-opacity-50 transform hover:scale-105"
-                    @click="closeModal"
-                  >
+                    @click="closeModal">
                     Close
                   </button>
                 </div>

@@ -1,105 +1,37 @@
 <template>
   <!-- Clinical Data Form -->
   <form @submit.prevent="showReviewModal">
-    <!-- Changed to show modal -->
     <div class="container">
       <!-- Container 1: Basic Info & Acute HIV -->
       <div class="form-container">
         <!-- Participant UID and Date -->
         <label for="participant_uid">Participant UID:</label>
-        <input
-          type="text"
-          v-model="formData.participant_uid"
-          id="participant_uid"
-          name="participant_uid"
-          required
-          pattern="[A-Za-z0-9]{5,}"
-          title="Minimum 5 Alphanumeric characters only"
-        />
+        <input type="text" v-model="formData.participant_uid" id="participant_uid" name="participant_uid" required
+          pattern="[A-Za-z0-9]{5,}" title="Minimum 5 Alphanumeric characters only" />
         <div v-if="statusMessage" id="status-message" :class="statusClass">
           {{ statusMessage }}
         </div>
-        <span v-if="isCheckingUid" class="uid-spinner"
-          ><i class="fas fa-spinner fa-spin"></i> Checking...</span
-        >
+        <span v-if="isCheckingUid" class="uid-spinner"><i class="fas fa-spinner fa-spin"></i> Checking...</span>
 
         <label for="dateInput">Date:</label>
-        <input
-          type="date"
-          id="dateInput"
-          v-model="formData.date"
-          name="date"
-          readonly
-        />
+        <input type="date" id="dateInput" v-model="formData.date" name="date" readonly />
 
         <!-- Type of Visit -->
-        <label style="margin-top: 1rem"
-          >TYPE OF VISIT: (Please tick a √ mark to indicate the visit)</label
-        >
-        <div
-          class="radio-group-vertical"
-          style="border: none; padding: 0; background: none"
-        >
-          <label
-            ><input
-              type="radio"
-              v-model="formData.visit_type"
-              name="visit_type"
-              value="Screening Visit MO"
-              required
-            />
-            SCREENING VISIT MO</label
-          >
-          <label
-            ><input
-              type="radio"
-              v-model="formData.visit_type"
-              name="visit_type"
-              value="End of M1"
-              required
-            />
-            END OF M1</label
-          >
-          <label
-            ><input
-              type="radio"
-              v-model="formData.visit_type"
-              name="visit_type"
-              value="End of M3"
-              required
-            />
-            END OF M3</label
-          >
-          <label
-            ><input
-              type="radio"
-              v-model="formData.visit_type"
-              name="visit_type"
-              value="End of M6"
-              required
-            />
-            END OF M6</label
-          >
-          <label
-            ><input
-              type="radio"
-              v-model="formData.visit_type"
-              name="visit_type"
-              value="End of M9"
-              required
-            />
-            END OF M9</label
-          >
-          <label
-            ><input
-              type="radio"
-              v-model="formData.visit_type"
-              name="visit_type"
-              value="Exit Visit M12"
-              required
-            />
-            EXIT VISIT M12</label
-          >
+        <label style="margin-top: 1rem">TYPE OF VISIT: (Please tick a √ mark to indicate the visit)</label>
+        <div class="radio-group-vertical" style="border: none; padding: 0; background: none">
+          <label><input type="radio" v-model="formData.visit_type" name="visit_type" value="Screening Visit MO"
+              required />
+            SCREENING VISIT MO</label>
+          <label><input type="radio" v-model="formData.visit_type" name="visit_type" value="End of M1" required />
+            END OF M1</label>
+          <label><input type="radio" v-model="formData.visit_type" name="visit_type" value="End of M3" required />
+            END OF M3</label>
+          <label><input type="radio" v-model="formData.visit_type" name="visit_type" value="End of M6" required />
+            END OF M6</label>
+          <label><input type="radio" v-model="formData.visit_type" name="visit_type" value="End of M9" required />
+            END OF M9</label>
+          <label><input type="radio" v-model="formData.visit_type" name="visit_type" value="Exit Visit M12" required />
+            EXIT VISIT M12</label>
         </div>
 
         <!-- Acute HIV Infection Section -->
@@ -111,12 +43,7 @@
 
         <!-- Symptoms Table -->
         <div class="table-responsive">
-          <table
-            border="1"
-            cellspacing="0"
-            cellpadding="5"
-            class="symptoms-table"
-          >
+          <table border="1" cellspacing="0" cellpadding="5" class="symptoms-table">
             <thead>
               <tr>
                 <th>Symptoms</th>
@@ -134,612 +61,301 @@
               <tr>
                 <td>Fever</td>
                 <td>
-                  <input
-                    type="radio"
-                    name="fever_status"
-                    v-model="formData.fever"
-                    value="Yes"
-                  />
+                  <input type="radio" name="fever_status" v-model="formData.fever" value="Yes" />
                 </td>
                 <td>
-                  <input
-                    type="radio"
-                    name="fever_status"
-                    v-model="formData.fever"
-                    value="No"
-                  />
+                  <input type="radio" name="fever_status" v-model="formData.fever" value="No" />
                 </td>
                 <td>
-                  <input
-                    type="text"
-                    v-model="formData.fever_specify"
-                    :disabled="formData.fever !== 'Yes'"
-                  />
+                  <input type="text" v-model="formData.fever_specify" :disabled="formData.fever !== 'Yes'" />
                 </td>
                 <td>
-                  <input
-                    type="date"
-                    v-model="formData.fever_start_date"
-                    :disabled="formData.fever !== 'Yes'"
-                  />
+                  <input type="date" v-model="formData.fever_start_date" :disabled="formData.fever !== 'Yes'" />
                 </td>
                 <td>
-                  <input
-                    type="checkbox"
-                    v-model="formData.fever_ongoing"
-                    :disabled="
-                      formData.fever !== 'Yes' || formData.fever_resolved
-                    "
-                    @change="handleCheckboxChange('fever', 'ongoing')"
-                  />
+                  <input type="checkbox" v-model="formData.fever_ongoing" :disabled="formData.fever !== 'Yes' || formData.fever_resolved
+                    " @change="handleCheckboxChange('fever', 'ongoing')" />
                 </td>
                 <td>
-                  <input
-                    type="checkbox"
-                    v-model="formData.fever_resolved"
-                    :disabled="
-                      formData.fever !== 'Yes' || formData.fever_ongoing
-                    "
-                    @change="handleCheckboxChange('fever', 'resolved')"
-                  />
+                  <input type="checkbox" v-model="formData.fever_resolved" :disabled="formData.fever !== 'Yes' || formData.fever_ongoing
+                    " @change="handleCheckboxChange('fever', 'resolved')" />
                 </td>
                 <td>
-                  <input
-                    type="checkbox"
-                    v-model="formData.fever_present"
-                    :disabled="formData.fever !== 'Yes'"
-                  />
+                  <input type="checkbox" v-model="formData.fever_present" :disabled="formData.fever !== 'Yes'" />
                 </td>
               </tr>
               <!-- Tiredness Row -->
               <tr>
                 <td>Tiredness</td>
                 <td>
-                  <input
-                    type="radio"
-                    name="tiredness_status"
-                    v-model="formData.tiredness"
-                    value="Yes"
-                  />
+                  <input type="radio" name="tiredness_status" v-model="formData.tiredness" value="Yes" />
                 </td>
                 <td>
-                  <input
-                    type="radio"
-                    name="tiredness_status"
-                    v-model="formData.tiredness"
-                    value="No"
-                  />
+                  <input type="radio" name="tiredness_status" v-model="formData.tiredness" value="No" />
                 </td>
                 <td>
-                  <input
-                    type="text"
-                    v-model="formData.tiredness_specify"
-                    :disabled="formData.tiredness !== 'Yes'"
-                  />
+                  <input type="text" v-model="formData.tiredness_specify" :disabled="formData.tiredness !== 'Yes'" />
                 </td>
                 <td>
-                  <input
-                    type="date"
-                    v-model="formData.tiredness_start_date"
-                    :disabled="formData.tiredness !== 'Yes'"
-                  />
+                  <input type="date" v-model="formData.tiredness_start_date" :disabled="formData.tiredness !== 'Yes'" />
                 </td>
                 <td>
-                  <input
-                    type="checkbox"
-                    v-model="formData.tiredness_ongoing"
-                    :disabled="
-                      formData.tiredness !== 'Yes' ||
-                      formData.tiredness_resolved
-                    "
-                    @change="handleCheckboxChange('tiredness', 'ongoing')"
-                  />
+                  <input type="checkbox" v-model="formData.tiredness_ongoing" :disabled="formData.tiredness !== 'Yes' ||
+                    formData.tiredness_resolved
+                    " @change="handleCheckboxChange('tiredness', 'ongoing')" />
                 </td>
                 <td>
-                  <input
-                    type="checkbox"
-                    v-model="formData.tiredness_resolved"
-                    :disabled="
-                      formData.tiredness !== 'Yes' || formData.tiredness_ongoing
-                    "
-                    @change="handleCheckboxChange('tiredness', 'resolved')"
-                  />
+                  <input type="checkbox" v-model="formData.tiredness_resolved" :disabled="formData.tiredness !== 'Yes' || formData.tiredness_ongoing
+                    " @change="handleCheckboxChange('tiredness', 'resolved')" />
                 </td>
                 <td>
-                  <input
-                    type="checkbox"
-                    v-model="formData.tiredness_present"
-                    :disabled="formData.tiredness !== 'Yes'"
-                  />
+                  <input type="checkbox" v-model="formData.tiredness_present"
+                    :disabled="formData.tiredness !== 'Yes'" />
                 </td>
               </tr>
               <!-- Lymph Node Enlargement Row -->
               <tr>
                 <td>Lymph Node Enlargement</td>
                 <td>
-                  <input
-                    type="radio"
-                    name="lymph_status"
-                    v-model="formData.lymph_node"
-                    value="Yes"
-                  />
+                  <input type="radio" name="lymph_status" v-model="formData.lymph_node" value="Yes" />
                 </td>
                 <td>
-                  <input
-                    type="radio"
-                    name="lymph_status"
-                    v-model="formData.lymph_node"
-                    value="No"
-                  />
+                  <input type="radio" name="lymph_status" v-model="formData.lymph_node" value="No" />
                 </td>
                 <td>
-                  <input
-                    type="text"
-                    v-model="formData.lymph_node_specify"
-                    :disabled="formData.lymph_node !== 'Yes'"
-                  />
+                  <input type="text" v-model="formData.lymph_node_specify" :disabled="formData.lymph_node !== 'Yes'" />
                 </td>
                 <td>
-                  <input
-                    type="date"
-                    v-model="formData.lymph_node_start_date"
-                    :disabled="formData.lymph_node !== 'Yes'"
-                  />
+                  <input type="date" v-model="formData.lymph_node_start_date"
+                    :disabled="formData.lymph_node !== 'Yes'" />
                 </td>
                 <td>
-                  <input
-                    type="checkbox"
-                    v-model="formData.lymph_node_ongoing"
-                    :disabled="
-                      formData.lymph_node !== 'Yes' ||
-                      formData.lymph_node_resolved
-                    "
-                    @change="handleCheckboxChange('lymph_node', 'ongoing')"
-                  />
+                  <input type="checkbox" v-model="formData.lymph_node_ongoing" :disabled="formData.lymph_node !== 'Yes' ||
+                    formData.lymph_node_resolved
+                    " @change="handleCheckboxChange('lymph_node', 'ongoing')" />
                 </td>
                 <td>
-                  <input
-                    type="checkbox"
-                    v-model="formData.lymph_node_resolved"
-                    :disabled="
-                      formData.lymph_node !== 'Yes' ||
-                      formData.lymph_node_ongoing
-                    "
-                    @change="handleCheckboxChange('lymph_node', 'resolved')"
-                  />
+                  <input type="checkbox" v-model="formData.lymph_node_resolved" :disabled="formData.lymph_node !== 'Yes' ||
+                    formData.lymph_node_ongoing
+                    " @change="handleCheckboxChange('lymph_node', 'resolved')" />
                 </td>
                 <td>
-                  <input
-                    type="checkbox"
-                    v-model="formData.lymph_node_present"
-                    :disabled="formData.lymph_node !== 'Yes'"
-                  />
+                  <input type="checkbox" v-model="formData.lymph_node_present"
+                    :disabled="formData.lymph_node !== 'Yes'" />
                 </td>
               </tr>
               <!-- Tonsilitis Row -->
               <tr>
                 <td>Tonsilitis</td>
                 <td>
-                  <input
-                    type="radio"
-                    name="tonsilitis_status"
-                    v-model="formData.tonsilitis"
-                    value="Yes"
-                  />
+                  <input type="radio" name="tonsilitis_status" v-model="formData.tonsilitis" value="Yes" />
                 </td>
                 <td>
-                  <input
-                    type="radio"
-                    name="tonsilitis_status"
-                    v-model="formData.tonsilitis"
-                    value="No"
-                  />
+                  <input type="radio" name="tonsilitis_status" v-model="formData.tonsilitis" value="No" />
                 </td>
                 <td>
-                  <input
-                    type="text"
-                    v-model="formData.tonsilitis_specify"
-                    :disabled="formData.tonsilitis !== 'Yes'"
-                  />
+                  <input type="text" v-model="formData.tonsilitis_specify" :disabled="formData.tonsilitis !== 'Yes'" />
                 </td>
                 <td>
-                  <input
-                    type="date"
-                    v-model="formData.tonsilitis_start_date"
-                    :disabled="formData.tonsilitis !== 'Yes'"
-                  />
+                  <input type="date" v-model="formData.tonsilitis_start_date"
+                    :disabled="formData.tonsilitis !== 'Yes'" />
                 </td>
                 <td>
-                  <input
-                    type="checkbox"
-                    v-model="formData.tonsilitis_ongoing"
-                    :disabled="
-                      formData.tonsilitis !== 'Yes' ||
-                      formData.tonsilitis_resolved
-                    "
-                    @change="handleCheckboxChange('tonsilitis', 'ongoing')"
-                  />
+                  <input type="checkbox" v-model="formData.tonsilitis_ongoing" :disabled="formData.tonsilitis !== 'Yes' ||
+                    formData.tonsilitis_resolved
+                    " @change="handleCheckboxChange('tonsilitis', 'ongoing')" />
                 </td>
                 <td>
-                  <input
-                    type="checkbox"
-                    v-model="formData.tonsilitis_resolved"
-                    :disabled="
-                      formData.tonsilitis !== 'Yes' ||
-                      formData.tonsilitis_ongoing
-                    "
-                    @change="handleCheckboxChange('tonsilitis', 'resolved')"
-                  />
+                  <input type="checkbox" v-model="formData.tonsilitis_resolved" :disabled="formData.tonsilitis !== 'Yes' ||
+                    formData.tonsilitis_ongoing
+                    " @change="handleCheckboxChange('tonsilitis', 'resolved')" />
                 </td>
                 <td>
-                  <input
-                    type="checkbox"
-                    v-model="formData.tonsilitis_present"
-                    :disabled="formData.tonsilitis !== 'Yes'"
-                  />
+                  <input type="checkbox" v-model="formData.tonsilitis_present"
+                    :disabled="formData.tonsilitis !== 'Yes'" />
                 </td>
               </tr>
               <!-- Sore Throat Row -->
               <tr>
                 <td>Sore Throat</td>
                 <td>
-                  <input
-                    type="radio"
-                    name="sore_throat_status"
-                    v-model="formData.sore_throat"
-                    value="Yes"
-                  />
+                  <input type="radio" name="sore_throat_status" v-model="formData.sore_throat" value="Yes" />
                 </td>
                 <td>
-                  <input
-                    type="radio"
-                    name="sore_throat_status"
-                    v-model="formData.sore_throat"
-                    value="No"
-                  />
+                  <input type="radio" name="sore_throat_status" v-model="formData.sore_throat" value="No" />
                 </td>
                 <td>
-                  <input
-                    type="text"
-                    v-model="formData.sore_throat_specify"
-                    :disabled="formData.sore_throat !== 'Yes'"
-                  />
+                  <input type="text" v-model="formData.sore_throat_specify"
+                    :disabled="formData.sore_throat !== 'Yes'" />
                 </td>
                 <td>
-                  <input
-                    type="date"
-                    v-model="formData.sore_throat_start_date"
-                    :disabled="formData.sore_throat !== 'Yes'"
-                  />
+                  <input type="date" v-model="formData.sore_throat_start_date"
+                    :disabled="formData.sore_throat !== 'Yes'" />
                 </td>
                 <td>
-                  <input
-                    type="checkbox"
-                    v-model="formData.sore_throat_ongoing"
-                    :disabled="
-                      formData.sore_throat !== 'Yes' ||
-                      formData.sore_throat_resolved
-                    "
-                    @change="handleCheckboxChange('sore_throat', 'ongoing')"
-                  />
+                  <input type="checkbox" v-model="formData.sore_throat_ongoing" :disabled="formData.sore_throat !== 'Yes' ||
+                    formData.sore_throat_resolved
+                    " @change="handleCheckboxChange('sore_throat', 'ongoing')" />
                 </td>
                 <td>
-                  <input
-                    type="checkbox"
-                    v-model="formData.sore_throat_resolved"
-                    :disabled="
-                      formData.sore_throat !== 'Yes' ||
-                      formData.sore_throat_ongoing
-                    "
-                    @change="handleCheckboxChange('sore_throat', 'resolved')"
-                  />
+                  <input type="checkbox" v-model="formData.sore_throat_resolved" :disabled="formData.sore_throat !== 'Yes' ||
+                    formData.sore_throat_ongoing
+                    " @change="handleCheckboxChange('sore_throat', 'resolved')" />
                 </td>
                 <td>
-                  <input
-                    type="checkbox"
-                    v-model="formData.sore_throat_present"
-                    :disabled="formData.sore_throat !== 'Yes'"
-                  />
+                  <input type="checkbox" v-model="formData.sore_throat_present"
+                    :disabled="formData.sore_throat !== 'Yes'" />
                 </td>
               </tr>
               <!-- Joint/Muscle Aches Row -->
               <tr>
                 <td>Joint and Muscle Aches</td>
                 <td>
-                  <input
-                    type="radio"
-                    name="joint_aches_status"
-                    v-model="formData.joint_aches"
-                    value="Yes"
-                  />
+                  <input type="radio" name="joint_aches_status" v-model="formData.joint_aches" value="Yes" />
                 </td>
                 <td>
-                  <input
-                    type="radio"
-                    name="joint_aches_status"
-                    v-model="formData.joint_aches"
-                    value="No"
-                  />
+                  <input type="radio" name="joint_aches_status" v-model="formData.joint_aches" value="No" />
                 </td>
                 <td>
-                  <input
-                    type="text"
-                    v-model="formData.joint_aches_specify"
-                    :disabled="formData.joint_aches !== 'Yes'"
-                  />
+                  <input type="text" v-model="formData.joint_aches_specify"
+                    :disabled="formData.joint_aches !== 'Yes'" />
                 </td>
                 <td>
-                  <input
-                    type="date"
-                    v-model="formData.joint_aches_start_date"
-                    :disabled="formData.joint_aches !== 'Yes'"
-                  />
+                  <input type="date" v-model="formData.joint_aches_start_date"
+                    :disabled="formData.joint_aches !== 'Yes'" />
                 </td>
                 <td>
-                  <input
-                    type="checkbox"
-                    v-model="formData.joint_aches_ongoing"
-                    :disabled="
-                      formData.joint_aches !== 'Yes' ||
-                      formData.joint_aches_resolved
-                    "
-                    @change="handleCheckboxChange('joint_aches', 'ongoing')"
-                  />
+                  <input type="checkbox" v-model="formData.joint_aches_ongoing" :disabled="formData.joint_aches !== 'Yes' ||
+                    formData.joint_aches_resolved
+                    " @change="handleCheckboxChange('joint_aches', 'ongoing')" />
                 </td>
                 <td>
-                  <input
-                    type="checkbox"
-                    v-model="formData.joint_aches_resolved"
-                    :disabled="
-                      formData.joint_aches !== 'Yes' ||
-                      formData.joint_aches_ongoing
-                    "
-                    @change="handleCheckboxChange('joint_aches', 'resolved')"
-                  />
+                  <input type="checkbox" v-model="formData.joint_aches_resolved" :disabled="formData.joint_aches !== 'Yes' ||
+                    formData.joint_aches_ongoing
+                    " @change="handleCheckboxChange('joint_aches', 'resolved')" />
                 </td>
                 <td>
-                  <input
-                    type="checkbox"
-                    v-model="formData.joint_aches_present"
-                    :disabled="formData.joint_aches !== 'Yes'"
-                  />
+                  <input type="checkbox" v-model="formData.joint_aches_present"
+                    :disabled="formData.joint_aches !== 'Yes'" />
                 </td>
               </tr>
               <!-- Diarrhoea Row -->
               <tr>
                 <td>Diarrhoea</td>
                 <td>
-                  <input
-                    type="radio"
-                    name="diarrhoea_status"
-                    v-model="formData.diarrhoea"
-                    value="Yes"
-                  />
+                  <input type="radio" name="diarrhoea_status" v-model="formData.diarrhoea" value="Yes" />
                 </td>
                 <td>
-                  <input
-                    type="radio"
-                    name="diarrhoea_status"
-                    v-model="formData.diarrhoea"
-                    value="No"
-                  />
+                  <input type="radio" name="diarrhoea_status" v-model="formData.diarrhoea" value="No" />
                 </td>
                 <td>
-                  <input
-                    type="text"
-                    v-model="formData.diarrhoea_specify"
-                    :disabled="formData.diarrhoea !== 'Yes'"
-                  />
+                  <input type="text" v-model="formData.diarrhoea_specify" :disabled="formData.diarrhoea !== 'Yes'" />
                 </td>
                 <td>
-                  <input
-                    type="date"
-                    v-model="formData.diarrhoea_start_date"
-                    :disabled="formData.diarrhoea !== 'Yes'"
-                  />
+                  <input type="date" v-model="formData.diarrhoea_start_date" :disabled="formData.diarrhoea !== 'Yes'" />
                 </td>
                 <td>
-                  <input
-                    type="checkbox"
-                    v-model="formData.diarrhoea_ongoing"
-                    :disabled="
-                      formData.diarrhoea !== 'Yes' ||
-                      formData.diarrhoea_resolved
-                    "
-                    @change="handleCheckboxChange('diarrhoea', 'ongoing')"
-                  />
+                  <input type="checkbox" v-model="formData.diarrhoea_ongoing" :disabled="formData.diarrhoea !== 'Yes' ||
+                    formData.diarrhoea_resolved
+                    " @change="handleCheckboxChange('diarrhoea', 'ongoing')" />
                 </td>
                 <td>
-                  <input
-                    type="checkbox"
-                    v-model="formData.diarrhoea_resolved"
-                    :disabled="
-                      formData.diarrhoea !== 'Yes' || formData.diarrhoea_ongoing
-                    "
-                    @change="handleCheckboxChange('diarrhoea', 'resolved')"
-                  />
+                  <input type="checkbox" v-model="formData.diarrhoea_resolved" :disabled="formData.diarrhoea !== 'Yes' || formData.diarrhoea_ongoing
+                    " @change="handleCheckboxChange('diarrhoea', 'resolved')" />
                 </td>
                 <td>
-                  <input
-                    type="checkbox"
-                    v-model="formData.diarrhoea_present"
-                    :disabled="formData.diarrhoea !== 'Yes'"
-                  />
+                  <input type="checkbox" v-model="formData.diarrhoea_present"
+                    :disabled="formData.diarrhoea !== 'Yes'" />
                 </td>
               </tr>
               <!-- Rash Row -->
               <tr>
                 <td>Rash</td>
                 <td>
-                  <input
-                    type="radio"
-                    name="rash_status"
-                    v-model="formData.rash"
-                    value="Yes"
-                  />
+                  <input type="radio" name="rash_status" v-model="formData.rash" value="Yes" />
                 </td>
                 <td>
-                  <input
-                    type="radio"
-                    name="rash_status"
-                    v-model="formData.rash"
-                    value="No"
-                  />
+                  <input type="radio" name="rash_status" v-model="formData.rash" value="No" />
                 </td>
                 <td>
-                  <input
-                    type="text"
-                    v-model="formData.rash_specify"
-                    :disabled="formData.rash !== 'Yes'"
-                  />
+                  <input type="text" v-model="formData.rash_specify" :disabled="formData.rash !== 'Yes'" />
                 </td>
                 <td>
-                  <input
-                    type="date"
-                    v-model="formData.rash_start_date"
-                    :disabled="formData.rash !== 'Yes'"
-                  />
+                  <input type="date" v-model="formData.rash_start_date" :disabled="formData.rash !== 'Yes'" />
                 </td>
                 <td>
-                  <input
-                    type="checkbox"
-                    v-model="formData.rash_ongoing"
-                    :disabled="
-                      formData.rash !== 'Yes' || formData.rash_resolved
-                    "
-                    @change="handleCheckboxChange('rash', 'ongoing')"
-                  />
+                  <input type="checkbox" v-model="formData.rash_ongoing" :disabled="formData.rash !== 'Yes' || formData.rash_resolved
+                    " @change="handleCheckboxChange('rash', 'ongoing')" />
                 </td>
                 <td>
-                  <input
-                    type="checkbox"
-                    v-model="formData.rash_resolved"
+                  <input type="checkbox" v-model="formData.rash_resolved"
                     :disabled="formData.rash !== 'Yes' || formData.rash_ongoing"
-                    @change="handleCheckboxChange('rash', 'resolved')"
-                  />
+                    @change="handleCheckboxChange('rash', 'resolved')" />
                 </td>
                 <td>
-                  <input
-                    type="checkbox"
-                    v-model="formData.rash_present"
-                    :disabled="formData.rash !== 'Yes'"
-                  />
+                  <input type="checkbox" v-model="formData.rash_present" :disabled="formData.rash !== 'Yes'" />
                 </td>
               </tr>
               <!-- Other Symptoms Row -->
               <tr>
                 <td>Others (specify)</td>
                 <td>
-                  <input
-                    type="radio"
-                    name="other_symptoms_status"
-                    v-model="formData.other_symptoms"
-                    value="Yes"
-                  />
+                  <input type="radio" name="other_symptoms_status" v-model="formData.other_symptoms" value="Yes" />
                 </td>
                 <td>
-                  <input
-                    type="radio"
-                    name="other_symptoms_status"
-                    v-model="formData.other_symptoms"
-                    value="No"
-                  />
+                  <input type="radio" name="other_symptoms_status" v-model="formData.other_symptoms" value="No" />
                 </td>
                 <td>
-                  <input
-                    type="text"
-                    v-model="formData.other_symptoms_specify"
-                    :disabled="formData.other_symptoms !== 'Yes'"
-                  />
+                  <input type="text" v-model="formData.other_symptoms_specify"
+                    :disabled="formData.other_symptoms !== 'Yes'" />
                 </td>
                 <td>
-                  <input
-                    type="date"
-                    v-model="formData.other_symptoms_start_date"
-                    :disabled="formData.other_symptoms !== 'Yes'"
-                  />
+                  <input type="date" v-model="formData.other_symptoms_start_date"
+                    :disabled="formData.other_symptoms !== 'Yes'" />
                 </td>
                 <td>
-                  <input
-                    type="checkbox"
-                    v-model="formData.other_symptoms_ongoing"
-                    :disabled="
-                      formData.other_symptoms !== 'Yes' ||
-                      formData.other_symptoms_resolved
-                    "
-                    @change="handleCheckboxChange('other_symptoms', 'ongoing')"
-                  />
+                  <input type="checkbox" v-model="formData.other_symptoms_ongoing" :disabled="formData.other_symptoms !== 'Yes' ||
+                    formData.other_symptoms_resolved
+                    " @change="handleCheckboxChange('other_symptoms', 'ongoing')" />
                 </td>
                 <td>
-                  <input
-                    type="checkbox"
-                    v-model="formData.other_symptoms_resolved"
-                    :disabled="
-                      formData.other_symptoms !== 'Yes' ||
-                      formData.other_symptoms_ongoing
-                    "
-                    @change="handleCheckboxChange('other_symptoms', 'resolved')"
-                  />
+                  <input type="checkbox" v-model="formData.other_symptoms_resolved" :disabled="formData.other_symptoms !== 'Yes' ||
+                    formData.other_symptoms_ongoing
+                    " @change="handleCheckboxChange('other_symptoms', 'resolved')" />
                 </td>
                 <td>
-                  <input
-                    type="checkbox"
-                    v-model="formData.other_symptoms_present"
-                    :disabled="formData.other_symptoms !== 'Yes'"
-                  />
+                  <input type="checkbox" v-model="formData.other_symptoms_present"
+                    :disabled="formData.other_symptoms !== 'Yes'" />
                 </td>
               </tr>
             </tbody>
           </table>
         </div>
 
-        <label style="margin-top: 1rem"
-          >If yes to any of the items above, is there a report of a possible
+        <label style="margin-top: 1rem">If yes to any of the items above, is there a report of a possible
           recent HIV exposure (e.g. condomless sex/injecting drug use) in the
-          past 14 days?</label
-        >
+          past 14 days?</label>
         <div style="display: flex; gap: 20px; margin-bottom: 1rem">
-          <label
-            style="
+          <label style="
               display: inline-flex;
               align-items: center;
               font-weight: normal;
               margin-bottom: 0;
-            "
-            ><input
-              type="radio"
-              v-model="formData.recent_hiv_exposure"
-              name="recent_hiv_exposure"
-              value="Yes"
-            />
-            YES</label
-          >
-          <label
-            style="
+            "><input type="radio" v-model="formData.recent_hiv_exposure" name="recent_hiv_exposure" value="Yes" />
+            YES</label>
+          <label style="
               display: inline-flex;
               align-items: center;
               font-weight: normal;
               margin-bottom: 0;
-            "
-            ><input
-              type="radio"
-              v-model="formData.recent_hiv_exposure"
-              name="recent_hiv_exposure"
-              value="No"
-            />
-            NO</label
-          >
+            "><input type="radio" v-model="formData.recent_hiv_exposure" name="recent_hiv_exposure" value="No" />
+            NO</label>
         </div>
 
         <div v-if="formData.recent_hiv_exposure === 'Yes'">
           <label for="describe_exposure">If yes, describe:</label>
-          <textarea
-            v-model="formData.describe_exposure"
-            id="describe_exposure"
-            name="describe_exposure"
-            rows="4"
-            cols="50"
-          ></textarea>
+          <textarea v-model="formData.describe_exposure" id="describe_exposure" name="describe_exposure" rows="4"
+            cols="50"></textarea>
         </div>
       </div>
 
@@ -747,12 +363,7 @@
       <div class="form-container">
         <h3 class="section-title">2. Syndromic STI Management</h3>
         <div class="table-responsive">
-          <table
-            border="1"
-            cellspacing="0"
-            cellpadding="5"
-            class="symptoms-table"
-          >
+          <table border="1" cellspacing="0" cellpadding="5" class="symptoms-table">
             <thead>
               <tr>
                 <th>Symptoms</th>
@@ -768,328 +379,178 @@
               <tr>
                 <td>Vaginal/urethral Discharge</td>
                 <td>
-                  <input
-                    type="radio"
-                    name="vag_discharge_status"
-                    v-model="formData.vaginal_discharge"
-                    value="Yes"
-                  />
+                  <input type="radio" name="vag_discharge_status" v-model="formData.vaginal_discharge" value="Yes" />
                 </td>
                 <td>
-                  <input
-                    type="radio"
-                    name="vag_discharge_status"
-                    v-model="formData.vaginal_discharge"
-                    value="No"
-                  />
+                  <input type="radio" name="vag_discharge_status" v-model="formData.vaginal_discharge" value="No" />
                 </td>
                 <td>
-                  <input
-                    type="date"
-                    v-model="formData.vaginal_discharge_start_date"
-                    :disabled="formData.vaginal_discharge !== 'Yes'"
-                  />
+                  <input type="date" v-model="formData.vaginal_discharge_start_date"
+                    :disabled="formData.vaginal_discharge !== 'Yes'" />
                 </td>
                 <td>
-                  <input
-                    type="text"
-                    v-model="formData.vaginal_discharge_specify"
-                    :disabled="formData.vaginal_discharge !== 'Yes'"
-                  />
+                  <input type="text" v-model="formData.vaginal_discharge_specify"
+                    :disabled="formData.vaginal_discharge !== 'Yes'" />
                 </td>
                 <td>
-                  <input
-                    type="text"
-                    v-model="formData.vaginal_discharge_treatment"
-                    :disabled="formData.vaginal_discharge !== 'Yes'"
-                  />
+                  <input type="text" v-model="formData.vaginal_discharge_treatment"
+                    :disabled="formData.vaginal_discharge !== 'Yes'" />
                 </td>
               </tr>
               <!-- Lower Abdominal Pain -->
               <tr>
                 <td>Lower Abdominal Pain</td>
                 <td>
-                  <input
-                    type="radio"
-                    name="abdo_pain_status"
-                    v-model="formData.lower_abdominal_pain"
-                    value="Yes"
-                  />
+                  <input type="radio" name="abdo_pain_status" v-model="formData.lower_abdominal_pain" value="Yes" />
                 </td>
                 <td>
-                  <input
-                    type="radio"
-                    name="abdo_pain_status"
-                    v-model="formData.lower_abdominal_pain"
-                    value="No"
-                  />
+                  <input type="radio" name="abdo_pain_status" v-model="formData.lower_abdominal_pain" value="No" />
                 </td>
                 <td>
-                  <input
-                    type="date"
-                    v-model="formData.lower_abdominal_pain_start_date"
-                    :disabled="formData.lower_abdominal_pain !== 'Yes'"
-                  />
+                  <input type="date" v-model="formData.lower_abdominal_pain_start_date"
+                    :disabled="formData.lower_abdominal_pain !== 'Yes'" />
                 </td>
                 <td>
-                  <input
-                    type="text"
-                    v-model="formData.lower_abdominal_pain_specify"
-                    :disabled="formData.lower_abdominal_pain !== 'Yes'"
-                  />
+                  <input type="text" v-model="formData.lower_abdominal_pain_specify"
+                    :disabled="formData.lower_abdominal_pain !== 'Yes'" />
                 </td>
                 <td>
-                  <input
-                    type="text"
-                    v-model="formData.lower_abdominal_pain_treatment"
-                    :disabled="formData.lower_abdominal_pain !== 'Yes'"
-                  />
+                  <input type="text" v-model="formData.lower_abdominal_pain_treatment"
+                    :disabled="formData.lower_abdominal_pain !== 'Yes'" />
                 </td>
               </tr>
               <!-- Anorectal Discharge -->
               <tr>
                 <td>Anorectal discharge</td>
                 <td>
-                  <input
-                    type="radio"
-                    name="anorectal_discharge_status"
-                    v-model="formData.anorectal_discharge"
-                    value="Yes"
-                  />
+                  <input type="radio" name="anorectal_discharge_status" v-model="formData.anorectal_discharge"
+                    value="Yes" />
                 </td>
                 <td>
-                  <input
-                    type="radio"
-                    name="anorectal_discharge_status"
-                    v-model="formData.anorectal_discharge"
-                    value="No"
-                  />
+                  <input type="radio" name="anorectal_discharge_status" v-model="formData.anorectal_discharge"
+                    value="No" />
                 </td>
                 <td>
-                  <input
-                    type="date"
-                    v-model="formData.anorectal_discharge_start_date"
-                    :disabled="formData.anorectal_discharge !== 'Yes'"
-                  />
+                  <input type="date" v-model="formData.anorectal_discharge_start_date"
+                    :disabled="formData.anorectal_discharge !== 'Yes'" />
                 </td>
                 <td>
-                  <input
-                    type="text"
-                    v-model="formData.anorectal_discharge_specify"
-                    :disabled="formData.anorectal_discharge !== 'Yes'"
-                  />
+                  <input type="text" v-model="formData.anorectal_discharge_specify"
+                    :disabled="formData.anorectal_discharge !== 'Yes'" />
                 </td>
                 <td>
-                  <input
-                    type="text"
-                    v-model="formData.anorectal_discharge_treatment"
-                    :disabled="formData.anorectal_discharge !== 'Yes'"
-                  />
+                  <input type="text" v-model="formData.anorectal_discharge_treatment"
+                    :disabled="formData.anorectal_discharge !== 'Yes'" />
                 </td>
               </tr>
               <!-- Genital/anal sore/blister/warts -->
               <tr>
                 <td>Genital/anal sore/blister/warts</td>
                 <td>
-                  <input
-                    type="radio"
-                    name="genital_sore_status"
-                    v-model="formData.genital_sore"
-                    value="Yes"
-                  />
+                  <input type="radio" name="genital_sore_status" v-model="formData.genital_sore" value="Yes" />
                 </td>
                 <td>
-                  <input
-                    type="radio"
-                    name="genital_sore_status"
-                    v-model="formData.genital_sore"
-                    value="No"
-                  />
+                  <input type="radio" name="genital_sore_status" v-model="formData.genital_sore" value="No" />
                 </td>
                 <td>
-                  <input
-                    type="date"
-                    v-model="formData.genital_sore_start_date"
-                    :disabled="formData.genital_sore !== 'Yes'"
-                  />
+                  <input type="date" v-model="formData.genital_sore_start_date"
+                    :disabled="formData.genital_sore !== 'Yes'" />
                 </td>
                 <td>
-                  <input
-                    type="text"
-                    v-model="formData.genital_sore_specify"
-                    :disabled="formData.genital_sore !== 'Yes'"
-                  />
+                  <input type="text" v-model="formData.genital_sore_specify"
+                    :disabled="formData.genital_sore !== 'Yes'" />
                 </td>
                 <td>
-                  <input
-                    type="text"
-                    v-model="formData.genital_sore_treatment"
-                    :disabled="formData.genital_sore !== 'Yes'"
-                  />
+                  <input type="text" v-model="formData.genital_sore_treatment"
+                    :disabled="formData.genital_sore !== 'Yes'" />
                 </td>
               </tr>
               <!-- Pain/burning with urination -->
               <tr>
                 <td>Pain/burning with urination</td>
                 <td>
-                  <input
-                    type="radio"
-                    name="urination_pain_status"
-                    v-model="formData.pain_with_urination"
-                    value="Yes"
-                  />
+                  <input type="radio" name="urination_pain_status" v-model="formData.pain_with_urination" value="Yes" />
                 </td>
                 <td>
-                  <input
-                    type="radio"
-                    name="urination_pain_status"
-                    v-model="formData.pain_with_urination"
-                    value="No"
-                  />
+                  <input type="radio" name="urination_pain_status" v-model="formData.pain_with_urination" value="No" />
                 </td>
                 <td>
-                  <input
-                    type="date"
-                    v-model="formData.pain_with_urination_start_date"
-                    :disabled="formData.pain_with_urination !== 'Yes'"
-                  />
+                  <input type="date" v-model="formData.pain_with_urination_start_date"
+                    :disabled="formData.pain_with_urination !== 'Yes'" />
                 </td>
                 <td>
-                  <input
-                    type="text"
-                    v-model="formData.pain_with_urination_specify"
-                    :disabled="formData.pain_with_urination !== 'Yes'"
-                  />
+                  <input type="text" v-model="formData.pain_with_urination_specify"
+                    :disabled="formData.pain_with_urination !== 'Yes'" />
                 </td>
                 <td>
-                  <input
-                    type="text"
-                    v-model="formData.pain_with_urination_treatment"
-                    :disabled="formData.pain_with_urination !== 'Yes'"
-                  />
+                  <input type="text" v-model="formData.pain_with_urination_treatment"
+                    :disabled="formData.pain_with_urination !== 'Yes'" />
                 </td>
               </tr>
               <!-- Swelling in the groin -->
               <tr>
                 <td>Swelling in the groin</td>
                 <td>
-                  <input
-                    type="radio"
-                    name="groin_swelling_status"
-                    v-model="formData.swelling_in_groin"
-                    value="Yes"
-                  />
+                  <input type="radio" name="groin_swelling_status" v-model="formData.swelling_in_groin" value="Yes" />
                 </td>
                 <td>
-                  <input
-                    type="radio"
-                    name="groin_swelling_status"
-                    v-model="formData.swelling_in_groin"
-                    value="No"
-                  />
+                  <input type="radio" name="groin_swelling_status" v-model="formData.swelling_in_groin" value="No" />
                 </td>
                 <td>
-                  <input
-                    type="date"
-                    v-model="formData.swelling_in_groin_start_date"
-                    :disabled="formData.swelling_in_groin !== 'Yes'"
-                  />
+                  <input type="date" v-model="formData.swelling_in_groin_start_date"
+                    :disabled="formData.swelling_in_groin !== 'Yes'" />
                 </td>
                 <td>
-                  <input
-                    type="text"
-                    v-model="formData.swelling_in_groin_specify"
-                    :disabled="formData.swelling_in_groin !== 'Yes'"
-                  />
+                  <input type="text" v-model="formData.swelling_in_groin_specify"
+                    :disabled="formData.swelling_in_groin !== 'Yes'" />
                 </td>
                 <td>
-                  <input
-                    type="text"
-                    v-model="formData.swelling_in_groin_treatment"
-                    :disabled="formData.swelling_in_groin !== 'Yes'"
-                  />
+                  <input type="text" v-model="formData.swelling_in_groin_treatment"
+                    :disabled="formData.swelling_in_groin !== 'Yes'" />
                 </td>
               </tr>
               <!-- Rash -->
               <tr>
                 <td>Rash</td>
                 <td>
-                  <input
-                    type="radio"
-                    name="rash_data_status"
-                    v-model="formData.rash_data_resolved"
-                    value="Yes"
-                  />
+                  <input type="radio" name="rash_data_status" v-model="formData.rash_data_resolved" value="Yes" />
                 </td>
                 <td>
-                  <input
-                    type="radio"
-                    name="rash_data_status"
-                    v-model="formData.rash_data_resolved"
-                    value="No"
-                  />
+                  <input type="radio" name="rash_data_status" v-model="formData.rash_data_resolved" value="No" />
                 </td>
                 <td>
-                  <input
-                    type="date"
-                    v-model="formData.rash_data_resolved_start_date"
-                    :disabled="formData.rash_data_resolved !== 'Yes'"
-                  />
+                  <input type="date" v-model="formData.rash_data_resolved_start_date"
+                    :disabled="formData.rash_data_resolved !== 'Yes'" />
                 </td>
                 <td>
-                  <input
-                    type="text"
-                    v-model="formData.rash_data_resolved_specify"
-                    :disabled="formData.rash_data_resolved !== 'Yes'"
-                  />
+                  <input type="text" v-model="formData.rash_data_resolved_specify"
+                    :disabled="formData.rash_data_resolved !== 'Yes'" />
                 </td>
                 <td>
-                  <input
-                    type="text"
-                    v-model="formData.rash_data_resolved_treatment"
-                    :disabled="formData.rash_data_resolved !== 'Yes'"
-                  />
+                  <input type="text" v-model="formData.rash_data_resolved_treatment"
+                    :disabled="formData.rash_data_resolved !== 'Yes'" />
                 </td>
               </tr>
               <!-- Other Symptoms -->
               <tr>
                 <td>Other (Specify)</td>
                 <td>
-                  <input
-                    type="radio"
-                    name="oth_symptoms_status"
-                    v-model="formData.oth_symptoms"
-                    value="Yes"
-                  />
+                  <input type="radio" name="oth_symptoms_status" v-model="formData.oth_symptoms" value="Yes" />
                 </td>
                 <td>
-                  <input
-                    type="radio"
-                    name="oth_symptoms_status"
-                    v-model="formData.oth_symptoms"
-                    value="No"
-                  />
+                  <input type="radio" name="oth_symptoms_status" v-model="formData.oth_symptoms" value="No" />
                 </td>
                 <td>
-                  <input
-                    type="date"
-                    v-model="formData.oth_symptoms_start_date"
-                    :disabled="formData.oth_symptoms !== 'Yes'"
-                  />
+                  <input type="date" v-model="formData.oth_symptoms_start_date"
+                    :disabled="formData.oth_symptoms !== 'Yes'" />
                 </td>
                 <td>
-                  <input
-                    type="text"
-                    v-model="formData.oth_symptoms_specify"
-                    :disabled="formData.oth_symptoms !== 'Yes'"
-                  />
+                  <input type="text" v-model="formData.oth_symptoms_specify"
+                    :disabled="formData.oth_symptoms !== 'Yes'" />
                 </td>
                 <td>
-                  <input
-                    type="text"
-                    v-model="formData.oth_symptoms_treatment"
-                    :disabled="formData.oth_symptoms !== 'Yes'"
-                  />
+                  <input type="text" v-model="formData.oth_symptoms_treatment"
+                    :disabled="formData.oth_symptoms !== 'Yes'" />
                 </td>
               </tr>
             </tbody>
@@ -1101,12 +562,7 @@
       <div class="form-container">
         <h3 class="section-title">3. Clinical Findings</h3>
         <div class="table-responsive">
-          <table
-            border="1"
-            cellspacing="0"
-            cellpadding="5"
-            class="findings-table"
-          >
+          <table border="1" cellspacing="0" cellpadding="5" class="findings-table">
             <thead>
               <tr>
                 <th>Assessment</th>
@@ -1117,31 +573,19 @@
               <tr>
                 <td>Acute HIV</td>
                 <td>
-                  <input
-                    type="text"
-                    v-model="formData.acute_hiv_specify"
-                    placeholder="Specify if yes"
-                  />
+                  <input type="text" v-model="formData.acute_hiv_specify" placeholder="Specify if yes" />
                 </td>
               </tr>
               <tr>
                 <td>STI</td>
                 <td>
-                  <input
-                    type="text"
-                    v-model="formData.sti_specify"
-                    placeholder="Specify if yes"
-                  />
+                  <input type="text" v-model="formData.sti_specify" placeholder="Specify if yes" />
                 </td>
               </tr>
               <tr>
                 <td>Others (specify)</td>
                 <td>
-                  <input
-                    type="text"
-                    v-model="formData.other_specify"
-                    placeholder="Specify if yes"
-                  />
+                  <input type="text" v-model="formData.other_specify" placeholder="Specify if yes" />
                 </td>
               </tr>
             </tbody>
@@ -1153,182 +597,98 @@
       <div class="form-container">
         <h3 class="section-title">4. Disease History and Medications</h3>
 
-        <label
-          >Do you currently have, or had in the past, any kidney disease,
-          diabetes, hypertension, or thyroid problem?</label
-        >
+        <label>Do you currently have, or had in the past, any kidney disease,
+          diabetes, hypertension, or thyroid problem?</label>
         <div style="display: flex; gap: 20px; margin-bottom: 1rem">
-          <label
-            style="
+          <label style="
               display: inline-flex;
               align-items: center;
               font-weight: normal;
               margin-bottom: 0;
-            "
-            ><input
-              type="radio"
-              v-model="formData.disease_history"
-              name="disease_history"
-              value="Yes"
-            />
-            YES</label
-          >
-          <label
-            style="
+            "><input type="radio" v-model="formData.disease_history" name="disease_history" value="Yes" />
+            YES</label>
+          <label style="
               display: inline-flex;
               align-items: center;
               font-weight: normal;
               margin-bottom: 0;
-            "
-            ><input
-              type="radio"
-              v-model="formData.disease_history"
-              name="disease_history"
-              value="No"
-            />
-            NO</label
-          >
-          <label
-            style="
+            "><input type="radio" v-model="formData.disease_history" name="disease_history" value="No" />
+            NO</label>
+          <label style="
               display: inline-flex;
               align-items: center;
               font-weight: normal;
               margin-bottom: 0;
-            "
-            ><input
-              type="radio"
-              v-model="formData.disease_history"
-              name="disease_history"
-              value="Not sure/Don’t know"
-            />
-            Not sure/Don’t know</label
-          >
+            "><input type="radio" v-model="formData.disease_history" name="disease_history"
+              value="Not sure/Don’t know" />
+            Not sure/Don’t know</label>
         </div>
 
         <div v-if="formData.disease_history === 'Yes'">
-          <label for="disease_specify"
-            >If yes, please specify the illness, dates, diagnosis, and
+          <label for="disease_specify">If yes, please specify the illness, dates, diagnosis, and
             treatments:<br />(Please note dates of illness/disease, date of
-            diagnosis and conditions as well as any courses of treatment)</label
-          >
-          <textarea
-            v-model="formData.disease_specify"
-            id="disease_specify"
-            rows="4"
-            placeholder="Specify details..."
-          ></textarea>
+            diagnosis and conditions as well as any courses of treatment)</label>
+          <textarea v-model="formData.disease_specify" id="disease_specify" rows="4"
+            placeholder="Specify details..."></textarea>
         </div>
 
-        <label
-          >Are you currently on any medications, including traditional or
-          alternative medications?</label
-        >
+        <label>Are you currently on any medications, including traditional or
+          alternative medications?</label>
         <div style="display: flex; gap: 20px; margin-bottom: 1rem">
-          <label
-            style="
+          <label style="
               display: inline-flex;
               align-items: center;
               font-weight: normal;
               margin-bottom: 0;
-            "
-            ><input
-              type="radio"
-              v-model="formData.current_medications"
-              name="current_medications"
-              value="Yes"
-            />
-            YES</label
-          >
-          <label
-            style="
+            "><input type="radio" v-model="formData.current_medications" name="current_medications" value="Yes" />
+            YES</label>
+          <label style="
               display: inline-flex;
               align-items: center;
               font-weight: normal;
               margin-bottom: 0;
-            "
-            ><input
-              type="radio"
-              v-model="formData.current_medications"
-              name="current_medications"
-              value="No"
-            />
-            NO</label
-          >
+            "><input type="radio" v-model="formData.current_medications" name="current_medications" value="No" />
+            NO</label>
         </div>
 
         <div v-if="formData.current_medications === 'Yes'">
-          <label for="medication_specify"
-            >If yes, please list the medications (Do not include medications
-            prescribed at this visit):</label
-          >
-          <textarea
-            v-model="formData.medication_specify"
-            id="medication_specify"
-            rows="3"
-            placeholder="List current medications"
-          ></textarea>
+          <label for="medication_specify">If yes, please list the medications (Do not include medications
+            prescribed at this visit):</label>
+          <textarea v-model="formData.medication_specify" id="medication_specify" rows="3"
+            placeholder="List current medications"></textarea>
         </div>
 
         <label>Are you allergic to any medications?</label>
         <div style="display: flex; gap: 20px; margin-bottom: 1rem">
-          <label
-            style="
+          <label style="
               display: inline-flex;
               align-items: center;
               font-weight: normal;
               margin-bottom: 0;
-            "
-            ><input
-              type="radio"
-              v-model="formData.medication_allergies"
-              name="medication_allergies"
-              value="Yes"
-            />
-            YES</label
-          >
-          <label
-            style="
+            "><input type="radio" v-model="formData.medication_allergies" name="medication_allergies" value="Yes" />
+            YES</label>
+          <label style="
               display: inline-flex;
               align-items: center;
               font-weight: normal;
               margin-bottom: 0;
-            "
-            ><input
-              type="radio"
-              v-model="formData.medication_allergies"
-              name="medication_allergies"
-              value="No"
-            />
-            NO</label
-          >
-          <label
-            style="
+            "><input type="radio" v-model="formData.medication_allergies" name="medication_allergies" value="No" />
+            NO</label>
+          <label style="
               display: inline-flex;
               align-items: center;
               font-weight: normal;
               margin-bottom: 0;
-            "
-            ><input
-              type="radio"
-              v-model="formData.medication_allergies"
-              name="medication_allergies"
-              value="Not sure/Don’t know"
-            />
-            Not sure/Don’t know</label
-          >
+            "><input type="radio" v-model="formData.medication_allergies" name="medication_allergies"
+              value="Not sure/Don’t know" />
+            Not sure/Don’t know</label>
         </div>
 
         <div v-if="formData.medication_allergies === 'Yes'">
-          <label for="allergy_specify"
-            >If yes, please indicate the name(s) of the medication(s) you're
-            allergic to:</label
-          >
-          <textarea
-            v-model="formData.allergy_specify"
-            id="allergy_specify"
-            rows="3"
-            placeholder="Specify medication allergies"
-          ></textarea>
+          <label for="allergy_specify">If yes, please indicate the name(s) of the medication(s) you're
+            allergic to:</label>
+          <textarea v-model="formData.allergy_specify" id="allergy_specify" rows="3"
+            placeholder="Specify medication allergies"></textarea>
         </div>
       </div>
 
@@ -1359,19 +719,13 @@
               <tr>
                 <td>Hepatitis B* (HBsAg)</td>
                 <td>
-                  <input
-                    type="date"
-                    v-model="formData.hepatitis_b_sample_date"
-                  />
+                  <input type="date" v-model="formData.hepatitis_b_sample_date" />
                 </td>
               </tr>
               <tr>
                 <td>Hepatitis C (Anti-HCV)</td>
                 <td>
-                  <input
-                    type="date"
-                    v-model="formData.hepatitis_C_sample_date"
-                  />
+                  <input type="date" v-model="formData.hepatitis_C_sample_date" />
                 </td>
               </tr>
               <tr>
@@ -1383,19 +737,13 @@
               <tr>
                 <td>Kidney function (serum Creatinine)**</td>
                 <td>
-                  <input
-                    type="date"
-                    v-model="formData.kidney_function_sample_date"
-                  />
+                  <input type="date" v-model="formData.kidney_function_sample_date" />
                 </td>
               </tr>
               <tr>
                 <td>Test for N. Gonorrhoea</td>
                 <td>
-                  <input
-                    type="date"
-                    v-model="formData.gonorrhoea_sample_date"
-                  />
+                  <input type="date" v-model="formData.gonorrhoea_sample_date" />
                 </td>
               </tr>
             </tbody>
@@ -1411,113 +759,65 @@
       <!-- Container 6: Assessment & Dispensing -->
       <div class="form-container">
         <h3 class="section-title">6. Assessment Notes and Dispensing</h3>
-        <label for="assessment_notes"
-          ><strong>Assessment Notes:</strong> (Note overall assessment,
-          suitability, side effects, medications prescribed, referrals)</label
-        >
-        <textarea
-          v-model="formData.assessment_notes"
-          id="assessment_notes"
-          name="assessment_notes"
-          rows="6"
-          placeholder="Enter assessment details..."
-        ></textarea>
+        <label for="assessment_notes"><strong>Assessment Notes:</strong> (Note overall assessment,
+          suitability, side effects, medications prescribed, referrals)</label>
+        <textarea v-model="formData.assessment_notes" id="assessment_notes" name="assessment_notes" rows="6"
+          placeholder="Enter assessment details..."></textarea>
 
         <label>PrEP dispensed:</label>
         <div style="display: flex; gap: 20px; margin-bottom: 1rem">
-          <label
-            style="
+          <label style="
               display: inline-flex;
               align-items: center;
               font-weight: normal;
               margin-bottom: 0;
-            "
-          >
-            <input
-              type="radio"
-              v-model="formData.prep_dispensed"
-              name="prep_dispensed"
-              value="Yes"
-              required
-            />
+            ">
+            <input type="radio" v-model="formData.prep_dispensed" name="prep_dispensed" value="Yes" required />
             YES
           </label>
-          <label
-            style="
+          <label style="
               display: inline-flex;
               align-items: center;
               font-weight: normal;
               margin-bottom: 0;
-            "
-          >
-            <input
-              type="radio"
-              v-model="formData.prep_dispensed"
-              name="prep_dispensed"
-              value="No"
-              required
-            />
+            ">
+            <input type="radio" v-model="formData.prep_dispensed" name="prep_dispensed" value="No" required />
             NO
           </label>
         </div>
 
         <div v-if="formData.prep_dispensed === 'Yes'">
-          <label for="prep_bottles"
-            >If YES, mention the number of bottles:</label
-          >
-          <input
-            type="number"
-            v-model.number="formData.prep_bottles"
-            id="prep_bottles"
-            name="prep_bottles"
-            min="1"
-            placeholder="Enter number"
-          />
+          <label for="prep_bottles">If YES, mention the number of bottles:</label>
+          <input type="number" v-model.number="formData.prep_bottles" id="prep_bottles" name="prep_bottles" min="1"
+            placeholder="Enter number" />
         </div>
 
+        <!-- THIS IS THE NEWLY ADDED BLOCK -->
+        <div v-if="formData.prep_dispensed === 'Yes'">
+          <label for="regimen_for_prep">Regimen for PrEP:</label>
+          <input type="text" v-model="formData.regimen_for_prep" id="regimen_for_prep" name="regimen_for_prep"
+            placeholder="e.g., Daily PrEP" required />
+        </div>
+        <!-- END OF NEWLY ADDED BLOCK -->
+
         <label for="clinician_information_date">Date:</label>
-        <input
-          type="date"
-          v-model="formData.clinician_information_date"
-          id="clinician_information_date"
-          name="clinician_information_date"
-          required
-        />
+        <input type="date" v-model="formData.clinician_information_date" id="clinician_information_date"
+          name="clinician_information_date" required />
 
         <label for="clinician_name">Clinician Name:</label>
-        <input
-          type="text"
-          v-model="formData.clinician_name"
-          id="clinician_name"
-          name="clinician_name"
-          readonly
-        />
+        <input type="text" v-model="formData.clinician_name" id="clinician_name" name="clinician_name" readonly />
 
         <label for="clinician_designation">Designation:</label>
-        <input
-          type="text"
-          v-model="formData.designation"
-          id="clinician_designation"
-          name="designation"
-          readonly
-        />
+        <input type="text" v-model="formData.designation" id="clinician_designation" name="designation" readonly />
 
         <label for="bhmc_registration">BHMC Registration:</label>
-        <input
-          type="text"
-          v-model="formData.bhmc_registration"
-          id="bhmc_registration"
-          name="bhmc_registration"
-          readonly
-        />
+        <input type="text" v-model="formData.bhmc_registration" id="bhmc_registration" name="bhmc_registration"
+          readonly />
       </div>
 
+
       <!-- Submit Button outside the last container -->
-      <button
-        type="submit"
-        class="submit-btn"
-        :disabled="submitDisabled || isSubmitting"
-      >
+      <button type="submit" class="submit-btn" :disabled="submitDisabled || isSubmitting">
         {{ isSubmitting ? "Submitting..." : "Review Data" }}
       </button>
     </div>
@@ -1525,36 +825,20 @@
   </form>
 
   <!-- Confirmation Modal -->
-  <Form3_ConfirmationModal
-    v-if="isReviewModalVisible"
-    :formData="formData"
-    :isSubmitting="isSubmitting"
-    :successMessage="modalSuccessMessage"
-    :errorMessage="modalErrorMessage"
-    @confirm="confirmAndSubmit"
-    @cancel="cancelReview"
-  />
+  <Form3_ConfirmationModal v-if="isReviewModalVisible" :formData="formData" :isSubmitting="isSubmitting"
+    :successMessage="modalSuccessMessage" :errorMessage="modalErrorMessage" @confirm="confirmAndSubmit"
+    @cancel="cancelReview" />
 
   <!-- Final Messages outside modal -->
-  <div
-    v-if="!isReviewModalVisible && finalSubmitMessage"
-    :class="finalSubmitClass"
-    class="final-message"
-  >
+  <div v-if="!isReviewModalVisible && finalSubmitMessage" :class="finalSubmitClass" class="final-message">
     <p>{{ finalSubmitMessage }}</p>
   </div>
-  <div
-    v-if="!isReviewModalVisible && !finalSubmitMessage"
-    style="text-align: center; margin-top: 20px"
-  >
+  <div v-if="!isReviewModalVisible && !finalSubmitMessage" style="text-align: center; margin-top: 20px">
     <h4 class="section-title" style="margin-bottom: 1rem; font-size: 1.2rem">
       Thank you for your time.
     </h4>
     <!-- Original general message display (optional) -->
-    <div
-      v-if="successMessage && !finalSubmitMessage"
-      class="success-message mt-2"
-    >
+    <div v-if="successMessage && !finalSubmitMessage" class="success-message mt-2">
       <p>{{ successMessage }}</p>
     </div>
     <div v-if="errorMessage && !finalSubmitMessage" class="error-message">
@@ -1566,14 +850,13 @@
 <script setup>
 import { ref, onMounted, watch } from "vue";
 import axios from "axios";
-// Import the NEW modal component
-import Form3_ConfirmationModal from "./Form3_ConfirmationModal.vue"; // Adjust path if needed
+import Form3_ConfirmationModal from "./Form3_ConfirmationModal.vue";
 
 // --- Configuration ---
 const GOOGLE_SCRIPT_URL =
-  "https://script.google.com/macros/s/AKfycbyTRBjdyQBUxWvo6HDNNSbhVLAXjkHMK8_gG1uLMce3jfONVrUQ5frhY1RqUmvRfJngIg/exec"; // Replace with Form 3 Script URL
+  "https://script.google.com/macros/s/AKfycbyTRBjdyQBUxWvo6HDNNSbhVLAXjkHMK8_gG1uLMce3jfONVrUQ5frhY1RqUmvRfJngIg/exec";
 const CSV_DATA_URL =
-  "https://docs.google.com/spreadsheets/d/e/2PACX-1vSfG6e5EIcHDaXopn9DxMZnTwVFGi5CiQxmKlEIPsd7uPtZiQIikYb46UdN78UhZlJfocCfl_s0hGGX/pub?gid=0&single=true&output=csv"; // UID validation source
+  "https://docs.google.com/spreadsheets/d/e/2PACX-1vSfG6e5EIcHDaXopn9DxMZnTwVFGi5CiQxmKlEIPsd7uPtZiQIikYb46UdN78UhZlJfocCfl_s0hGGX/pub?gid=0&single=true&output=csv";
 const UID_MIN_LENGTH = 5;
 const SUBMIT_SUCCESS_DELAY = 2500;
 
@@ -1582,7 +865,7 @@ const formData = ref({
   participant_uid: "",
   date: "",
   visit_type: "",
-  // Acute HIV Symptoms (initialize booleans to false)
+  // Acute HIV Symptoms
   fever: "",
   fever_specify: "",
   fever_start_date: "",
@@ -1694,7 +977,9 @@ const formData = ref({
   // Assessment & Dispensing
   assessment_notes: "",
   prep_dispensed: "",
-  prep_bottles: null, // Use null for number
+  // THIS IS THE NEWLY ADDED FIELD
+  regimen_for_prep: "",
+  prep_bottles: null,
   clinician_information_date: "",
   clinician_name: "",
   designation: "",
@@ -1712,7 +997,7 @@ const modalErrorMessage = ref("");
 const finalSubmitMessage = ref("");
 const finalSubmitClass = ref("");
 const successMessage = ref("");
-const errorMessage = ref(""); // General messages
+const errorMessage = ref("");
 let csvData = [];
 
 // --- Functions ---
@@ -1720,7 +1005,6 @@ const initializeDate = () => {
   formData.value.date = new Date().toISOString().split("T")[0];
 };
 const fetchCsvData = async () => {
-  /* ... same as before ... */
   isCheckingUid.value = true;
   statusMessage.value = "Loading validation data...";
   statusClass.value = "";
@@ -1734,13 +1018,11 @@ const fetchCsvData = async () => {
       .map((row) =>
         row.split(",").map((cell) => cell.trim().replace(/^"|"$/g, ""))
       );
-    console.log("CSV Data Loaded for Form 3");
     statusMessage.value = "Validation data loaded. Please enter UID.";
     if (formData.value.participant_uid)
       validateUidOnInput(formData.value.participant_uid);
     else submitDisabled.value = true;
   } catch (error) {
-    console.error("Error fetching CSV data for Form 3:", error);
     statusMessage.value = "Error loading validation data. Cannot check UID.";
     statusClass.value = "error";
     csvData = [];
@@ -1755,7 +1037,6 @@ const fetchCsvData = async () => {
   }
 };
 const validateUid = (uid) => {
-  /* ... same as before ... */
   if (!uid || !csvData || csvData.length <= 1) return false;
   const normalizedUid = uid.trim().toLowerCase();
   return csvData
@@ -1763,7 +1044,6 @@ const validateUid = (uid) => {
     .some((row) => row.length > 1 && row[1]?.toLowerCase() === normalizedUid);
 };
 const validateUidOnInput = (newUid) => {
-  /* ... same as before ... */
   clearFinalMessage();
   modalErrorMessage.value = "";
   modalSuccessMessage.value = "";
@@ -1850,7 +1130,7 @@ const confirmAndSubmit = async () => {
           response.data.message || "Form submitted successfully!",
           "success"
         );
-        clearForm(); // Clear form data after successful submission
+        clearForm();
         statusMessage.value = "";
         statusClass.value = "";
         submitDisabled.value = true;
@@ -1860,7 +1140,6 @@ const confirmAndSubmit = async () => {
       modalErrorMessage.value = response.data.message || "Submission failed.";
     }
   } catch (error) {
-    console.error("Form Submit Error:", error);
     let detailedError = "Error submitting the form.";
     if (error.response) detailedError += ` (Status: ${error.response.status})`;
     else if (error.request) detailedError += " (No response)";
@@ -1911,12 +1190,10 @@ const clearForm = () => {
 
 // Logged In User
 const getLoggedInUser = () => {
-  /* ... same as before ... */
   try {
     const user = localStorage.getItem("loggedInUser");
     return user ? JSON.parse(user) : null;
   } catch (e) {
-    console.error("Error parsing loggedInUser", e);
     return null;
   }
 };
@@ -1932,6 +1209,7 @@ function clearFinalMessage() {
 }
 
 // onMounted
+
 onMounted(() => {
   initializeDate();
   fetchCsvData();
@@ -1939,9 +1217,8 @@ onMounted(() => {
   if (loggedInUser) {
     formData.value.clinician_name = loggedInUser.fullname || "";
     formData.value.designation = loggedInUser.designation || "";
-    formData.value.bhmc_registration = loggedInUser.bhcno || "";
+    formData.value.bhmc_registration = loggedInUser.bhc_no || "";
   } else {
-    console.warn("Form 3: Logged in user details not found.");
     formData.value.clinician_name = "";
     formData.value.designation = "";
     formData.value.bhmc_registration = "";
@@ -1950,7 +1227,7 @@ onMounted(() => {
 </script>
 
 <style>
-/* Keep the original Form 3 styles */
+/* Your styles are unchanged */
 .form-container {
   padding: 2rem;
   background-color: #fff;
@@ -1958,11 +1235,13 @@ onMounted(() => {
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   margin-bottom: 2rem;
 }
+
 label {
   display: block;
   margin-bottom: 5px;
   font-weight: bold;
 }
+
 input,
 select,
 textarea {
@@ -1974,6 +1253,7 @@ textarea {
   box-sizing: border-box;
   font-size: 0.95rem;
 }
+
 input:focus,
 select:focus,
 textarea:focus {
@@ -1981,32 +1261,38 @@ textarea:focus {
   outline: none;
   box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
 }
+
 input[readonly] {
   background-color: #f8f9fa;
   cursor: not-allowed;
 }
+
 input[type="radio"],
 input[type="checkbox"] {
   width: auto;
   margin-right: 8px;
   vertical-align: middle;
 }
-label > input[type="radio"],
-label > input[type="checkbox"] {
+
+label>input[type="radio"],
+label>input[type="checkbox"] {
   margin-bottom: 0;
 }
+
 .radio-group-vertical {
   display: flex;
   flex-direction: column;
   gap: 8px;
   margin-bottom: 15px;
 }
+
 .radio-group-vertical label {
   font-weight: normal;
   display: inline-flex;
   align-items: center;
   margin-bottom: 0;
 }
+
 .section-title {
   font-size: 1.5rem;
   color: #3498db;
@@ -2015,9 +1301,11 @@ label > input[type="checkbox"] {
   padding-bottom: 5px;
   border-bottom: 1px solid #eee;
 }
+
 .section-title:first-of-type {
   margin-top: 0;
 }
+
 .submit-btn {
   background-color: #3498db;
   color: #fff;
@@ -2033,14 +1321,17 @@ label > input[type="checkbox"] {
   margin-left: auto;
   margin-right: auto;
 }
+
 .submit-btn:hover:not(:disabled) {
   background-color: #2980b9;
 }
+
 .submit-btn:disabled {
   background-color: #bdc3c7;
   cursor: not-allowed;
   opacity: 0.7;
 }
+
 #status-message {
   margin-top: -10px;
   margin-bottom: 15px;
@@ -2050,31 +1341,37 @@ label > input[type="checkbox"] {
   border-width: 1px;
   border-style: solid;
 }
+
 #status-message.success {
   background-color: #dff0d8;
   color: #3c763d;
   border-color: #d6e9c6;
 }
+
 #status-message.error {
   background-color: #f2dede;
   color: #a94442;
   border-color: #ebccd1;
 }
+
 .uid-spinner {
   margin-left: 10px;
   color: #3498db;
   font-size: 0.9em;
 }
+
 .table-responsive {
   overflow-x: auto;
   margin-bottom: 1rem;
 }
+
 table {
   border-collapse: collapse;
   width: 100%;
   margin-bottom: 1rem;
   font-size: 0.9rem;
 }
+
 th,
 td {
   border: 1px solid #ccc;
@@ -2082,16 +1379,19 @@ td {
   text-align: left;
   vertical-align: middle;
 }
+
 th {
   background-color: #f2f2f2;
   font-weight: bold;
   text-align: center;
 }
+
 td input[type="radio"],
 td input[type="checkbox"] {
   display: block;
   margin: 0 auto;
 }
+
 td input[type="text"],
 td input[type="date"] {
   width: 95%;
@@ -2099,24 +1399,28 @@ td input[type="date"] {
   margin-bottom: 0;
   font-size: 0.9rem;
 }
+
 .success-message {
   color: green;
   text-align: center;
   font-weight: bold;
   margin-top: 15px;
 }
+
 .error-message {
   color: red;
   text-align: center;
   font-weight: bold;
   margin-top: 15px;
 }
+
 .submitting-indicator {
   margin-top: 20px;
   text-align: center;
   font-size: 1.2rem;
   color: #3498db;
 }
+
 .final-message {
   max-width: 700px;
   margin: 20px auto;
@@ -2125,11 +1429,13 @@ td input[type="date"] {
   text-align: center;
   font-weight: 500;
 }
+
 .final-message.success-final {
   background-color: #d1e7dd;
   color: #0f5132;
   border: 1px solid #badbcc;
 }
+
 .final-message.error-final {
   background-color: #f8d7da;
   color: #842029;
