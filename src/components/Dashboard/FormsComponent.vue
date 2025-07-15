@@ -243,7 +243,8 @@ onMounted(() => {
   if (loggedInUser && loggedInUser.role === "L4") {
     // If the user is L4, only show "ORW FIELD FORMAT" and "MONITORING VIEW"
     mainCards.value = allMainCards.filter(
-      (card) => card.title === "ORW FIELD FORMAT",
+      (card) => card.title === "BASELINE BEHAVIOUR TOOL" || card.title === "ORW FIELD FORMAT"
+
     );
     additionalCards.value = allAdditionalCards.filter(
       (card) => card.title === "MONITORING VIEW",

@@ -852,9 +852,10 @@ import { ref, onMounted, watch } from "vue";
 import axios from "axios";
 import Form3_ConfirmationModal from "./Form3_ConfirmationModal.vue";
 
-// --- Configuration ---
+// // --- Configuration ---
 const GOOGLE_SCRIPT_URL =
   "https://script.google.com/macros/s/AKfycbyTRBjdyQBUxWvo6HDNNSbhVLAXjkHMK8_gG1uLMce3jfONVrUQ5frhY1RqUmvRfJngIg/exec";
+
 const CSV_DATA_URL =
   "https://docs.google.com/spreadsheets/d/e/2PACX-1vSfG6e5EIcHDaXopn9DxMZnTwVFGi5CiQxmKlEIPsd7uPtZiQIikYb46UdN78UhZlJfocCfl_s0hGGX/pub?gid=0&single=true&output=csv";
 const UID_MIN_LENGTH = 5;
@@ -1096,6 +1097,62 @@ const cancelReview = () => {
 };
 
 // Submission
+// const confirmAndSubmit = async () => {
+//   isSubmitting.value = true;
+//   modalSuccessMessage.value = "";
+//   modalErrorMessage.value = "";
+//   clearFinalMessage();
+
+//   const url = GOOGLE_SCRIPT_URL;
+//   try {
+//     const dataToSend = { ...formData.value };
+//     Object.keys(dataToSend).forEach((key) => {
+//       if (typeof dataToSend[key] === "boolean")
+//         dataToSend[key] = dataToSend[key] ? "Yes" : "No";
+//     });
+//     if (dataToSend.prep_dispensed === "No") dataToSend.prep_bottles = "";
+
+//     const formDataSerialized = new URLSearchParams(dataToSend).toString();
+
+//     const response = await axios.post(url, formDataSerialized, {
+//       headers: { "Content-Type": "application/x-www-form-urlencoded" },
+//     });
+
+//     if (
+//       response.status === 200 &&
+//       response.data &&
+//       response.data.status === "success"
+//     ) {
+//       modalSuccessMessage.value =
+//         response.data.message || "Form submitted successfully!";
+//       setTimeout(() => {
+//         isReviewModalVisible.value = false;
+//         setFinalMessage(
+//           response.data.message || "Form submitted successfully!",
+//           "success"
+//         );
+//         clearForm();
+//         statusMessage.value = "";
+//         statusClass.value = "";
+//         submitDisabled.value = true;
+//         modalSuccessMessage.value = "";
+//       }, SUBMIT_SUCCESS_DELAY);
+//     } else {
+//       modalErrorMessage.value = response.data.message || "Submission failed.";
+//     }
+//   } catch (error) {
+//     let detailedError = "Error submitting the form.";
+//     if (error.response) detailedError += ` (Status: ${error.response.status})`;
+//     else if (error.request) detailedError += " (No response)";
+//     else detailedError += ` (${error.message})`;
+//     modalErrorMessage.value = detailedError;
+//   } finally {
+//     isSubmitting.value = false;
+//   }
+// };
+
+
+// Submission
 const confirmAndSubmit = async () => {
   isSubmitting.value = true;
   modalSuccessMessage.value = "";
@@ -1103,33 +1160,48 @@ const confirmAndSubmit = async () => {
   clearFinalMessage();
 
   const url = GOOGLE_SCRIPT_URL;
+
+  // Use a standard FormData object, which is the most reliable way.
+  const dataToSend = new FormData();
+
+  // Go through each key in your Vue form's data
+  for (const key in formData.value) {
+    let value = formData.value[key];
+
+    // Convert boolean true/false to "Yes" or "No" strings
+    if (typeof value === 'boolean') {
+      value = value ? 'Yes' : 'No';
+    }
+
+    // Make sure null values are sent as empty strings
+    if (value === null) {
+      value = '';
+    }
+
+    // Append each piece of data to the FormData object
+    dataToSend.append(key, value);
+  }
+
+  // Special case: if prep is not dispensed, ensure bottles is empty
+  if (formData.value.prep_dispensed === 'No') {
+    dataToSend.set('prep_bottles', '');
+  }
+
   try {
-    const dataToSend = { ...formData.value };
-    Object.keys(dataToSend).forEach((key) => {
-      if (typeof dataToSend[key] === "boolean")
-        dataToSend[key] = dataToSend[key] ? "Yes" : "No";
-    });
-    if (dataToSend.prep_dispensed === "No") dataToSend.prep_bottles = "";
-
-    const formDataSerialized = new URLSearchParams(dataToSend).toString();
-
-    const response = await axios.post(url, formDataSerialized, {
-      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    // We will use the 'fetch' API directly as it often handles redirects more gracefully.
+    const response = await fetch(url, {
+      method: 'POST',
+      body: dataToSend,
     });
 
-    if (
-      response.status === 200 &&
-      response.data &&
-      response.data.status === "success"
-    ) {
-      modalSuccessMessage.value =
-        response.data.message || "Form submitted successfully!";
+    // Manually parse the JSON response from the script
+    const result = await response.json();
+
+    if (response.ok && result.status === 'success') {
+      modalSuccessMessage.value = result.message || "Form submitted successfully!";
       setTimeout(() => {
         isReviewModalVisible.value = false;
-        setFinalMessage(
-          response.data.message || "Form submitted successfully!",
-          "success"
-        );
+        setFinalMessage(result.message || "Form submitted successfully!", "success");
         clearForm();
         statusMessage.value = "";
         statusClass.value = "";
@@ -1137,14 +1209,12 @@ const confirmAndSubmit = async () => {
         modalSuccessMessage.value = "";
       }, SUBMIT_SUCCESS_DELAY);
     } else {
-      modalErrorMessage.value = response.data.message || "Submission failed.";
+      // Use the error message from the script if it exists
+      modalErrorMessage.value = result.message || "Submission failed. The script returned an error.";
     }
   } catch (error) {
-    let detailedError = "Error submitting the form.";
-    if (error.response) detailedError += ` (Status: ${error.response.status})`;
-    else if (error.request) detailedError += " (No response)";
-    else detailedError += ` (${error.message})`;
-    modalErrorMessage.value = detailedError;
+    console.error("Submission Error:", error);
+    modalErrorMessage.value = "A network error occurred. Could not connect to the server.";
   } finally {
     isSubmitting.value = false;
   }

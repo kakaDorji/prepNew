@@ -489,9 +489,8 @@ const donutChartsData = computed(() => {
     "Kidney_m12",
     "Gonorrhoea",
     "Gonorrhoea_m6",
-    "Gonorrhoea_m12",
+    "Gonorrhoea_m12"
   ];
-  //-	Gonorrhea
   return columns.map((column) => {
     const index = findColumnIndex(headers, column);
     if (index === -1) {

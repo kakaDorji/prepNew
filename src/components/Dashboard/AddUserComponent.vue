@@ -5,7 +5,8 @@
         <div
           class="absolute inset-0 bg-gradient-to-r from-cyan-400 to-light-blue-500 shadow-lg transform -skew-y-6 sm:skew-y-0 sm:-rotate-6 sm:rounded-3xl">
         </div>
-        <div class="relative bg-white shadow-lg sm:rounded-3xl sm:p-20">
+        <!-- height chan gher  -->
+        <div class="relative bg-white shadow-lg sm:rounded-3xl sm:p-8">
           <div class="max-w-md mx-auto">
             <div>
               <h1 class="text-2xl font-semibold text-center mb-6">
