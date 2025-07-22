@@ -10,11 +10,10 @@
 [[redirects]]
   from = "/api/*"
   to = "https://script.google.com/macros/s/AKfycbyweINy0bkmq5rsd0_PZmh_MDfMBoCp4ZCh0SgarLmWxXyMICCoAIujPypCZ1aDqpGBPQ/exec"
-  '
   status = 200
   force = true
 
-#  Support Vue router (history mode)
+# Support Vue router (history mode)
 [[redirects]]
   from = "/*"
   to = "/index.html"
