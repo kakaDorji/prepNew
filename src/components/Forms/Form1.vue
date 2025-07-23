@@ -672,7 +672,7 @@ onMounted(() => {
 
   // Populate prescriber details
   const loggedInUser = getLoggedInUser();
-  console.log("Checking loggedInUser details:", getLoggedInUser());
+
   if (loggedInUser) {
     formData.value.prescriber_name = loggedInUser.fullname || "";
     formData.value.prescriber_designation = loggedInUser.designation || "";

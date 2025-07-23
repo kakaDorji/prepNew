@@ -689,7 +689,7 @@ onMounted(() => {
   initializeDate();
   fetchCsvData();
   const loggedInUser = getLoggedInUser();
-  console.log(loggedInUser);
+
   if (loggedInUser) {
     // Map loggedInUser fields to formData fields used in the form
     formData.value.name = loggedInUser.fullname || ""; // Matches 'Name' field at the bottom

@@ -1817,7 +1817,7 @@ onMounted(() => {
   initializeDate();
   fetchCsvData();
   const loggedInUser = getLoggedInUser();
-  console.log(loggedInUser);
+
   if (loggedInUser) {
     formData.value.interviewer_name = loggedInUser.fullname || "";
     formData.value.designation = loggedInUser.designation || "";
