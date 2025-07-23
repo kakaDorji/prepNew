@@ -1,19 +1,17 @@
-# =========================
-# Netlify Configuration
-# =========================
+# netlify.toml (Correct Version)
 
 [build]
   command = "npm run build"
   publish = "dist"
 
-# Proxy /api/* to your Google Apps Script
+# Proxy /api to your Google Apps Script
 [[redirects]]
-  from = "/api/*"
-  to = "https://script.google.com/macros/s/AKfycbyweINy0bkmq5rsd0_PZmh_MDfMBoCp4ZCh0SgarLmWxXyMICCoAIujPypCZ1aDqpGBPQ/exec"
-  status = 200
+  from = "/api"
+  to = "https://script.google.com/macros/s/AKfycbzA9uII3S4bndv-9dBx-JuUpc6s3zSwo_D6FaNdupDz-zVvufnGFd9sEiXKJ26MqgejHA/exec"
+  status = 200 # <-- THIS IS THE FIX. Use 200, not 301.
   force = true
 
-# Support Vue router (history mode)
+# This rule for Vue Router MUST BE LAST
 [[redirects]]
   from = "/*"
   to = "/index.html"
