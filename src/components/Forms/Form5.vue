@@ -13,142 +13,59 @@
         </p>
 
         <label for="participant_uid">Participant UID:</label>
-        <input
-          type="text"
-          v-model="formData.participant_uid"
-          id="participant_uid"
-          name="participant_uid"
-          required
-          pattern="[A-Za-z0-9]{5,}"
-          title="Minimum 5 Alphanumeric characters only"
-        />
+        <input type="text" v-model="formData.participant_uid" id="participant_uid" name="participant_uid" required
+          pattern="[A-Za-z0-9]{5,}" title="Minimum 5 Alphanumeric characters only" />
         <div v-if="statusMessage" id="status-message" :class="statusClass">
           {{ statusMessage }}
         </div>
-        <span v-if="isCheckingUid" class="uid-spinner"
-          ><i class="fas fa-spinner fa-spin"></i> Checking...</span
-        >
+        <span v-if="isCheckingUid" class="uid-spinner"><i class="fas fa-spinner fa-spin"></i> Checking...</span>
 
         <label for="prep_site">PrEP site:</label>
-        <select
-          name="prep_site"
-          id="prep_site"
-          v-model="formData.prep_site"
-          required
-        >
+        <select name="prep_site" id="prep_site" v-model="formData.prep_site" required>
           <option v-for="site in prepSites">
             {{ site }}
           </option>
         </select>
 
         <label for="dateInput">DATE:</label>
-        <input
-          type="date"
-          id="dateInput"
-          name="date"
-          v-model="formData.date"
-          readonly
-        />
+        <input type="date" id="dateInput" name="date" v-model="formData.date" readonly />
         <!-- Made readonly as it's initialized -->
 
-        <label
-          >1. What is the reason for this visit? (Tick one or more
-          answers)</label
-        >
+        <label>1. What is the reason for this visit? (Tick one or more
+          answers)</label>
         <div class="checkbox-group-vertical">
-          <label
-            ><input
-              type="checkbox"
-              v-model="formData.reason_visit"
-              value="Side effects from PrEP"
-            />
-            Side effects from PrEP</label
-          >
-          <label
-            ><input
-              type="checkbox"
-              v-model="formData.reason_visit"
-              value="Wish to discontinue PrEP"
-            />
-            Wish to discontinue PrEP</label
-          >
-          <label
-            ><input
-              type="checkbox"
-              v-model="formData.reason_visit"
-              value="STI symptoms/Screening"
-            />
-            STI symptoms/Screening</label
-          >
-          <label
-            ><input
-              type="checkbox"
-              v-model="formData.reason_visit"
-              value="Change of dose/regimen"
-            />
-            Change of dose/regimen</label
-          >
-          <label
-            ><input
-              type="checkbox"
-              v-model="formData.reason_visit"
-              value="Additional doses of PrEP"
-            />
-            Additional doses of PrEP</label
-          >
-          <label
-            ><input
-              type="checkbox"
-              v-model="formData.reason_visit"
-              value="New medical problem"
-            />
-            New medical problem</label
-          >
-          <label
-            ><input
-              type="checkbox"
-              v-model="formData.reason_visit"
-              value="Follow up for existing medical problem"
-            />
-            Follow up for existing medical problem</label
-          >
-          <label
-            ><input
-              type="checkbox"
-              v-model="formData.reason_visit"
-              value="Other"
-            />
-            Other</label
-          >
+          <label><input type="checkbox" v-model="formData.reason_visit" value="Side effects from PrEP" />
+            Side effects from PrEP</label>
+          <label><input type="checkbox" v-model="formData.reason_visit" value="Wish to discontinue PrEP" />
+            Wish to discontinue PrEP</label>
+          <label><input type="checkbox" v-model="formData.reason_visit" value="STI symptoms/Screening" />
+            STI symptoms/Screening</label>
+          <label><input type="checkbox" v-model="formData.reason_visit" value="Change of dose/regimen" />
+            Change of dose/regimen</label>
+          <label><input type="checkbox" v-model="formData.reason_visit" value="Additional doses of PrEP" />
+            Additional doses of PrEP</label>
+          <label><input type="checkbox" v-model="formData.reason_visit" value="New medical problem" />
+            New medical problem</label>
+          <label><input type="checkbox" v-model="formData.reason_visit"
+              value="Follow up for existing medical problem" />
+            Follow up for existing medical problem</label>
+          <label><input type="checkbox" v-model="formData.reason_visit" value="Other" />
+            Other</label>
           <!-- Textarea for "Other" reason -->
-          <div
-            v-if="
-              Array.isArray(formData.reason_visit) &&
-              formData.reason_visit.includes('Other')
-            "
-            style="margin-top: 0px"
-          >
-            <textarea
-              v-model="formData.other_reason_visit"
-              rows="3"
-              placeholder="Describe other reasons..."
-            ></textarea>
+          <div v-if="
+            Array.isArray(formData.reason_visit) &&
+            formData.reason_visit.includes('Other')
+          " style="margin-top: 0px">
+            <textarea v-model="formData.other_reason_visit" rows="3" placeholder="Describe other reasons..."></textarea>
           </div>
         </div>
 
-        <label style="margin-top: 1rem"
-          >2. If answered “Side effects from PrEP above”: Please describe the
+        <label style="margin-top: 1rem">2. If answered “Side effects from PrEP above”: Please describe the
           side effects you have experienced. Probe for common side effects e.g.,
           nausea, vomiting, abdominal cramps, fatigue, dizziness,
-          headache.</label
-        >
+          headache.</label>
         <div class="table-responsive">
-          <table
-            border="1"
-            cellspacing="0"
-            cellpadding="5"
-            class="symptoms-table"
-          >
+          <table border="1" cellspacing="0" cellpadding="5" class="symptoms-table">
             <thead>
               <tr>
                 <th>Sl No</th>
@@ -165,44 +82,18 @@
                 <td>Nausea</td>
                 <td>
                   <div class="yes-no-radio">
-                    <label
-                      ><input
-                        type="radio"
-                        name="nausea"
-                        v-model="formData.nausea"
-                        value="Yes"
-                      />
-                      Y</label
-                    ><label
-                      ><input
-                        type="radio"
-                        name="nausea"
-                        v-model="formData.nausea"
-                        value="No"
-                      />
-                      N</label
-                    >
+                    <label><input type="radio" name="nausea" v-model="formData.nausea" value="Yes" />
+                      Y</label><label><input type="radio" name="nausea" v-model="formData.nausea" value="No" />
+                      N</label>
                   </div>
                 </td>
                 <td>
-                  <input
-                    type="checkbox"
-                    v-model="formData.nausea_ongoing"
-                    :disabled="
-                      formData.nausea !== 'Yes' || formData.nausea_resolved
-                    "
-                    @change="handleSideEffectCheck('nausea', 'ongoing')"
-                  />
+                  <input type="checkbox" v-model="formData.nausea_ongoing" :disabled="formData.nausea !== 'Yes' || formData.nausea_resolved
+                    " @change="handleSideEffectCheck('nausea', 'ongoing')" />
                 </td>
                 <td>
-                  <input
-                    type="checkbox"
-                    v-model="formData.nausea_resolved"
-                    :disabled="
-                      formData.nausea !== 'Yes' || formData.nausea_ongoing
-                    "
-                    @change="handleSideEffectCheck('nausea', 'resolved')"
-                  />
+                  <input type="checkbox" v-model="formData.nausea_resolved" :disabled="formData.nausea !== 'Yes' || formData.nausea_ongoing
+                    " @change="handleSideEffectCheck('nausea', 'resolved')" />
                 </td>
               </tr>
               <tr>
@@ -210,44 +101,18 @@
                 <td>Vomiting</td>
                 <td>
                   <div class="yes-no-radio">
-                    <label
-                      ><input
-                        type="radio"
-                        name="vomiting"
-                        v-model="formData.vomiting"
-                        value="Yes"
-                      />
-                      Y</label
-                    ><label
-                      ><input
-                        type="radio"
-                        name="vomiting"
-                        v-model="formData.vomiting"
-                        value="No"
-                      />
-                      N</label
-                    >
+                    <label><input type="radio" name="vomiting" v-model="formData.vomiting" value="Yes" />
+                      Y</label><label><input type="radio" name="vomiting" v-model="formData.vomiting" value="No" />
+                      N</label>
                   </div>
                 </td>
                 <td>
-                  <input
-                    type="checkbox"
-                    v-model="formData.vomiting_ongoing"
-                    :disabled="
-                      formData.vomiting !== 'Yes' || formData.vomiting_resolved
-                    "
-                    @change="handleSideEffectCheck('vomiting', 'ongoing')"
-                  />
+                  <input type="checkbox" v-model="formData.vomiting_ongoing" :disabled="formData.vomiting !== 'Yes' || formData.vomiting_resolved
+                    " @change="handleSideEffectCheck('vomiting', 'ongoing')" />
                 </td>
                 <td>
-                  <input
-                    type="checkbox"
-                    v-model="formData.vomiting_resolved"
-                    :disabled="
-                      formData.vomiting !== 'Yes' || formData.vomiting_ongoing
-                    "
-                    @change="handleSideEffectCheck('vomiting', 'resolved')"
-                  />
+                  <input type="checkbox" v-model="formData.vomiting_resolved" :disabled="formData.vomiting !== 'Yes' || formData.vomiting_ongoing
+                    " @change="handleSideEffectCheck('vomiting', 'resolved')" />
                 </td>
               </tr>
               <tr>
@@ -255,50 +120,25 @@
                 <td>Abdominal cramps</td>
                 <td>
                   <div class="yes-no-radio">
-                    <label
-                      ><input
-                        type="radio"
-                        name="cramps"
-                        v-model="formData.abdominal_cramps"
-                        value="Yes"
-                      />
-                      Y</label
-                    ><label
-                      ><input
-                        type="radio"
-                        name="cramps"
-                        v-model="formData.abdominal_cramps"
-                        value="No"
-                      />
-                      N</label
-                    >
+                    <label><input type="radio" name="cramps" v-model="formData.abdominal_cramps" value="Yes" />
+                      Y</label><label><input type="radio" name="cramps" v-model="formData.abdominal_cramps"
+                        value="No" />
+                      N</label>
                   </div>
                 </td>
                 <td>
-                  <input
-                    type="checkbox"
-                    v-model="formData.abdominal_cramps_ongoing"
-                    :disabled="
-                      formData.abdominal_cramps !== 'Yes' ||
-                      formData.abdominal_cramps_resolved
-                    "
-                    @change="
+                  <input type="checkbox" v-model="formData.abdominal_cramps_ongoing" :disabled="formData.abdominal_cramps !== 'Yes' ||
+                    formData.abdominal_cramps_resolved
+                    " @change="
                       handleSideEffectCheck('abdominal_cramps', 'ongoing')
-                    "
-                  />
+                      " />
                 </td>
                 <td>
-                  <input
-                    type="checkbox"
-                    v-model="formData.abdominal_cramps_resolved"
-                    :disabled="
-                      formData.abdominal_cramps !== 'Yes' ||
-                      formData.abdominal_cramps_ongoing
-                    "
-                    @change="
+                  <input type="checkbox" v-model="formData.abdominal_cramps_resolved" :disabled="formData.abdominal_cramps !== 'Yes' ||
+                    formData.abdominal_cramps_ongoing
+                    " @change="
                       handleSideEffectCheck('abdominal_cramps', 'resolved')
-                    "
-                  />
+                      " />
                 </td>
               </tr>
               <tr>
@@ -306,44 +146,18 @@
                 <td>Fatigue</td>
                 <td>
                   <div class="yes-no-radio">
-                    <label
-                      ><input
-                        type="radio"
-                        name="fatigue"
-                        v-model="formData.fatigue"
-                        value="Yes"
-                      />
-                      Y</label
-                    ><label
-                      ><input
-                        type="radio"
-                        name="fatigue"
-                        v-model="formData.fatigue"
-                        value="No"
-                      />
-                      N</label
-                    >
+                    <label><input type="radio" name="fatigue" v-model="formData.fatigue" value="Yes" />
+                      Y</label><label><input type="radio" name="fatigue" v-model="formData.fatigue" value="No" />
+                      N</label>
                   </div>
                 </td>
                 <td>
-                  <input
-                    type="checkbox"
-                    v-model="formData.fatigue_ongoing"
-                    :disabled="
-                      formData.fatigue !== 'Yes' || formData.fatigue_resolved
-                    "
-                    @change="handleSideEffectCheck('fatigue', 'ongoing')"
-                  />
+                  <input type="checkbox" v-model="formData.fatigue_ongoing" :disabled="formData.fatigue !== 'Yes' || formData.fatigue_resolved
+                    " @change="handleSideEffectCheck('fatigue', 'ongoing')" />
                 </td>
                 <td>
-                  <input
-                    type="checkbox"
-                    v-model="formData.fatigue_resolved"
-                    :disabled="
-                      formData.fatigue !== 'Yes' || formData.fatigue_ongoing
-                    "
-                    @change="handleSideEffectCheck('fatigue', 'resolved')"
-                  />
+                  <input type="checkbox" v-model="formData.fatigue_resolved" :disabled="formData.fatigue !== 'Yes' || formData.fatigue_ongoing
+                    " @change="handleSideEffectCheck('fatigue', 'resolved')" />
                 </td>
               </tr>
               <tr>
@@ -351,45 +165,19 @@
                 <td>Dizziness</td>
                 <td>
                   <div class="yes-no-radio">
-                    <label
-                      ><input
-                        type="radio"
-                        name="dizziness"
-                        v-model="formData.dizziness"
-                        value="Yes"
-                      />
-                      Y</label
-                    ><label
-                      ><input
-                        type="radio"
-                        name="dizziness"
-                        v-model="formData.dizziness"
-                        value="No"
-                      />
-                      N</label
-                    >
+                    <label><input type="radio" name="dizziness" v-model="formData.dizziness" value="Yes" />
+                      Y</label><label><input type="radio" name="dizziness" v-model="formData.dizziness" value="No" />
+                      N</label>
                   </div>
                 </td>
                 <td>
-                  <input
-                    type="checkbox"
-                    v-model="formData.dizziness_ongoing"
-                    :disabled="
-                      formData.dizziness !== 'Yes' ||
-                      formData.dizziness_resolved
-                    "
-                    @change="handleSideEffectCheck('dizziness', 'ongoing')"
-                  />
+                  <input type="checkbox" v-model="formData.dizziness_ongoing" :disabled="formData.dizziness !== 'Yes' ||
+                    formData.dizziness_resolved
+                    " @change="handleSideEffectCheck('dizziness', 'ongoing')" />
                 </td>
                 <td>
-                  <input
-                    type="checkbox"
-                    v-model="formData.dizziness_resolved"
-                    :disabled="
-                      formData.dizziness !== 'Yes' || formData.dizziness_ongoing
-                    "
-                    @change="handleSideEffectCheck('dizziness', 'resolved')"
-                  />
+                  <input type="checkbox" v-model="formData.dizziness_resolved" :disabled="formData.dizziness !== 'Yes' || formData.dizziness_ongoing
+                    " @change="handleSideEffectCheck('dizziness', 'resolved')" />
                 </td>
               </tr>
               <tr>
@@ -397,44 +185,18 @@
                 <td>Headache</td>
                 <td>
                   <div class="yes-no-radio">
-                    <label
-                      ><input
-                        type="radio"
-                        name="headache"
-                        v-model="formData.headache"
-                        value="Yes"
-                      />
-                      Y</label
-                    ><label
-                      ><input
-                        type="radio"
-                        name="headache"
-                        v-model="formData.headache"
-                        value="No"
-                      />
-                      N</label
-                    >
+                    <label><input type="radio" name="headache" v-model="formData.headache" value="Yes" />
+                      Y</label><label><input type="radio" name="headache" v-model="formData.headache" value="No" />
+                      N</label>
                   </div>
                 </td>
                 <td>
-                  <input
-                    type="checkbox"
-                    v-model="formData.headache_ongoing"
-                    :disabled="
-                      formData.headache !== 'Yes' || formData.headache_resolved
-                    "
-                    @change="handleSideEffectCheck('headache', 'ongoing')"
-                  />
+                  <input type="checkbox" v-model="formData.headache_ongoing" :disabled="formData.headache !== 'Yes' || formData.headache_resolved
+                    " @change="handleSideEffectCheck('headache', 'ongoing')" />
                 </td>
                 <td>
-                  <input
-                    type="checkbox"
-                    v-model="formData.headache_resolved"
-                    :disabled="
-                      formData.headache !== 'Yes' || formData.headache_ongoing
-                    "
-                    @change="handleSideEffectCheck('headache', 'resolved')"
-                  />
+                  <input type="checkbox" v-model="formData.headache_resolved" :disabled="formData.headache !== 'Yes' || formData.headache_ongoing
+                    " @change="handleSideEffectCheck('headache', 'resolved')" />
                 </td>
               </tr>
               <tr>
@@ -442,208 +204,96 @@
                 <td>Others (please describe below)</td>
                 <td>
                   <div class="yes-no-radio">
-                    <label
-                      ><input
-                        type="radio"
-                        name="others"
-                        v-model="formData.others"
-                        value="Yes"
-                      />
-                      Y</label
-                    ><label
-                      ><input
-                        type="radio"
-                        name="others"
-                        v-model="formData.others"
-                        value="No"
-                      />
-                      N</label
-                    >
+                    <label><input type="radio" name="others" v-model="formData.others" value="Yes" />
+                      Y</label><label><input type="radio" name="others" v-model="formData.others" value="No" />
+                      N</label>
                   </div>
                 </td>
                 <td>
-                  <input
-                    type="checkbox"
-                    v-model="formData.others_ongoing"
-                    :disabled="
-                      formData.others !== 'Yes' || formData.others_resolved
-                    "
-                    @change="handleSideEffectCheck('others', 'ongoing')"
-                  />
+                  <input type="checkbox" v-model="formData.others_ongoing" :disabled="formData.others !== 'Yes' || formData.others_resolved
+                    " @change="handleSideEffectCheck('others', 'ongoing')" />
                 </td>
                 <td>
-                  <input
-                    type="checkbox"
-                    v-model="formData.others_resolved"
-                    :disabled="
-                      formData.others !== 'Yes' || formData.others_ongoing
-                    "
-                    @change="handleSideEffectCheck('others', 'resolved')"
-                  />
+                  <input type="checkbox" v-model="formData.others_resolved" :disabled="formData.others !== 'Yes' || formData.others_ongoing
+                    " @change="handleSideEffectCheck('others', 'resolved')" />
                 </td>
               </tr>
             </tbody>
           </table>
         </div>
-        <textarea
-          v-if="formData.others === 'Yes'"
-          v-model="formData.others_description"
-          rows="3"
-          placeholder="Please describe other side effects..."
-        ></textarea>
+        <textarea v-if="formData.others === 'Yes'" v-model="formData.others_description" rows="3"
+          placeholder="Please describe other side effects..."></textarea>
 
-        <label style="margin-top: 1rem"
-          >3. Have you had any challenges taking your PrEP as per prescribed
-          doses?</label
-        >
+        <label style="margin-top: 1rem">3. Have you had any challenges taking your PrEP as per prescribed
+          doses?</label>
         <div style="display: flex; gap: 20px; margin-bottom: 1rem">
-          <label
-            style="
+          <label style="
               display: inline-flex;
               align-items: center;
               font-weight: normal;
               margin-bottom: 0;
-            "
-            ><input
-              type="radio"
-              v-model="formData.challenges_prep"
-              name="challenges_prep"
-              value="Yes"
-              required
-            />
-            Yes</label
-          >
-          <label
-            style="
+            "><input type="radio" v-model="formData.challenges_prep" name="challenges_prep" value="Yes" required />
+            Yes</label>
+          <label style="
               display: inline-flex;
               align-items: center;
               font-weight: normal;
               margin-bottom: 0;
-            "
-            ><input
-              type="radio"
-              v-model="formData.challenges_prep"
-              name="challenges_prep"
-              value="No"
-              required
-              @click="formData.challenges_details = ''"
-            />
-            No</label
-          >
+            "><input type="radio" v-model="formData.challenges_prep" name="challenges_prep" value="No" required
+              @click="formData.challenges_details = ''" />
+            No</label>
         </div>
-        <textarea
-          v-if="formData.challenges_prep === 'Yes'"
-          v-model="formData.challenges_details"
-          rows="3"
-          placeholder="If yes, describe the challenges..."
-        ></textarea>
+        <textarea v-if="formData.challenges_prep === 'Yes'" v-model="formData.challenges_details" rows="3"
+          placeholder="If yes, describe the challenges..."></textarea>
 
-        <label
-          >4. If answered “Additional doses of PrEP above”: Please provide more
-          information (e.g., Loss/theft, travel?)</label
-        >
-        <textarea
-          v-model="formData.additional_doses_details"
-          rows="3"
-          placeholder="Provide details..."
-        ></textarea>
+        <label>4. If answered “Additional doses of PrEP above”: Please provide more
+          information (e.g., Loss/theft, travel?)</label>
+        <textarea v-model="formData.additional_doses_details" rows="3" placeholder="Provide details..."></textarea>
 
         <label>5. Do you wish to stop taking PrEP or continue?</label>
         <div style="display: flex; gap: 20px; margin-bottom: 1rem">
-          <label
-            style="
+          <label style="
               display: inline-flex;
               align-items: center;
               font-weight: normal;
               margin-bottom: 0;
-            "
-            ><input
-              type="radio"
-              v-model="formData.prep_continue"
-              name="prep_continue"
-              value="Stop"
-              required
-            />
-            Stop</label
-          >
-          <label
-            style="
+            "><input type="radio" v-model="formData.prep_continue" name="prep_continue" value="Stop" required />
+            Stop</label>
+          <label style="
               display: inline-flex;
               align-items: center;
               font-weight: normal;
               margin-bottom: 0;
-            "
-            ><input
-              type="radio"
-              v-model="formData.prep_continue"
-              name="prep_continue"
-              value="Continue"
-              required
-            />
-            Continue</label
-          >
+            "><input type="radio" v-model="formData.prep_continue" name="prep_continue" value="Continue" required />
+            Continue</label>
         </div>
 
         <div v-if="formData.prep_continue === 'Stop'">
           <label>• If stopping, provide reasons:</label>
-          <textarea
-            v-model="formData.stopping_reasons"
-            rows="3"
-            placeholder="Provide reasons"
-          ></textarea>
+          <textarea v-model="formData.stopping_reasons" rows="3" placeholder="Provide reasons"></textarea>
           <label>• Preferred Prevention method after stopping:</label>
-          <textarea
-            v-model="formData.stopping_Preventionmethod"
-            rows="3"
-            placeholder="Specify method"
-          ></textarea>
+          <textarea v-model="formData.stopping_Preventionmethod" rows="3" placeholder="Specify method"></textarea>
         </div>
 
         <label>6. Other notes, tests performed, referrals made, etc.</label>
-        <textarea
-          v-model="formData.other_notes"
-          rows="4"
-          placeholder="Write any other relevant notes..."
-        ></textarea>
+        <textarea v-model="formData.other_notes" rows="4" placeholder="Write any other relevant notes..."></textarea>
 
         <!-- Signature Section (Readonly) -->
         <h3 class="section-title" style="margin-top: 2rem">
           Interviewer Details
         </h3>
         <label for="interviewer_name">Name:</label>
-        <input
-          type="text"
-          v-model="formData.interviewer_name"
-          id="interviewer_name"
-          name="interviewer_name"
-          readonly
-        />
+        <input type="text" v-model="formData.interviewer_name" id="interviewer_name" name="interviewer_name" readonly />
 
         <label for="designation">Designation:</label>
-        <input
-          type="text"
-          v-model="formData.designation"
-          id="designation"
-          name="designation"
-          readonly
-        />
+        <input type="text" v-model="formData.designation" id="designation" name="designation" readonly />
 
         <label for="bmhc_number">BMHC Number:</label>
-        <input
-          type="text"
-          v-model="formData.bmhc_number"
-          id="bmhc_number"
-          name="bmhc_number"
-          readonly
-        />
+        <input type="text" v-model="formData.bmhc_number" id="bmhc_number" name="bmhc_number" readonly />
       </div>
 
       <!-- Submit Button -->
-      <button
-        type="submit"
-        class="submit-btn"
-        :disabled="submitDisabled || isSubmitting"
-      >
+      <button type="submit" class="submit-btn" :disabled="submitDisabled || isSubmitting">
         {{ isSubmitting ? "Submitting..." : "Review Data" }}
         <!-- Changed Text -->
       </button>
@@ -652,28 +302,15 @@
   </form>
 
   <!-- Confirmation Modal -->
-  <Form5_ConfirmationModal
-    v-if="isReviewModalVisible"
-    :formData="formData"
-    :isSubmitting="isSubmitting"
-    :successMessage="modalSuccessMessage"
-    :errorMessage="modalErrorMessage"
-    @confirm="confirmAndSubmit"
-    @cancel="cancelReview"
-  />
+  <Form5_ConfirmationModal v-if="isReviewModalVisible" :formData="formData" :isSubmitting="isSubmitting"
+    :successMessage="modalSuccessMessage" :errorMessage="modalErrorMessage" @confirm="confirmAndSubmit"
+    @cancel="cancelReview" />
 
   <!-- Final Messages outside modal -->
-  <div
-    v-if="!isReviewModalVisible && finalSubmitMessage"
-    :class="finalSubmitClass"
-    class="final-message"
-  >
+  <div v-if="!isReviewModalVisible && finalSubmitMessage" :class="finalSubmitClass" class="final-message">
     <p>{{ finalSubmitMessage }}</p>
   </div>
-  <div
-    v-if="!isReviewModalVisible && !finalSubmitMessage"
-    style="text-align: center; margin-top: 20px"
-  >
+  <div v-if="!isReviewModalVisible && !finalSubmitMessage" style="text-align: center; margin-top: 20px">
     <h4 class="section-title" style="margin-bottom: 1rem; font-size: 1.2rem">
       Thank you for your time.
     </h4>
@@ -685,10 +322,7 @@
       <p>{{ errorMessage }}</p>
     </div>
     <!-- Original loading indicator -->
-    <div
-      v-if="isSubmitting && !isReviewModalVisible"
-      class="submitting-indicator"
-    >
+    <div v-if="isSubmitting && !isReviewModalVisible" class="submitting-indicator">
       Submitting...
     </div>
   </div>
@@ -989,10 +623,11 @@ onMounted(() => {
   initializeDate();
   fetchCsvData();
   const loggedInUser = getLoggedInUser();
+  console.log(loggedInUser);
   if (loggedInUser) {
     formData.value.interviewer_name = loggedInUser.fullname || "";
     formData.value.designation = loggedInUser.designation || "";
-    formData.value.bmhc_number = loggedInUser.bhcno || ""; // Use bmhc_number
+    formData.value.bmhc_number = loggedInUser.bhc_no || ""; // Use bmhc_number
   } else {
     console.warn("Form 5: Logged in user details not found.");
     formData.value.interviewer_name = "";
@@ -1011,11 +646,13 @@ onMounted(() => {
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   margin-bottom: 2rem;
 }
+
 label {
   display: block;
   margin-bottom: 5px;
   font-weight: bold;
 }
+
 input,
 select,
 textarea {
@@ -1027,6 +664,7 @@ textarea {
   box-sizing: border-box;
   font-size: 0.95rem;
 }
+
 input:focus,
 select:focus,
 textarea:focus {
@@ -1034,20 +672,24 @@ textarea:focus {
   outline: none;
   box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
 }
+
 input[readonly] {
   background-color: #f8f9fa;
   cursor: not-allowed;
 }
+
 input[type="radio"],
 input[type="checkbox"] {
   width: auto;
   margin-right: 8px;
   vertical-align: middle;
 }
-label > input[type="radio"],
-label > input[type="checkbox"] {
+
+label>input[type="radio"],
+label>input[type="checkbox"] {
   margin-bottom: 0;
 }
+
 .checkbox-group-vertical {
   display: flex;
   flex-direction: column;
@@ -1058,12 +700,14 @@ label > input[type="checkbox"] {
   border-radius: 5px;
   background-color: #fdfdfd;
 }
+
 .checkbox-group-vertical label {
   font-weight: normal;
   display: inline-flex;
   align-items: center;
   margin-bottom: 0;
 }
+
 .section-title {
   font-size: 1.5rem;
   color: #3498db;
@@ -1072,9 +716,11 @@ label > input[type="checkbox"] {
   padding-bottom: 5px;
   border-bottom: 1px solid #eee;
 }
+
 .section-title:first-of-type {
   margin-top: 0;
 }
+
 .submit-btn {
   background-color: #3498db;
   color: #fff;
@@ -1090,14 +736,17 @@ label > input[type="checkbox"] {
   margin-left: auto;
   margin-right: auto;
 }
+
 .submit-btn:hover:not(:disabled) {
   background-color: #2980b9;
 }
+
 .submit-btn:disabled {
   background-color: #bdc3c7;
   cursor: not-allowed;
   opacity: 0.7;
 }
+
 #status-message {
   margin-top: -10px;
   margin-bottom: 15px;
@@ -1107,31 +756,37 @@ label > input[type="checkbox"] {
   border-width: 1px;
   border-style: solid;
 }
+
 #status-message.success {
   background-color: #dff0d8;
   color: #3c763d;
   border-color: #d6e9c6;
 }
+
 #status-message.error {
   background-color: #f2dede;
   color: #a94442;
   border-color: #ebccd1;
 }
+
 .uid-spinner {
   margin-left: 10px;
   color: #3498db;
   font-size: 0.9em;
 }
+
 .table-responsive {
   overflow-x: auto;
   margin-bottom: 1rem;
 }
+
 table {
   border-collapse: collapse;
   width: 100%;
   margin-bottom: 1rem;
   font-size: 0.9rem;
 }
+
 th,
 td {
   border: 1px solid #ccc;
@@ -1139,26 +794,31 @@ td {
   text-align: left;
   vertical-align: middle;
 }
+
 th {
   background-color: #f2f2f2;
   font-weight: bold;
   text-align: center;
 }
+
 td input[type="radio"],
 td input[type="checkbox"] {
   display: block;
   margin: 0 auto;
 }
+
 /* Specific style for yes/no radios in table */
 .yes-no-radio {
   display: flex;
   justify-content: center;
   gap: 15px;
 }
+
 .yes-no-radio label {
   margin-bottom: 0;
   font-weight: normal;
 }
+
 td input[type="text"],
 td input[type="date"] {
   width: 95%;
@@ -1166,24 +826,28 @@ td input[type="date"] {
   margin-bottom: 0;
   font-size: 0.9rem;
 }
+
 .success-message {
   color: green;
   text-align: center;
   font-weight: bold;
   margin-top: 15px;
 }
+
 .error-message {
   color: red;
   text-align: center;
   font-weight: bold;
   margin-top: 15px;
 }
+
 .submitting-indicator {
   margin-top: 20px;
   text-align: center;
   font-size: 1.2rem;
   color: #3498db;
 }
+
 .final-message {
   max-width: 700px;
   margin: 20px auto;
@@ -1192,16 +856,19 @@ td input[type="date"] {
   text-align: center;
   font-weight: 500;
 }
+
 .final-message.success-final {
   background-color: #d1e7dd;
   color: #0f5132;
   border: 1px solid #badbcc;
 }
+
 .final-message.error-final {
   background-color: #f8d7da;
   color: #842029;
   border: 1px solid #f5c2c7;
 }
+
 .conditional-section {
   margin-left: 15px;
   padding-left: 15px;

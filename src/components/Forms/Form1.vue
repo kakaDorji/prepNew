@@ -6,39 +6,19 @@
       <div class="form-container">
         <!-- All your existing form fields remain exactly the same -->
         <label for="date">Date:</label>
-        <input
-          type="date"
-          v-model="formData.date"
-          id="dateInput"
-          name="date"
-          required
-        />
+        <input type="date" v-model="formData.date" id="dateInput" name="date" required />
 
         <label for="participant_uid">Participant UID:</label>
-        <input
-          type="text"
-          v-model="formData.participant_uid"
-          id="participant_uid"
-          name="participant_uid"
-          required
-          pattern="[A-Za-z0-9]{5,}"
-          title="Minimum 5 Alphanumeric characters"
-        />
+        <input type="text" v-model="formData.participant_uid" id="participant_uid" name="participant_uid" required
+          pattern="[A-Za-z0-9]{5,}" title="Minimum 5 Alphanumeric characters" />
         <!-- Status Message for UID Validation -->
         <div v-if="statusMessage" id="status-message" :class="statusClass">
           {{ statusMessage }}
         </div>
-        <span v-if="isCheckingUid" class="uid-spinner"
-          ><i class="fas fa-spinner fa-spin"></i> Checking...</span
-        >
+        <span v-if="isCheckingUid" class="uid-spinner"><i class="fas fa-spinner fa-spin"></i> Checking...</span>
 
         <label for="type_of_visit">Type of Visit:</label>
-        <select
-          v-model="formData.type_of_visit"
-          id="type_of_visit"
-          name="type_of_visit"
-          required
-        >
+        <select v-model="formData.type_of_visit" id="type_of_visit" name="type_of_visit" required>
           <option value="mst" disabled>Select one</option>
           <option value="Screening Visit MO">Screening Visit MO</option>
           <option value="End of M1">End of M1</option>
@@ -49,57 +29,29 @@
         </select>
 
         <label>KP:</label>
-        <div
-          style="
+        <div style="
             display: flex;
             flex-wrap: wrap;
             gap: 15px;
             margin-top: 10px;
             margin-bottom: 15px;
-          "
-        >
-          <label
-            style="display: inline-flex; align-items: center; margin-bottom: 0"
-          >
-            <input
-              type="radio"
-              v-model="formData.kpo_group"
-              value="FSW"
-              name="kpo_group"
-            />
+          ">
+          <label style="display: inline-flex; align-items: center; margin-bottom: 0">
+            <input type="radio" v-model="formData.kpo_group" value="FSW" name="kpo_group" />
             FSW
           </label>
-          <label
-            style="display: inline-flex; align-items: center; margin-bottom: 0"
-          >
-            <input
-              type="radio"
-              v-model="formData.kpo_group"
-              value="MSM"
-              name="kpo_group"
-            />
+          <label style="display: inline-flex; align-items: center; margin-bottom: 0">
+            <input type="radio" v-model="formData.kpo_group" value="MSM" name="kpo_group" />
             MSM
           </label>
-          <label
-            style="display: inline-flex; align-items: center; margin-bottom: 0"
-          >
-            <input
-              type="radio"
-              v-model="formData.kpo_group"
-              value="TGQ"
-              name="kpo_group"
-            />
+          <label style="display: inline-flex; align-items: center; margin-bottom: 0">
+            <input type="radio" v-model="formData.kpo_group" value="TGQ" name="kpo_group" />
             TGQ
           </label>
         </div>
 
         <label for="prep_site">PrEP Site</label>
-        <select
-          v-model="formData.prep_site"
-          id="prep_site"
-          name="prep_site"
-          required
-        >
+        <select v-model="formData.prep_site" id="prep_site" name="prep_site" required>
           <option v-for="site in prepSites" :key="site" :value="site">
             {{ site }}
           </option>
@@ -108,44 +60,21 @@
         <!-- Demographic Assessment -->
         <h3 class="section-title">A. Demographic Assessment</h3>
         <label for="age">Age (15 years and older):</label>
-        <input
-          type="number"
-          v-model.number="formData.age"
-          id="age"
-          name="age"
-          min="15"
-          @blur="checkAge"
-          required
-        />
-        <div
-          v-if="ageMessage"
-          id="message"
-          style="
+        <input type="number" v-model.number="formData.age" id="age" name="age" min="15" @blur="checkAge" required />
+        <div v-if="ageMessage" id="message" style="
             color: #a94442;
             margin-top: -10px;
             margin-bottom: 15px;
             font-size: 0.9em;
-          "
-        >
+          ">
           {{ ageMessage }}
         </div>
 
         <label for="weight">Weight(Kg):</label>
-        <input
-          type="number"
-          step="0.1"
-          v-model.number="formData.weight"
-          id="weight"
-          name="weight"
-        />
+        <input type="number" step="0.1" v-model.number="formData.weight" id="weight" name="weight" />
 
         <label for="resident">Resident of:</label>
-        <select
-          v-model="formData.resident"
-          id="resident"
-          name="resident"
-          style="margin-top: 10px"
-        >
+        <select v-model="formData.resident" id="resident" name="resident" style="margin-top: 10px">
           <option value="" disabled>Select Dzongkhag</option>
           <option value="Thimphu">Thimphu</option>
           <option value="Paro">Paro</option>
@@ -171,425 +100,221 @@
 
         <!-- Behavioral Risk Assessment -->
         <h3 class="section-title">B. Behavioral Risk Assessment</h3>
-        <div
-          class="checkbox-group"
-          style="
+        <div class="checkbox-group" style="
             padding: 10px;
             border: 1px solid #eee;
             border-radius: 5px;
             background-color: #fdfdfd;
-          "
-        >
-          <label
-            ><input
-              type="checkbox"
-              v-model="formData.behavioral_risk"
-              value="Condomless_Sex_gt1"
-            />
+          ">
+          <label><input type="checkbox" v-model="formData.behavioral_risk" value="Condomless_Sex_gt1" />
             In the past 6 months, did you have condomless sex with > 1
-            client/partner?</label
-          >
-          <label
-            ><input
-              type="checkbox"
-              v-model="formData.behavioral_risk"
-              value="STI_Symptoms_Diagnosis"
-            />
+            client/partner?</label>
+          <label><input type="checkbox" v-model="formData.behavioral_risk" value="STI_Symptoms_Diagnosis" />
             In the past 6 months, did you get diagnosed with/experience symptoms
-            of STIs?</label
-          >
-          <label
-            ><input
-              type="checkbox"
-              v-model="formData.behavioral_risk"
-              value="Unaware_Partner_HIV_Status"
-            />
-            Are you aware of your sexual/injecting partner’s HIV status?</label
-          >
-          <label
-            ><input
-              type="checkbox"
-              v-model="formData.behavioral_risk"
-              value="Sex_Under_Influence"
-            />
+            of STIs?</label>
+          <label><input type="checkbox" v-model="formData.behavioral_risk" value="Unaware_Partner_HIV_Status" />
+            Are you aware of your sexual/injecting partner’s HIV status?</label>
+          <label><input type="checkbox" v-model="formData.behavioral_risk" value="Sex_Under_Influence" />
             Do you recurrently have sex under the influence of
-            alcohol/recreational drugs?</label
-          >
-          <label
-            ><input
-              type="checkbox"
-              v-model="formData.behavioral_risk"
-              value="PEP_Last_6_Months"
-            />
+            alcohol/recreational drugs?</label>
+          <label><input type="checkbox" v-model="formData.behavioral_risk" value="PEP_Last_6_Months" />
             Have you taken post exposure prophylaxis (PEP) in the last 6
-            months?</label
-          >
-          <label
-            ><input
-              type="checkbox"
-              v-model="formData.behavioral_risk"
-              value="Anticipate_Condomless_Sex"
-            />
-            Do you anticipate condomless sex in the next 3 months?</label
-          >
+            months?</label>
+          <label><input type="checkbox" v-model="formData.behavioral_risk" value="Anticipate_Condomless_Sex" />
+            Do you anticipate condomless sex in the next 3 months?</label>
         </div>
         <p>
-          <strong
-            >(Please note the potential PrEP user must fulfill at least one
-            behavioral risk criteria to be suitable for PrEP)</strong
-          >
+          <strong>(Please note the potential PrEP user must fulfill at least one
+            behavioral risk criteria to be suitable for PrEP)</strong>
         </p>
 
         <!-- HIV Status Assessment -->
         <h3 class="section-title">C. HIV Status Assessment</h3>
-        <div
-          style="
+        <div style="
             margin-bottom: 15px;
             padding: 10px;
             border: 1px solid #eee;
             border-radius: 5px;
-          "
-        >
-          <label style="font-weight: 600; margin-bottom: 10px"
-            >HIV Test (Rapid):</label
-          >
-          <div
-            style="
+          ">
+          <label style="font-weight: 600; margin-bottom: 10px">HIV Test (Rapid):</label>
+          <div style="
               display: flex;
               align-items: center;
               flex-wrap: wrap;
               gap: 10px 15px;
-            "
-          >
+            ">
             <span style="margin-right: 5px">Date:</span>
-            <input
-              type="date"
-              v-model="formData.rapid_test_date"
-              name="rapid_test_date"
-              style="width: auto; max-width: 160px; padding: 0.4rem 0.6rem"
-            />
+            <input type="date" v-model="formData.rapid_test_date" name="rapid_test_date"
+              style="width: auto; max-width: 160px; padding: 0.4rem 0.6rem" />
             <span style="margin-left: 15px; margin-right: 5px">Result:</span>
-            <label
-              style="
+            <label style="
                 display: inline-flex;
                 align-items: center;
                 font-weight: normal;
                 margin-bottom: 0;
-              "
-              ><input
-                type="radio"
-                v-model="formData.rapid_test_result"
-                name="rapid_test_result"
-                value="positive"
-              />
-              Positive</label
-            >
-            <label
-              style="
+              "><input type="radio" v-model="formData.rapid_test_result" name="rapid_test_result" value="positive" />
+              Positive</label>
+            <label style="
                 display: inline-flex;
                 align-items: center;
                 font-weight: normal;
                 margin-bottom: 0;
-              "
-              ><input
-                type="radio"
-                v-model="formData.rapid_test_result"
-                name="rapid_test_result"
-                value="negative"
-              />
-              Negative</label
-            >
+              "><input type="radio" v-model="formData.rapid_test_result" name="rapid_test_result" value="negative" />
+              Negative</label>
           </div>
         </div>
-        <div
-          style="
+        <div style="
             margin-bottom: 20px;
             padding: 10px;
             border: 1px solid #eee;
             border-radius: 5px;
-          "
-        >
-          <label style="font-weight: 600; margin-bottom: 10px"
-            >HIV 4th Generation HIV test:</label
-          >
-          <div
-            style="
+          ">
+          <label style="font-weight: 600; margin-bottom: 10px">HIV 4th Generation HIV test:</label>
+          <div style="
               display: flex;
               align-items: center;
               flex-wrap: wrap;
               gap: 10px 15px;
-            "
-          >
+            ">
             <span style="margin-right: 5px">Date:</span>
-            <input
-              type="date"
-              v-model="formData.generation_test_date"
-              name="generation_test_date"
-              style="width: auto; max-width: 160px; padding: 0.4rem 0.6rem"
-            />
+            <input type="date" v-model="formData.generation_test_date" name="generation_test_date"
+              style="width: auto; max-width: 160px; padding: 0.4rem 0.6rem" />
             <span style="margin-left: 15px; margin-right: 5px">Result:</span>
-            <label
-              style="
+            <label style="
                 display: inline-flex;
                 align-items: center;
                 font-weight: normal;
                 margin-bottom: 0;
-              "
-              ><input
-                type="radio"
-                v-model="formData.generation_test_result"
-                name="generation_test_result"
-                value="positive"
-              />
-              Positive</label
-            >
-            <label
-              style="
+              "><input type="radio" v-model="formData.generation_test_result" name="generation_test_result"
+                value="positive" />
+              Positive</label>
+            <label style="
                 display: inline-flex;
                 align-items: center;
                 font-weight: normal;
                 margin-bottom: 0;
-              "
-              ><input
-                type="radio"
-                v-model="formData.generation_test_result"
-                name="generation_test_result"
-                value="negative"
-              />
-              Negative</label
-            >
+              "><input type="radio" v-model="formData.generation_test_result" name="generation_test_result"
+                value="negative" />
+              Negative</label>
           </div>
         </div>
 
-        <div
-          style="
+        <div style="
             margin-bottom: 15px;
             display: flex;
             gap: 15px;
             align-items: center;
-          "
-        >
-          <label style="margin-bottom: 0; font-weight: 600"
-            >Willing to start PrEP:</label
-          >
-          <label
-            style="
+          ">
+          <label style="margin-bottom: 0; font-weight: 600">Willing to start PrEP:</label>
+          <label style="
               display: inline-flex;
               align-items: center;
               font-weight: normal;
               margin-bottom: 0;
-            "
-          >
-            <input
-              type="radio"
-              v-model="formData.start_prep"
-              name="start_prep"
-              value="Yes"
-              required
-            />
+            ">
+            <input type="radio" v-model="formData.start_prep" name="start_prep" value="Yes" required />
             Yes
           </label>
-          <label
-            style="
+          <label style="
               display: inline-flex;
               align-items: center;
               font-weight: normal;
               margin-bottom: 0;
-            "
-          >
-            <input
-              type="radio"
-              v-model="formData.start_prep"
-              name="start_prep"
-              value="No"
-            />
+            ">
+            <input type="radio" v-model="formData.start_prep" name="start_prep" value="No" />
             No
           </label>
         </div>
-        <div
-          style="
+        <div style="
             margin-bottom: 20px;
             display: flex;
             gap: 15px;
             align-items: center;
-          "
-        >
-          <label style="margin-bottom: 0; font-weight: 600"
-            >Willing to return for at least one follow-up visit:</label
-          >
-          <label
-            style="
+          ">
+          <label style="margin-bottom: 0; font-weight: 600">Willing to return for at least one follow-up visit:</label>
+          <label style="
               display: inline-flex;
               align-items: center;
               font-weight: normal;
               margin-bottom: 0;
-            "
-            ><input
-              type="radio"
-              v-model="formData.follow_up"
-              name="follow_up"
-              value="Yes"
-              required
-            />
-            Yes</label
-          >
-          <label
-            style="
+            "><input type="radio" v-model="formData.follow_up" name="follow_up" value="Yes" required />
+            Yes</label>
+          <label style="
               display: inline-flex;
               align-items: center;
               font-weight: normal;
               margin-bottom: 0;
-            "
-            ><input
-              type="radio"
-              v-model="formData.follow_up"
-              name="follow_up"
-              value="No"
-              required
-            />
-            No</label
-          >
+            "><input type="radio" v-model="formData.follow_up" name="follow_up" value="No" required />
+            No</label>
         </div>
 
         <!-- Clinical/Medical Assessment -->
         <h3 class="section-title">D. Clinical/Medical Assessment</h3>
-        <div
-          class="checkbox-group"
-          style="
+        <div class="checkbox-group" style="
             padding: 10px;
             border: 1px solid #eee;
             border-radius: 5px;
             background-color: #fdfdfd;
-          "
-        >
-          <label
-            ><input
-              type="checkbox"
-              v-model="formData.medicalInfo"
-              value="No_HIV_Exposure_Last_72h"
-            />
-            No HIV risk exposure in the last 72 hours</label
-          >
-          <label
-            ><input
-              type="checkbox"
-              v-model="formData.medicalInfo"
-              value="No_Acute_HIV_Symptoms"
-            />
-            No signs/symptoms of acute HIV (AHI)</label
-          >
-          <label
-            ><input
-              type="checkbox"
-              v-model="formData.medicalInfo"
-              value="No_Allergy_Contraindications_TDF_3TC"
-            />
+          ">
+          <label><input type="checkbox" v-model="formData.medicalInfo" value="No_HIV_Exposure_Last_72h" />
+            No HIV risk exposure in the last 72 hours</label>
+          <label><input type="checkbox" v-model="formData.medicalInfo" value="No_Acute_HIV_Symptoms" />
+            No signs/symptoms of acute HIV (AHI)</label>
+          <label><input type="checkbox" v-model="formData.medicalInfo" value="No_Allergy_Contraindications_TDF_3TC" />
             No allergy or contraindications to Tenofovir + Lamivudine (TDF +
-            3TC)</label
-          >
-          <label
-            ><input
-              type="checkbox"
-              v-model="formData.medicalInfo"
-              value="Medically_Suitable"
-            />
-            Medically suitable to start PrEP</label
-          >
+            3TC)</label>
+          <label><input type="checkbox" v-model="formData.medicalInfo" value="Medically_Suitable" />
+            Medically suitable to start PrEP</label>
         </div>
 
         <!-- PrEP Initiation -->
         <h3 class="section-title">E. PrEP Initiation</h3>
-        <div
-          style="
+        <div style="
             margin-bottom: 15px;
             display: flex;
             gap: 15px;
             align-items: center;
-          "
-        >
-          <label style="margin-bottom: 0; font-weight: 600"
-            >Suitable for PrEP:</label
-          >
-          <label
-            style="
+          ">
+          <label style="margin-bottom: 0; font-weight: 600">Suitable for PrEP:</label>
+          <label style="
               display: inline-flex;
               align-items: center;
               font-weight: normal;
               margin-bottom: 0;
-            "
-          >
-            <input
-              type="radio"
-              v-model="formData.suitable_for_prep"
-              name="suitable_for_prep"
-              value="Yes"
-              required
-            />
+            ">
+            <input type="radio" v-model="formData.suitable_for_prep" name="suitable_for_prep" value="Yes" required />
             Yes
           </label>
-          <label
-            style="
+          <label style="
               display: inline-flex;
               align-items: center;
               font-weight: normal;
               margin-bottom: 0;
-            "
-          >
-            <input
-              type="radio"
-              v-model="formData.suitable_for_prep"
-              name="suitable_for_prep"
-              value="No"
-            />
+            ">
+            <input type="radio" v-model="formData.suitable_for_prep" name="suitable_for_prep" value="No" />
             No
           </label>
         </div>
 
-        <div
-          v-if="formData.type_of_visit === 'Screening Visit MO'"
-          id="prep-initiation-section"
-        >
+        <div v-if="formData.type_of_visit === 'Screening Visit MO'" id="prep-initiation-section">
           <label for="prep_initiation_date">Date of initiation of PrEP:</label>
-          <input
-            type="date"
-            v-model="formData.prep_initiation_date"
-            id="prep_initiation_date"
-            name="prep_initiation_date"
-          />
+          <input type="date" v-model="formData.prep_initiation_date" id="prep_initiation_date"
+            name="prep_initiation_date" />
         </div>
 
         <!-- Prescriber Signature -->
         <h3 class="section-title">Prescriber’s Details</h3>
         <label>Date:</label>
-        <input
-          type="date"
-          v-model="formData.signature_date"
-          name="signature_date"
-          readonly
-        />
+        <input type="date" v-model="formData.signature_date" name="signature_date" readonly />
         <label>Name:</label>
-        <input
-          type="text"
-          v-model="formData.prescriber_name"
-          name="prescriber_name"
-          readonly
-        />
+        <input type="text" v-model="formData.prescriber_name" name="prescriber_name" readonly />
         <label>Designation:</label>
-        <input
-          type="text"
-          v-model="formData.prescriber_designation"
-          name="prescriber_designation"
-          readonly
-        />
+        <input type="text" v-model="formData.prescriber_designation" name="prescriber_designation" readonly />
         <label>BMHC NO:</label>
-        <input type="text" v-model="formData.bmhc_no" name="bmhc_no" readonly />
+        <input type="text" v-model="formData.bhc_no" name="bmhc_no" readonly />
 
         <!-- Submit Button -->
-        <button
-          type="submit"
-          class="submit-btn"
-          :disabled="submitDisabled || isSubmitting"
-        >
+        <button type="submit" class="submit-btn" :disabled="submitDisabled || isSubmitting">
           Review Data
           <!-- Changed Text -->
         </button>
@@ -598,28 +323,15 @@
   </form>
 
   <!-- Use the Confirmation Modal -->
-  <Form1_ConfirmationModal
-    v-if="isReviewModalVisible"
-    :formData="formData"
-    :isSubmitting="isSubmitting"
-    :successMessage="modalSuccessMessage"
-    :errorMessage="modalErrorMessage"
-    @confirm="confirmAndSubmit"
-    @cancel="cancelReview"
-  />
+  <Form1_ConfirmationModal v-if="isReviewModalVisible" :formData="formData" :isSubmitting="isSubmitting"
+    :successMessage="modalSuccessMessage" :errorMessage="modalErrorMessage" @confirm="confirmAndSubmit"
+    @cancel="cancelReview" />
 
   <!-- Final Messages outside modal -->
-  <div
-    v-if="!isReviewModalVisible && finalSubmitMessage"
-    :class="finalSubmitClass"
-    class="final-message"
-  >
+  <div v-if="!isReviewModalVisible && finalSubmitMessage" :class="finalSubmitClass" class="final-message">
     <p>{{ finalSubmitMessage }}</p>
   </div>
-  <div
-    v-if="!isReviewModalVisible && !finalSubmitMessage"
-    style="text-align: center; margin-top: 20px"
-  >
+  <div v-if="!isReviewModalVisible && !finalSubmitMessage" style="text-align: center; margin-top: 20px">
     <h4 class="section-title" style="margin-bottom: 1rem; font-size: 1.2rem">
       Thank you for your time.
     </h4>
@@ -671,7 +383,7 @@ const formData = ref({
   signature_date: "",
   prescriber_name: "",
   prescriber_designation: "",
-  bmhc_no: "",
+  bhc_no: "",
 });
 
 const statusMessage = ref(""); // For UID validation feedback
@@ -960,10 +672,11 @@ onMounted(() => {
 
   // Populate prescriber details
   const loggedInUser = getLoggedInUser();
+  console.log("Checking loggedInUser details:", getLoggedInUser());
   if (loggedInUser) {
     formData.value.prescriber_name = loggedInUser.fullname || "";
     formData.value.prescriber_designation = loggedInUser.designation || "";
-    formData.value.bmhc_no = loggedInUser.bhcno || "";
+    formData.value.bhc_no = loggedInUser.bhc_no || "";
   } else {
     console.warn("Logged in user details not found in localStorage.");
     // Optionally clear fields if no user found
@@ -1028,8 +741,8 @@ input[type="checkbox"] {
 }
 
 /* Ensure labels containing radios/checkboxes don't have extra bottom margin */
-label > input[type="radio"],
-label > input[type="checkbox"] {
+label>input[type="radio"],
+label>input[type="checkbox"] {
   margin-bottom: 0;
 }
 
