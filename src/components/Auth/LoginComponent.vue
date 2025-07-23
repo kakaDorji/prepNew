@@ -85,34 +85,52 @@ const password = ref("");
 const errorMessage = ref("");
 const router = useRouter();
 
+// Define the API URL dynamically based on the environment
+const API_URL = import.meta.env.MODE === 'production'
+  ? 'https://script.google.com/macros/s/AKfycbwY6LyT1MksQhSwJmaiozcnll2P6XQSQLbEmkZ-Cm_52pNwenZvoGPRRb_RYHNs_N89bQ/exec'
+  : '/api';
+
 const handleSubmit = async () => {
   errorMessage.value = "";
 
-  const res = await fetch("/api", {
-    method: "POST",
-    body: JSON.stringify({
-      action: "login",
-      username: username.value,
-      password: password.value,
-    }),
-  });
-
-  const result = await res.json();
-  if (result.success === true) {
-    localStorage.setItem("authToken", result.token);
-    localStorage.setItem("loggedInUser", JSON.stringify(result.user));
-    // Store role if needed
-    await Swal.fire({
-      title: "Success!",
-      text: "Redirecting...",
-      icon: "success",
-      timer: 1500,
-      showConfirmButton: false,
+  try {
+    // Perform the login request
+    const res = await fetch(API_URL, {
+      method: "POST",
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        action: "login",
+        username: username.value,
+        password: password.value,
+      }),
     });
 
-    router.push(result.user.role === "L4" ? "/dashboard/forms" : "/dashboard");
-  } else {
-    errorMessage.value = result.message;
+    const result = await res.json();
+    if (result.success === true) {
+      // Store auth token and user data
+      localStorage.setItem("authToken", result.token);
+      localStorage.setItem("loggedInUser", JSON.stringify(result.user));
+
+      // Show success message
+      await Swal.fire({
+        title: "Success!",
+        text: "Redirecting...",
+        icon: "success",
+        timer: 1500,
+        showConfirmButton: false,
+      });
+
+      // Redirect based on role
+      router.push(result.user.role === "L4" ? "/dashboard/forms" : "/dashboard");
+    } else {
+      errorMessage.value = result.message;
+    }
+  } catch (error) {
+    // Handle errors (e.g., network issues)
+    console.error("Error:", error);
+    errorMessage.value = "An error occurred. Please try again.";
   }
 };
 </script>
