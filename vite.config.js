@@ -23,15 +23,17 @@ export default defineConfig({
   server: {
     proxy: {
       '/api': {
-        target: 'https://script.google.com',
+        target: 'https://script.google.com', // Change to the new Google Apps Script URL
         changeOrigin: true,
         secure: false,
-rewrite: (path) =>
-path.replace(
-  /^\/api/,
-  '/macros/s/AKfycbwY6LyT1MksQhSwJmaiozcnll2P6XQSQLbEmkZ-Cm_52pNwenZvoGPRRb_RYHNs_N89bQ/exec'
-),
+        rewrite: (path) =>
+          path.replace(
+            /^\/api/,
+            '/macros/s/AKfycbzA9uII3S4bndv-9dBx-JuUpc6s3zSwo_D6FaNdupDz-zVvufnGFd9sEiXKJ26MqgejHA/exec'
+          ),
 
+
+         
         configure: (proxy) => {
           // Modify request headers
           proxy.on('proxyReq', (proxyReq) => {
@@ -68,9 +70,7 @@ path.replace(
         manualChunks: {
           vue: ['vue', 'vue-router', 'pinia'],
           vendor: ['axios', 'lodash'],
-          
         },
-       
       }
     },
 
