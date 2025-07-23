@@ -623,13 +623,25 @@ onMounted(() => {
   initializeDate();
   fetchCsvData();
 
+  // --- FIX IS HERE ---
+  // 1. Get the user data string from localStorage
+  const storedUser = localStorage.getItem("loggedInUser");
 
+  // 2. Parse the string into a JavaScript object. This creates the 'loggedInUser' variable.
+  const loggedInUser = storedUser ? JSON.parse(storedUser) : null;
+  // --- END OF FIX ---
+
+
+  // Now this part of your code will work perfectly
   if (loggedInUser) {
+    // Make sure 'fullname', 'designation', and 'bhc_no' are the exact names
+    // your API sends back for the user object.
     formData.value.interviewer_name = loggedInUser.fullname || "";
     formData.value.designation = loggedInUser.designation || "";
-    formData.value.bmhc_number = loggedInUser.bhc_no || ""; // Use bmhc_number
+    formData.value.bmhc_number = loggedInUser.bhc_no || "";
   } else {
     console.warn("Form 5: Logged in user details not found.");
+    // This part is also good practice, in case someone is not logged in
     formData.value.interviewer_name = "";
     formData.value.designation = "";
     formData.value.bmhc_number = "";

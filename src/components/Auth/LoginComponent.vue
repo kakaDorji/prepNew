@@ -88,14 +88,19 @@ const router = useRouter();
 const handleSubmit = async () => {
   errorMessage.value = "";
 
-  const res = await fetch("/api", {
+  const res = await fetch(import.meta.env.VITE_API_URL, {
     method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
     body: JSON.stringify({
       action: "login",
       username: username.value,
       password: password.value,
     }),
   });
+
+
 
   const result = await res.json();
   if (result.success === true) {
