@@ -9,12 +9,8 @@
       <!-- Login form container -->
       <div class="relative bg-white shadow-lg sm:rounded-3xl sm:p-10">
         <div>
-          <h2 class="mt-6 text-center text-3xl font-extrabold text-gray-900">
-            Welcome Back
-          </h2>
-          <p class="mt-2 text-center text-sm text-gray-600">
-            Sign in to your account
-          </p>
+          <h2 class="mt-6 text-center text-3xl font-extrabold text-gray-900">Welcome Back</h2>
+          <p class="mt-2 text-center text-sm text-gray-600">Sign in to your account</p>
         </div>
 
         <form class="mt-8 space-y-6" @submit.prevent="handleSubmit">
@@ -51,7 +47,7 @@
 
           <!-- Submit Button -->
           <div>
-            <button type="submit"
+            <button type="submit" :disabled="loading"
               class="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors duration-200">
               <span class="absolute left-0 inset-y-0 flex items-center pl-3">
                 <svg class="h-5 w-5 text-indigo-400 group-hover:text-indigo-300" xmlns="http://www.w3.org/2000/svg"
@@ -67,9 +63,7 @@
         </form>
 
         <!-- Error Message -->
-        <p v-if="errorMessage" class="mt-2 text-center text-sm text-red-600">
-          {{ errorMessage }}
-        </p>
+        <p v-if="errorMessage" class="mt-2 text-center text-sm text-red-600">{{ errorMessage }}</p>
       </div>
     </div>
   </div>
@@ -83,22 +77,23 @@ import { useRouter } from "vue-router";
 const username = ref("");
 const password = ref("");
 const errorMessage = ref("");
+const loading = ref(false);
 const router = useRouter();
 
 // Define the API URL dynamically based on the environment
 const API_URL = import.meta.env.MODE === 'production'
   ? 'https://script.google.com/macros/s/AKfycbwY6LyT1MksQhSwJmaiozcnll2P6XQSQLbEmkZ-Cm_52pNwenZvoGPRRb_RYHNs_N89bQ/exec'
-  : '/api';
+  : '/api'; // For local development
 
 const handleSubmit = async () => {
   errorMessage.value = "";
+  loading.value = true; // Set loading to true while making the request
 
   try {
-    // Perform the login request
     const res = await fetch(API_URL, {
       method: "POST",
       headers: {
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
       },
       body: JSON.stringify({
         action: "login",
@@ -108,6 +103,8 @@ const handleSubmit = async () => {
     });
 
     const result = await res.json();
+    console.log(result);
+
     if (result.success === true) {
       // Store auth token and user data
       localStorage.setItem("authToken", result.token);
@@ -128,9 +125,10 @@ const handleSubmit = async () => {
       errorMessage.value = result.message;
     }
   } catch (error) {
-    // Handle errors (e.g., network issues)
     console.error("Error:", error);
     errorMessage.value = "An error occurred. Please try again.";
+  } finally {
+    loading.value = false; // Set loading to false after the request
   }
 };
 </script>
