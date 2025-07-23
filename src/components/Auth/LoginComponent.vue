@@ -82,7 +82,7 @@ const router = useRouter();
 
 // Define the API URL dynamically based on the environment
 const API_URL = import.meta.env.MODE === 'production'
-  ? 'https://script.google.com/macros/s/AKfycbwY6LyT1MksQhSwJmaiozcnll2P6XQSQLbEmkZ-Cm_52pNwenZvoGPRRb_RYHNs_N89bQ/exec'
+  ? 'https://script.google.com/macros/s/AKfycbw-RnQGTAc0uKt8O7Xy_95gAnk8yxyIlGIqHYjUGRM32nBwZ00reqBRkVIPh7KIBSt9EA/exec'
   : '/api'; // For local development
 
 const handleSubmit = async () => {
