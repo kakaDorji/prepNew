@@ -75,6 +75,7 @@
   </div>
 </template>
 
+
 <script setup>
 import { ref } from "vue";
 import Swal from "sweetalert2";
@@ -88,7 +89,7 @@ const router = useRouter();
 const handleSubmit = async () => {
   errorMessage.value = "";
 
-  const res = await fetch(import.meta.env.VITE_API_URL, {
+  const res = await fetch('/api', {
     method: "POST",
     headers: {
       "Content-Type": "application/json"
