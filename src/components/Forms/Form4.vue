@@ -156,15 +156,15 @@
             No</label>
         </div>
 
-        <label>1.4 If YES, is your sex partner male, female, or TG? (tick all that
+        <label>1.4 If YES, is your sex partner MSM, FSW, or TG? (tick all that
           apply)</label>
         <div class="checkbox-group-vertical">
-          <label><input type="checkbox" v-model="formData.partner_gender" value="Male"
+          <label><input type="checkbox" v-model="formData.partner_gender" value="MSM"
               :disabled="formData.live_with_partner !== 'Yes'" />
-            Male</label>
-          <label><input type="checkbox" v-model="formData.partner_gender" value="Female"
+            MSM</label>
+          <label><input type="checkbox" v-model="formData.partner_gender" value="FSW"
               :disabled="formData.live_with_partner !== 'Yes'" />
-            Female</label>
+            FSW</label>
           <label><input type="checkbox" v-model="formData.partner_gender" value="Transgender"
               :disabled="formData.live_with_partner !== 'Yes'" />
             Transgender</label>

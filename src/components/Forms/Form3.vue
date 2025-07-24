@@ -37,7 +37,7 @@
         <!-- Acute HIV Infection Section -->
         <h4 class="section-title">1. Acute HIV Infection</h4>
         <p>
-          In the past 15 days, have you experienced any of the following? If
+          In the past 14 days, have you experienced any of the following? If
           yes, then indicate start date and whether it is ongoing or resolved.
         </p>
 
