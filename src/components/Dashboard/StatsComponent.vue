@@ -9,18 +9,12 @@
       <!-- Search bar -->
       <div class="mb-4">
         <div class="mt-1 relative rounded-md shadow-sm">
-          <input
-            type="text"
+          <input type="text"
             class="focus:ring-indigo-500 focus:border-indigo-500 block w-full p-4 sm:text-sm border-gray-300 rounded-md"
-            placeholder="Enter UID"
-            v-model="searchTerm"
-            @keypress.enter="handleSearch"
-          />
+            placeholder="Enter UID" v-model="searchTerm" @keypress.enter="handleSearch" />
           <div class="absolute inset-y-0 right-0 flex items-center pr-3">
-            <button
-              @click="handleSearch"
-              class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-900 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-            >
+            <button @click="handleSearch"
+              class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-900 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
               Search
             </button>
           </div>
@@ -30,83 +24,48 @@
       <!-- Modified Date of Referral Filter section with Download button -->
       <div class="mb-6 flex items-center space-x-4">
         <div class="flex items-center space-x-2">
-          <label for="start-date" class="text-sm font-medium text-gray-700"
-            >Start Date:</label
-          >
-          <input
-            type="date"
-            id="start-date"
-            v-model="startDateFilter"
-            class="block w-40 pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md"
-          />
+          <label for="start-date" class="text-sm font-medium text-gray-700">Start Date:</label>
+          <input type="date" id="start-date" v-model="startDateFilter"
+            class="block w-40 pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md" />
         </div>
         <div class="flex items-center space-x-2">
-          <label for="end-date" class="text-sm font-medium text-gray-700"
-            >End Date:</label
-          >
-          <input
-            type="date"
-            id="end-date"
-            v-model="endDateFilter"
-            class="block w-40 pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md"
-          />
+          <label for="end-date" class="text-sm font-medium text-gray-700">End Date:</label>
+          <input type="date" id="end-date" v-model="endDateFilter"
+            class="block w-40 pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md" />
         </div>
-        <button
-          @click="applyFilters"
-          class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-900 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-        >
+        <button @click="applyFilters"
+          class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-900 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
           Apply Filters
         </button>
-        <button
-          @click="downloadCSV"
-          class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
-        >
+        <button @click="downloadCSV"
+          class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
           Download CSV
         </button>
       </div>
       <!-- Status message -->
       <div class="mb-4 text-sm text-gray-600">
         {{ statusMessage }}
-        <span v-if="filteredRows.length > 0" class="ml-2 font-semibold"
-          >Total entries: {{ filteredRows.length - 1 }}</span
-        >
+        <span v-if="filteredRows.length > 0" class="ml-2 font-semibold">Total entries: {{ filteredRows.length - 1
+        }}</span>
       </div>
 
       <!-- Table -->
       <div id="data-container" class="flex flex-col">
         <div class="-my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
-          <div
-            class="py-2 align-middle inline-block min-w-full sm:px-6 lg:px-8"
-          >
-            <div
-              class="shadow overflow-hidden border-b border-gray-200 sm:rounded-lg"
-            >
-              <table
-                v-if="filteredRows.length > 0"
-                class="min-w-full divide-y divide-gray-200"
-              >
+          <div class="py-2 align-middle inline-block min-w-full sm:px-6 lg:px-8">
+            <div class="shadow overflow-hidden border-b border-gray-200 sm:rounded-lg">
+              <table v-if="filteredRows.length > 0" class="min-w-full divide-y divide-gray-200">
                 <thead class="bg-gray-50">
                   <tr>
-                    <th
-                      v-for="(header, index) in filteredRows[0]"
-                      :key="index"
-                      scope="col"
-                      class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                    >
+                    <th v-for="(header, index) in filteredRows[0]" :key="index" scope="col"
+                      class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       <div class="flex flex-col">
                         <span class="whitespace-nowrap">{{ header }}</span>
                         <div v-if="header === 'Referral to PrEP site'">
-                          <select
-                            v-model="prepSiteFilter"
-                            @change="applyFilters"
-                            class="mt-1 block w-full pl-3 pr-10 py-2 text-base border border-gray-300 bg-indigo-900 text-white focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md"
-                          >
+                          <select v-model="prepSiteFilter" @change="applyFilters"
+                            class="mt-1 block w-full pl-3 pr-10 py-2 text-base border border-gray-300 bg-indigo-900 text-white focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md">
                             <option value="">All</option>
-                            <option
-                              v-for="option in prepSiteOptions"
-                              :key="option"
-                              :value="option"
-                            >
+                            <option v-for="option in prepSiteOptions" :key="option" :value="option">
                               {{ option }}
                             </option>
                           </select>
@@ -116,20 +75,11 @@
                   </tr>
                 </thead>
                 <tbody class="bg-white divide-y divide-gray-200">
-                  <tr
-                    v-for="(row, rowIndex) in displayedRows"
-                    :key="rowIndex"
-                    class="hover:bg-gray-50"
-                  >
-                    <td
-                      v-for="(cell, cellIndex) in row"
-                      :key="cellIndex"
-                      :class="[
-                        highlightCondition(cell, cellIndex),
-                        'px-6 py-4 whitespace-nowrap text-sm',
-                      ]"
-                      :data-label="filteredRows[0][cellIndex]"
-                    >
+                  <tr v-for="(row, rowIndex) in displayedRows" :key="rowIndex" class="hover:bg-gray-50">
+                    <td v-for="(cell, cellIndex) in row" :key="cellIndex" :class="[
+                      highlightCondition(cell, cellIndex),
+                      'px-6 py-4 whitespace-nowrap text-sm',
+                    ]" :data-label="filteredRows[0][cellIndex]">
                       {{ cell }}
                     </td>
                   </tr>
@@ -142,27 +92,18 @@
 
       <!-- Pagination -->
       <div
-        class="bg-white px-4 py-3 flex items-center justify-between border-t border-gray-200 sm:px-6 mt-4 rounded-b-lg"
-      >
+        class="bg-white px-4 py-3 flex items-center justify-between border-t border-gray-200 sm:px-6 mt-4 rounded-b-lg">
         <div class="flex-1 flex justify-between sm:hidden">
-          <button
-            @click="changePage(-1)"
-            :disabled="currentPage === 1"
-            class="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
-          >
+          <button @click="changePage(-1)" :disabled="currentPage === 1"
+            class="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
             Previous
           </button>
-          <button
-            @click="changePage(1)"
-            :disabled="currentPage === totalPages"
-            class="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
-          >
+          <button @click="changePage(1)" :disabled="currentPage === totalPages"
+            class="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
             Next
           </button>
         </div>
-        <div
-          class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between"
-        >
+        <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
           <div>
             <p class="text-sm text-gray-700">
               Showing page <span class="font-medium">{{ currentPage }}</span> of
@@ -170,48 +111,25 @@
             </p>
           </div>
           <div>
-            <nav
-              class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px"
-              aria-label="Pagination"
-            >
-              <button
-                @click="changePage(-1)"
-                :disabled="currentPage === 1"
-                class="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50"
-              >
+            <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
+              <button @click="changePage(-1)" :disabled="currentPage === 1"
+                class="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
                 <span class="sr-only">Previous</span>
-                <svg
-                  class="h-5 w-5"
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 20 20"
-                  fill="currentColor"
-                  aria-hidden="true"
-                >
-                  <path
-                    fill-rule="evenodd"
+                <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"
+                  aria-hidden="true">
+                  <path fill-rule="evenodd"
                     d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z"
-                    clip-rule="evenodd"
-                  />
+                    clip-rule="evenodd" />
                 </svg>
               </button>
-              <button
-                @click="changePage(1)"
-                :disabled="currentPage === totalPages"
-                class="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50"
-              >
+              <button @click="changePage(1)" :disabled="currentPage === totalPages"
+                class="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
                 <span class="sr-only">Next</span>
-                <svg
-                  class="h-5 w-5"
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 20 20"
-                  fill="currentColor"
-                  aria-hidden="true"
-                >
-                  <path
-                    fill-rule="evenodd"
+                <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"
+                  aria-hidden="true">
+                  <path fill-rule="evenodd"
                     d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"
-                    clip-rule="evenodd"
-                  />
+                    clip-rule="evenodd" />
                 </svg>
               </button>
             </nav>
@@ -468,16 +386,17 @@ onMounted(() => {
 }
 
 th {
-  background: linear-gradient(
-    135deg,
-    #2f3083,
-    #3636a5
-  ); /* From primary color to a lighter shade */
+  background: linear-gradient(135deg,
+      #2f3083,
+      #3636a5);
+  /* From primary color to a lighter shade */
   border: 1px solid #333232;
   color: #fff;
   font-size: 20px;
-  text-align: left; /* Add alignment if needed */
-  padding: 10px; /* Adjust spacing for readability */
+  text-align: left;
+  /* Add alignment if needed */
+  padding: 10px;
+  /* Adjust spacing for readability */
 }
 
 td {
