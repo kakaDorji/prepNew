@@ -12,6 +12,33 @@
         </div>
         <span v-if="isCheckingUid" class="uid-spinner"><i class="fas fa-spinner fa-spin"></i> Checking...</span>
 
+        <!-- Visit Type Selection for Existing Data -->
+        <div v-if="availableVisitTypes.length > 0" class="visit-type-selection">
+          <h4>Available Visits for {{ formData.participant_uid }}:</h4>
+          <div class="visit-buttons">
+            <button v-for="visitType in availableVisitTypes" :key="visitType" type="button" class="visit-btn"
+              :class="{ 'selected': selectedVisitType === visitType }" @click="loadVisitData(visitType)">
+              {{ visitType }}
+            </button>
+            <button v-for="newVisit in getAvailableNewVisits()" :key="newVisit" type="button"
+              class="visit-btn new-visit" @click="startNewVisit(newVisit)">
+              + Add {{ newVisit }}
+            </button>
+          </div>
+        </div>
+
+        <!-- Prefill Status and Delete Button -->
+        <div v-if="isPrefilled" class="prefill-status">
+          <div class="update-mode-banner">
+            <i class="fas fa-edit"></i> UPDATE MODE - {{ selectedVisitType }}
+          </div>
+          <button type="button" class="delete-btn" @click="confirmDelete" :disabled="isDeletingRecord">
+            <i v-if="isDeletingRecord" class="fas fa-spinner fa-spin"></i>
+            <i v-else class="fas fa-trash"></i>
+            {{ isDeletingRecord ? 'Deleting...' : `Delete ${selectedVisitType} Record` }}
+          </button>
+        </div>
+
         <label for="prep_site">PrEP Site</label>
         <select v-model="formData.prep_site" id="prep_site" name="prep_site" required>
           <option v-for="site in prepSites">
@@ -1370,7 +1397,7 @@
 
       <!-- Submit Button outside the last container -->
       <button type="submit" class="submit-btn" :disabled="submitDisabled || isSubmitting">
-        {{ isSubmitting ? "Submitting..." : "Review Data" }}
+        {{ getSubmitButtonText() }}
       </button>
     </div>
     <!-- End .container -->
@@ -1408,7 +1435,7 @@ import Form4_ConfirmationModal from "./Form4_ConfirmationModal.vue"; // Adjust p
 
 // --- Configuration ---
 const GOOGLE_SCRIPT_URL =
-  "https://script.google.com/macros/s/AKfycbzhYgC8w3iP7ByzKTMmuatXits30ilyeucQVgQiAL4mCa-o03zQ9p4_azNyzbuf00sj5Q/exec"; // Replace with Form 4 Script URL
+  "https://script.google.com/macros/s/AKfycby-UFXJlTK2QaFhUCbMF1VK0Q2o6AMesV76iKyTrXUoe-Ok5ilcRX0uqK6S9MYlchlitQ/exec"; // Replace with Form 4 Script URL
 const CSV_DATA_URL =
   "https://docs.google.com/spreadsheets/d/e/2PACX-1vSfG6e5EIcHDaXopn9DxMZnTwVFGi5CiQxmKlEIPsd7uPtZiQIikYb46UdN78UhZlJfocCfl_s0hGGX/pub?gid=0&single=true&output=csv"; // UID validation source
 const UID_MIN_LENGTH = 5;
@@ -1565,6 +1592,13 @@ const modalSuccessMessage = ref("");
 const modalErrorMessage = ref("");
 const finalSubmitMessage = ref("");
 const finalSubmitClass = ref("");
+
+// CRUD State Variables
+const availableVisitTypes = ref([]);
+const selectedVisitType = ref('');
+const isPrefilled = ref(false);
+const isDeletingRecord = ref(false);
+const allVisitTypes = ['Screening Visit MO', 'End of M1', 'End of M3', 'End of M6', 'End of M9', 'End of M12'];
 const successMessage = ref("");
 const errorMessage = ref(""); // General messages
 let csvData = [];
@@ -1672,7 +1706,178 @@ const validateUidOnInput = (newUid) => {
     }
   }
 };
-watch(() => formData.value.participant_uid, validateUidOnInput);
+watch(() => formData.value.participant_uid, (newUid) => {
+  validateUidOnInput(newUid);
+  if (newUid && csvData.length > 1 && validateUid(newUid)) {
+    loadAvailableVisits(newUid);
+  } else {
+    availableVisitTypes.value = [];
+    selectedVisitType.value = '';
+    isPrefilled.value = false;
+  }
+});
+
+// CRUD Functions
+// Get submit button text based on state
+const getSubmitButtonText = () => {
+  if (isSubmitting.value) return 'Submitting...';
+  if (isPrefilled.value && selectedVisitType.value) return `Update ${selectedVisitType.value} Data`;
+  if (formData.value.type_of_visit && formData.value.type_of_visit !== 'mst') return `Add ${formData.value.type_of_visit} Data`;
+  return 'Review Data';
+};
+
+// Get available new visit types (not yet created)
+const getAvailableNewVisits = () => {
+  return allVisitTypes.filter(visit => !availableVisitTypes.value.includes(visit));
+};
+
+// Load available visit types for UID
+const loadAvailableVisits = async (uid) => {
+  try {
+    const response = await axios.get(GOOGLE_SCRIPT_URL, {
+      params: { action: 'getVisitTypes', uid: uid },
+      timeout: 10000
+    });
+
+    if (response.data.status === 'success') {
+      availableVisitTypes.value = response.data.availableVisits || [];
+      if (availableVisitTypes.value.length > 0) {
+        statusMessage.value = `Found ${availableVisitTypes.value.length} existing visits. Select one to edit or add new.`;
+      } else {
+        statusMessage.value = `Add first visit for ${uid}`;
+      }
+    }
+  } catch (error) {
+    console.error('Error loading visits:', error);
+    availableVisitTypes.value = [];
+  }
+};
+
+// Load data for specific visit type
+const loadVisitData = async (visitType) => {
+  try {
+    statusMessage.value = 'Loading visit data...';
+    selectedVisitType.value = visitType;
+
+    const response = await axios.get(GOOGLE_SCRIPT_URL, {
+      params: { action: 'prefill', uid: formData.value.participant_uid, visitType: visitType },
+      timeout: 10000
+    });
+
+    if (response.data.status === 'success') {
+      const prefillData = response.data.data;
+
+      // Populate form fields
+      Object.keys(prefillData).forEach(key => {
+        if (formData.value.hasOwnProperty(key)) {
+          // Handle arrays
+          if (Array.isArray(formData.value[key]) && typeof prefillData[key] === 'string') {
+            formData.value[key] = prefillData[key] ? prefillData[key].split('; ') : [];
+          }
+          // Handle booleans
+          else if (typeof formData.value[key] === 'boolean') {
+            formData.value[key] = prefillData[key] === 'Yes' || prefillData[key] === true;
+          }
+          // Handle regular values
+          else {
+            formData.value[key] = prefillData[key];
+          }
+        }
+      });
+
+      isPrefilled.value = true;
+      statusMessage.value = `${visitType} data loaded successfully!`;
+      statusClass.value = 'success';
+      submitDisabled.value = false;
+
+    } else {
+      statusMessage.value = response.data.message || `Error loading ${visitType} data`;
+      statusClass.value = 'error';
+    }
+  } catch (error) {
+    console.error('Error loading visit data:', error);
+    statusMessage.value = `Error loading ${visitType} data`;
+    statusClass.value = 'error';
+  }
+};
+
+// Start new visit (clear form and select visit type)
+const startNewVisit = (visitType) => {
+  // Clear form but keep basic info
+  const basicInfo = {
+    participant_uid: formData.value.participant_uid,
+    prep_site: formData.value.prep_site,
+    interviewer_name: formData.value.interviewer_name,
+    designation: formData.value.designation,
+    bhmc_registration: formData.value.bhmc_registration,
+    date: formData.value.date
+  };
+
+  // Reset form
+  clearForm();
+
+  // Restore basic info
+  Object.assign(formData.value, basicInfo);
+
+  // Set the new visit type
+  formData.value.type_of_visit = visitType;
+  selectedVisitType.value = visitType;
+  isPrefilled.value = false;
+
+  statusMessage.value = `Adding new ${visitType} data`;
+  statusClass.value = 'info';
+  submitDisabled.value = false;
+};
+
+// Confirm delete action
+const confirmDelete = () => {
+  if (confirm(`Are you sure you want to delete the ${selectedVisitType.value} record for UID: ${formData.value.participant_uid}?\n\nThis action cannot be undone.`)) {
+    deleteRecord();
+  }
+};
+
+// Delete record function
+const deleteRecord = async () => {
+  isDeletingRecord.value = true;
+
+  try {
+    const response = await axios.post(GOOGLE_SCRIPT_URL,
+      new URLSearchParams({
+        action: 'delete',
+        uid: formData.value.participant_uid,
+        visitType: selectedVisitType.value
+      }).toString(),
+      {
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        timeout: 15000
+      }
+    );
+
+    if (response.data.status === 'success') {
+      statusMessage.value = response.data.message || 'Record deleted successfully!';
+      statusClass.value = 'success';
+
+      // Refresh available visits
+      await loadAvailableVisits(formData.value.participant_uid);
+
+      // Clear current form
+      clearForm();
+      isPrefilled.value = false;
+      selectedVisitType.value = '';
+      formData.value.type_of_visit = 'mst';
+    } else {
+      statusMessage.value = response.data.message || 'Failed to delete record';
+      statusClass.value = 'error';
+    }
+
+  } catch (error) {
+    console.error('Delete error:', error);
+    statusMessage.value = 'Error deleting record. Please try again.';
+    statusClass.value = 'error';
+  } finally {
+    isDeletingRecord.value = false;
+  }
+};
 
 // Modal Control
 const showReviewModal = () => {
@@ -1709,6 +1914,12 @@ const confirmAndSubmit = async () => {
   const url = GOOGLE_SCRIPT_URL;
   try {
     const dataToSend = { ...formData.value };
+
+    // Add action parameter if updating
+    if (isPrefilled.value && selectedVisitType.value) {
+      dataToSend.action = 'update';
+    }
+
     // Format arrays and booleans for submission
     Object.keys(dataToSend).forEach((key) => {
       if (Array.isArray(dataToSend[key])) {
@@ -1719,26 +1930,36 @@ const confirmAndSubmit = async () => {
     });
 
     const formDataSerialized = new URLSearchParams(dataToSend).toString();
-    // Use fetch with 'no-cors' as in the original submitForm
-    const response = await fetch(url, {
-      method: "POST",
+
+    // Use axios instead of fetch for better CORS handling and response parsing
+    const response = await axios.post(url, formDataSerialized, {
       headers: { "Content-Type": "application/x-www-form-urlencoded" },
-      body: formDataSerialized,
-      mode: "no-cors", // Important for simple GAS endpoints
+      timeout: 15000
     });
 
-    // Assume success with no-cors if no error thrown
-    modalSuccessMessage.value =
-      "Form submitted successfully (response not readable due to CORS).";
-    setTimeout(() => {
-      isReviewModalVisible.value = false;
-      setFinalMessage("Form submitted successfully!", "success");
-      clearForm();
-      statusMessage.value = "";
-      statusClass.value = "";
-      submitDisabled.value = true;
-      modalSuccessMessage.value = "";
-    }, SUBMIT_SUCCESS_DELAY);
+    if (response.data.status === 'success') {
+      modalSuccessMessage.value = response.data.message;
+
+      setTimeout(async () => {
+        isReviewModalVisible.value = false;
+        setFinalMessage(response.data.message, "success");
+
+        // After successful submission, refresh the available visits if we have a UID
+        if (formData.value.participant_uid) {
+          await loadAvailableVisits(formData.value.participant_uid);
+        }
+
+        clearForm();
+        statusMessage.value = "";
+        statusClass.value = "";
+        submitDisabled.value = true;
+        modalSuccessMessage.value = "";
+        isPrefilled.value = false;
+        selectedVisitType.value = '';
+      }, SUBMIT_SUCCESS_DELAY);
+    } else {
+      modalErrorMessage.value = response.data.message || 'Submission failed';
+    }
   } catch (error) {
     console.error("Form 4 Submit Error:", error);
     let detailedError = "Error submitting Form 4.";
@@ -2078,6 +2299,115 @@ td input[type="date"] {
   background-color: #f8d7da;
   color: #842029;
   border: 1px solid #f5c2c7;
+}
+
+/* Visit Type Selection Styles */
+.visit-type-selection {
+  margin: 20px 0;
+  padding: 15px;
+  border: 2px solid #e3f2fd;
+  border-radius: 8px;
+  background-color: #f8f9fa;
+}
+
+.visit-type-selection h4 {
+  margin: 0 0 15px 0;
+  color: #333;
+  font-size: 1.1rem;
+}
+
+.visit-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.visit-btn {
+  padding: 10px 15px;
+  border: 2px solid #007bff;
+  background-color: white;
+  color: #007bff;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  font-size: 0.9rem;
+}
+
+.visit-btn:hover {
+  background-color: #007bff;
+  color: white;
+  transform: translateY(-1px);
+}
+
+.visit-btn.selected {
+  background-color: #007bff;
+  color: white;
+  box-shadow: 0 2px 4px rgba(0, 123, 255, 0.3);
+}
+
+.visit-btn.new-visit {
+  border-color: #28a745;
+  color: #28a745;
+  border-style: dashed;
+}
+
+.visit-btn.new-visit:hover {
+  background-color: #28a745;
+  color: white;
+  border-style: solid;
+}
+
+/* Prefill Status Styles */
+.prefill-status {
+  margin: 15px 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 15px;
+  flex-wrap: wrap;
+}
+
+.update-mode-banner {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background-color: #28a745;
+  color: white;
+  padding: 8px 15px;
+  border-radius: 6px;
+  font-weight: 500;
+  font-size: 0.9rem;
+}
+
+.delete-btn {
+  background-color: #dc3545;
+  color: white;
+  padding: 8px 15px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: background-color 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.delete-btn:hover:not(:disabled) {
+  background-color: #c82333;
+}
+
+.delete-btn:disabled {
+  background-color: #6c757d;
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+#status-message.info {
+  background-color: #d9edf7;
+  color: #31708f;
+  border-color: #bce8f1;
 }
 
 .conditional-section {

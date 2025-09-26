@@ -1449,7 +1449,7 @@ import { prepSites } from "../location/prepSite";
 
 // --- Configuration ---
 const GOOGLE_SCRIPT_URL =
-  "https://script.google.com/macros/s/AKfycbz6ugkpSN8qWytGVod4uUlsSN5asjN-ggBFyknbzowVyrthEcl2X4DVfvG-wdnj34Hh/exec"; // FORM 6 URL
+  "https://script.google.com/macros/s/AKfycbxv_Hsa0K1P5quhAb7v9-bgMHBVNHkNuJiwmakUdg5HKElDyGXWsFq81bcFL2FL9bX1/execc"; // FORM 6 URL
 const CSV_DATA_URL =
   "https://docs.google.com/spreadsheets/d/e/2PACX-1vSfG6e5EIcHDaXopn9DxMZnTwVFGi5CiQxmKlEIPsd7uPtZiQIikYb46UdN78UhZlJfocCfl_s0hGGX/pub?gid=0&single=true&output=csv";
 const UID_MIN_LENGTH = 5;
@@ -1766,7 +1766,7 @@ const confirmAndSubmit = async () => {
       mode: "no-cors",
     });
     modalSuccessMessage.value =
-      "Form submitted successfully (response not readable).";
+      "Form submitted successfully ";
     setTimeout(() => {
       isReviewModalVisible.value = false;
       setFinalMessage("Form submitted successfully!", "success");

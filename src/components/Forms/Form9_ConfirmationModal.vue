@@ -24,27 +24,26 @@
             <h4 class="details-section-title">Basic Information</h4>
             <div class="detail-item highlight">
               <span class="detail-label"><i class="fas fa-fingerprint"></i> Participant UID:</span>
-              <!-- CORRECTED: from participant_uid to uid -->
               <span class="detail-value value-strong">{{
-                formData.uid || "N/A"
+                formData.uid || "Not specified"
                 }}</span>
             </div>
             <div class="detail-item">
               <span class="detail-label"><i class="fas fa-user-nurse"></i> Person Dispensing:</span>
               <span class="detail-value">{{
-                formData.person_dispensing || "N/A"
+                formData.person_dispensing || "Not specified"
                 }}</span>
             </div>
             <div class="detail-item">
               <span class="detail-label"><i class="fas fa-user-friends"></i> ORW Following Up:</span>
               <span class="detail-value">{{
-                formData.orw_followup || "N/A"
+                formData.orw_followup || "Not specified"
                 }}</span>
             </div>
             <div class="detail-item">
               <span class="detail-label"><i class="fas fa-user"></i> Client Receiving:</span>
               <span class="detail-value">{{
-                formData.client_receiving || "N/A"
+                formData.client_receiving || "Not specified"
                 }}</span>
             </div>
             <div class="detail-item">
@@ -62,46 +61,45 @@
               </h4>
               <div class="detail-item">
                 <span class="detail-label"><i class="fas fa-calendar-day"></i> Date Dispensed:</span>
-                <!-- CORRECTED: Suffixes now match the formData keys -->
                 <span class="detail-value">{{
-                  getMonthData("date") || "N/A"
+                  formData.visit_date || "Not specified"
                   }}</span>
               </div>
               <div class="detail-item">
                 <span class="detail-label"><i class="fas fa-pills"></i> Regiment:</span>
                 <span class="detail-value">{{
-                  getMonthData("regimen") || "N/A"
+                  formData.regimen || "Not specified"
                   }}</span>
               </div>
               <div class="detail-item">
                 <span class="detail-label"><i class="fas fa-prescription-bottle-alt"></i> Bottles
                   Dispensed (Lot/Batch):</span>
                 <span class="detail-value">{{
-                  getMonthData("bottles") || "N/A"
+                  formData.bottles || "Not specified"
                   }}</span>
               </div>
               <div class="detail-item">
                 <span class="detail-label"><i class="fas fa-calendar-times"></i> Next Due Date:</span>
                 <span class="detail-value">{{
-                  getMonthData("next_due_date") || "N/A"
+                  formData.next_due_date || "Not specified"
                   }}</span>
               </div>
               <div class="detail-item">
                 <span class="detail-label"><i class="fas fa-signature"></i> Dispenser Signature:</span>
                 <span class="detail-value">{{
-                  getMonthData("dispenser_signature") || "N/A"
+                  formData.dispenser_signature || "Not specified"
                   }}</span>
               </div>
               <div class="detail-item">
                 <span class="detail-label"><i class="fas fa-signature"></i> Recipient Signature:</span>
                 <span class="detail-value">{{
-                  getMonthData("recipient_signature") || "N/A"
+                  formData.recipient_signature || "Not specified"
                   }}</span>
               </div>
               <div class="detail-item full-width">
                 <span class="detail-label"><i class="fas fa-comment-dots"></i> Remarks:</span>
                 <span class="detail-value pre-wrap">{{
-                  getMonthData("remarks") || "None"
+                  formData.remarks || "None"
                   }}</span>
               </div>
             </template>
@@ -153,23 +151,7 @@ const props = defineProps({
 });
 const emit = defineEmits(["confirm", "cancel"]);
 
-// --- CORRECTED: This function now handles the special case for "regimen" ---
-const getMonthData = (fieldSuffix) => {
-  if (!props.formData || !props.formData.medication) return "";
-
-  const monthNumber = props.formData.medication.substring(1);
-  let fullKey = ''; // Declare the variable
-
-  // SPECIAL CASE: Handle the inconsistent 'regimen' key name
-  if (fieldSuffix === 'regimen') {
-    fullKey = `regimen_m${monthNumber}`; // Builds the key as 'regimen_m1'
-  } else {
-    // STANDARD CASE: For all other keys like 'date', 'bottles', etc.
-    fullKey = `m${monthNumber}_${fieldSuffix}`; // Builds the key as 'm1_date'
-  }
-
-  return props.formData[fullKey] || "";
-};
+// No longer needed - we now directly access formData properties
 
 const emitConfirm = () => emit("confirm");
 const emitCancel = () => {

@@ -15,6 +15,91 @@
         </div>
         <span v-if="isCheckingUid" class="uid-spinner"><i class="fas fa-spinner fa-spin"></i> Checking...</span>
 
+        <!-- Visit Type Selection with Available Visits -->
+        <div v-if="formData.participant_uid && validateUid(formData.participant_uid)">
+
+          <!-- Loading check -->
+          <div v-if="isCheckingVisits" style="text-align: center; padding: 1rem; color: #3498db;">
+            <span class="uid-spinner"><i class="fas fa-spinner fa-spin"></i> Checking visits...</span>
+          </div>
+
+          <!-- Visit Selection -->
+          <div v-else>
+            <label style="margin-top: 1rem">TYPE OF VISIT:</label>
+
+            <!-- Show existing visits if any -->
+            <div v-if="hasVisitsWithData" style="margin-bottom: 1rem;">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                <p style="font-size: 0.9em; color: #3498db; margin: 0;">
+                  <strong>UPDATE existing data:</strong> ({{ visitsWithData.length }} visit(s) found)
+                </p>
+                <button 
+                  v-if="formData.type_of_visit && visitDataStatus[formData.type_of_visit] === 'Has Data'"
+                  type="button" 
+                  @click="confirmDeleteVisit(formData.type_of_visit)"
+                  :disabled="isDeletingVisit === formData.type_of_visit" 
+                  class="delete-visit-btn-small"
+                  :title="`Delete ${formData.type_of_visit} record`"
+                >
+                  <span v-if="isDeletingVisit === formData.type_of_visit">
+                    <i class="fas fa-spinner fa-spin"></i>
+                  </span>
+                  <span v-else>
+                    <i class="fas fa-trash"></i>
+                  </span>
+                </button>
+              </div>
+              <div class="radio-group-vertical"
+                style="border: 1px solid #3498db; padding: 10px; background: #f0f8ff; border-radius: 5px;">
+                <label v-for="visit in visitsWithData" :key="'update-' + visit.value" 
+                  style="margin: 0; display: flex; align-items: center; margin-bottom: 5px;">
+                  <input type="radio" v-model="formData.type_of_visit" name="type_of_visit" :value="visit.value"
+                    @click="loadVisitData(visit.value)" required style="margin-right: 8px;" />
+                  {{ visit.label }}
+                  <span style="color: #28a745; font-size: 0.85em; margin-left: 8px;">✓ Has Data</span>
+                  <span v-if="isLoadingVisit === visit.value" style="margin-left: 10px;">
+                    <i class="fas fa-spinner fa-spin"></i>
+                  </span>
+                </label>
+              </div>
+            </div>
+
+            <!-- Create new visit - show visits that DON'T have data -->
+            <div v-if="hasVisitsWithoutData">
+              <p style="font-size: 0.9em; color: #856404; margin-bottom: 0.5rem;">
+                <strong>CREATE new visit data:</strong>
+              </p>
+              <div class="radio-group-vertical"
+                style="border: 1px solid #ffc107; padding: 10px; background: #fffbf0; border-radius: 5px;">
+                <label v-for="visit in visitsWithoutData" :key="'create-' + visit.value">
+                  <input type="radio" v-model="formData.type_of_visit" name="type_of_visit" :value="visit.value"
+                    @click="createNewVisit(visit.value)" required />
+                  {{ visit.label }}
+                  <span style="color: #ffc107; font-size: 0.85em;">+ New</span>
+                </label>
+              </div>
+            </div>
+
+            <!-- Current mode display -->
+            <div v-if="formData.type_of_visit"
+              style="margin-top: 1rem; padding: 10px 15px; border-radius: 6px; font-size: 0.9em; text-align: center; font-weight: 500;"
+              :style="isPrefilled ? 'background: #d4edda; color: #155724; border: 1px solid #c3e6cb;' : 'background: #fff3cd; color: #856404; border: 1px solid #ffeaa7;'">
+              <i :class="isPrefilled ? 'fas fa-edit' : 'fas fa-plus'"></i>
+              <strong>{{ formData.type_of_visit }}</strong>
+              <span v-if="isPrefilled"> - Update Mode</span>
+              <span v-else> - New Record</span>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- Fallback simple text input for invalid UIDs -->
+        <div v-else>
+          <label for="type_of_visit">Type of Visit:</label>
+          <input type="text" v-model="formData.type_of_visit" id="type_of_visit" name="type_of_visit" 
+            placeholder="Enter visit type" />
+        </div>
+
         <!-- PrEP Site -->
         <label for="prep_site">PrEP Site</label>
         <select v-model="formData.prep_site" id="prep_site" name="prep_site" required>
@@ -1384,8 +1469,7 @@
 
       <!-- Submit Button outside the last container -->
       <button type="submit" class="submit-btn" :disabled="submitDisabled || isSubmitting">
-        {{ isSubmitting ? "Submitting..." : "Review Data" }}
-        <!-- Changed Text -->
+        {{ getSubmitButtonText() }}
       </button>
     </div>
     <!-- End .container -->
@@ -1415,14 +1499,14 @@
 </template>
 
 <script setup>
-import { ref, onMounted, watch } from "vue";
+import { ref, computed, onMounted, watch } from "vue";
 import axios from "axios";
 // Import the modal component (assuming reuse)
 import Form2_ConfirmationModal from "./Form2_ConfirmationModal.vue"; // Adjust path if needed
 import { prepSites } from "../location/prepSite";
 // --- Configuration ---
-const GOOGLE_SCRIPT_URL =
-  "https://script.google.com/macros/s/AKfycbzIluNtj1MbiDhBsyOSYDaX_nZfmupCjKz2De1m-IqAZyqQepHH9QLoNvqBsa2v0hsn/exec"; // Replace with your Form 2 Script URL
+
+const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwhKwOhzqEr6prEHWANCqMncDFS4ASezLlSbpbz11H2BXKNYyUdcdNniHar1s4-RCIq/exec';
 const CSV_DATA_URL =
   "https://docs.google.com/spreadsheets/d/e/2PACX-1vSfG6e5EIcHDaXopn9DxMZnTwVFGi5CiQxmKlEIPsd7uPtZiQIikYb46UdN78UhZlJfocCfl_s0hGGX/pub?gid=0&single=true&output=csv"; // Same UID validation source
 const UID_MIN_LENGTH = 5;
@@ -1529,6 +1613,17 @@ const submitDisabled = ref(true); // For UID check
 const isCheckingUid = ref(false);
 const isSubmitting = ref(false); // For modal button state
 
+// Prefill state tracking
+const isPrefilled = ref(false);
+const isDeletingRecord = ref(false);
+
+// Available Visits state variables
+const availableVisits = ref([]); // Store which visit types have data for current UID
+const isCheckingVisits = ref(false); // Track when checking for available visits
+const isLoadingVisit = ref(null); // Track which visit is being loaded
+const isDeletingVisit = ref(null); // Track which visit is being deleted
+const visitDataStatus = ref({}); // Track which visits have data
+
 // Modal and Final Message State
 const isReviewModalVisible = ref(false);
 const modalSuccessMessage = ref("");
@@ -1604,11 +1699,13 @@ function validateUidOnInput(newUid) {
   clearFinalMessage();
   modalErrorMessage.value = "";
   modalSuccessMessage.value = "";
+  isPrefilled.value = false; // Reset prefill state when UID changes
 
   if (!newUid) {
     statusMessage.value = "";
     statusClass.value = "";
     submitDisabled.value = true;
+    isPrefilled.value = false;
     return;
   }
   const pattern = new RegExp(`^[A-Za-z0-9]{${UID_MIN_LENGTH},}$`);
@@ -1637,11 +1734,215 @@ function validateUidOnInput(newUid) {
   }
 }
 
-// Watch UID Input (Same as Form 1)
+// === PREFILL FUNCTION ===
+// Fetch existing data if UID exists
+const fetchPrefillData = async (uid) => {
+  if (!uid || uid.length < UID_MIN_LENGTH) return;
+
+  try {
+    const params = new URLSearchParams({
+      participant_uid: uid,
+      action: 'getPrefillData'
+    }).toString();
+
+    let result;
+
+    try {
+      // Try regular fetch first
+      const response = await fetch(`${GOOGLE_SCRIPT_URL}?${params}`);
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      result = await response.json();
+    } catch (fetchError) {
+      console.warn('Regular fetch failed, trying JSONP:', fetchError.message);
+
+      // Fallback to JSONP for CORS issues
+      result = await fetchWithJsonp(`${GOOGLE_SCRIPT_URL}?${params}&callback=`);
+    }
+
+    console.log('Prefill result:', result);
+
+    if (result.status === "success" && result.prefill) {
+      // Prefill form with existing data
+      Object.keys(result.prefill).forEach(key => {
+        if (key in formData.value) {
+          // Handle array fields
+          const arrayKeys = [
+            "partner_gender", "condomless_reasons", "lubricant_use_reasons",
+            "sti_symptoms", "informed_person"
+          ];
+
+          if (arrayKeys.includes(key) && typeof result.prefill[key] === 'string') {
+            formData.value[key] = result.prefill[key].split('; ').filter(Boolean);
+          } else if (key.includes('date') && result.prefill[key]) {
+            const dateValue = new Date(result.prefill[key]);
+            if (!isNaN(dateValue.getTime())) {
+              formData.value[key] = dateValue.toISOString().split('T')[0];
+            } else {
+              formData.value[key] = result.prefill[key];
+            }
+          } else {
+            formData.value[key] = result.prefill[key];
+          }
+        }
+      });
+
+      statusMessage.value = "UID found! Form prefilled with existing data!";
+      statusClass.value = "success";
+      submitDisabled.value = false;
+      isPrefilled.value = true; // Mark as prefilled
+    } else if (result.status === "error") {
+      statusMessage.value = "Add data for " + formData.value.participant_uid;
+      statusClass.value = "";
+      isPrefilled.value = false; // Not prefilled
+    }
+  } catch (err) {
+    console.error('Prefill error:', err);
+    statusMessage.value = "Error fetching prefill data: " + err.message;
+    statusClass.value = "error";
+    isPrefilled.value = false;
+  }
+};
+
+// Dynamic button text based on form state
+const getSubmitButtonText = () => {
+  if (isSubmitting.value) {
+    return isPrefilled.value ? "Updating..." : "Adding...";
+  }
+  return isPrefilled.value ? "Update Data" : "Add New";
+};
+
+// JSONP helper function for CORS fallback
+const fetchWithJsonp = (url) => {
+  return new Promise((resolve, reject) => {
+    const callbackName = 'jsonp_callback_' + Math.round(100000 * Math.random());
+
+    // Create script element
+    const script = document.createElement('script');
+
+    // Create global callback
+    window[callbackName] = (data) => {
+      delete window[callbackName];
+      document.head.removeChild(script);
+      resolve(data);
+    };
+
+    // Handle errors
+    script.onerror = () => {
+      delete window[callbackName];
+      document.head.removeChild(script);
+      reject(new Error('JSONP request failed'));
+    };
+
+    // Set up script source with callback
+    script.src = url + callbackName;
+
+    // Add script to head
+    document.head.appendChild(script);
+
+    // Timeout after 10 seconds
+    setTimeout(() => {
+      if (window[callbackName]) {
+        delete window[callbackName];
+        document.head.removeChild(script);
+        reject(new Error('JSONP request timeout'));
+      }
+    }, 10000);
+  });
+};
+
+// === DELETE RECORD FUNCTIONS ===
+// Confirm before deleting the record
+const confirmDeleteRecord = () => {
+  const confirmMessage = `Are you sure you want to DELETE the record for ${formData.value.participant_uid}?\n\n⚠️ This action CANNOT be undone!\n\nThe record will be permanently removed from the database.`;
+
+  if (confirm(confirmMessage)) {
+    deleteRecord();
+  }
+};
+
+// Delete the current record
+const deleteRecord = async () => {
+  if (!formData.value.participant_uid || !validateUid(formData.value.participant_uid)) {
+    alert('Invalid UID');
+    return;
+  }
+
+  isDeletingRecord.value = true;
+
+  try {
+    const params = new URLSearchParams({
+      participant_uid: formData.value.participant_uid,
+      action: 'deleteRecord'
+    }).toString();
+
+    console.log(`Deleting record for UID: ${formData.value.participant_uid}`);
+
+    let result;
+
+    try {
+      // Try regular fetch first
+      const response = await fetch(`${GOOGLE_SCRIPT_URL}?${params}`, {
+        method: 'POST'
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      result = await response.json();
+    } catch (fetchError) {
+      console.warn('Regular fetch failed, trying JSONP:', fetchError.message);
+
+      // Fallback to JSONP for CORS issues
+      result = await fetchWithJsonp(`${GOOGLE_SCRIPT_URL}?${params}&callback=`);
+    }
+
+    console.log('Delete response:', result);
+
+    if (result.status === "success") {
+      // Clear form and reset states
+      clearForm();
+
+      statusMessage.value = `Record deleted successfully for ${formData.value.participant_uid}`;
+      statusClass.value = "success";
+      isPrefilled.value = false;
+
+      // Show success message briefly
+      setTimeout(() => {
+        if (statusMessage.value.includes('deleted successfully')) {
+          statusMessage.value = "Validation data loaded. Please enter UID.";
+          statusClass.value = "";
+        }
+      }, 3000);
+
+    } else {
+      statusMessage.value = `Failed to delete record: ` + (result.message || 'Unknown error');
+      statusClass.value = "error";
+    }
+
+  } catch (err) {
+    console.error(`Error deleting record:`, err);
+    statusMessage.value = `Error deleting record: ` + err.message;
+    statusClass.value = "error";
+  } finally {
+    isDeletingRecord.value = false;
+  }
+};
+
+// Watch UID Input with prefill
 watch(
   () => formData.value.participant_uid,
   (newUid) => {
     validateUidOnInput(newUid);
+    // Reset prefill state when UID changes
+    isPrefilled.value = false;
+    if (validateUid(newUid)) {
+      fetchPrefillData(newUid); // Auto-prefill if UID is valid
+    }
   }
 );
 
@@ -1678,47 +1979,57 @@ const confirmAndSubmit = async () => {
   modalErrorMessage.value = "";
   clearFinalMessage();
 
-  const url = GOOGLE_SCRIPT_URL; // Use the Form 2 URL
-
   try {
-    // Prepare data: Join all array fields into strings (e.g., semicolon-separated)
+    // Prepare data for new dynamic script
     const dataToSend = { ...formData.value };
+
+    // Convert arrays to semicolon-separated strings
     const arrayKeys = [
-      "partner_gender",
-      "condomless_reasons",
-      "lubricant_use_reasons",
-      "sti_symptoms",
-      "informed_person",
+      "partner_gender", "condomless_reasons", "lubricant_use_reasons",
+      "sti_symptoms", "informed_person"
     ];
     arrayKeys.forEach((key) => {
       if (Array.isArray(dataToSend[key])) {
-        dataToSend[key] = dataToSend[key].join("; "); // Use semicolon or other delimiter
+        dataToSend[key] = dataToSend[key].join("; ");
       }
     });
 
-    const formDataSerialized = new URLSearchParams(dataToSend).toString();
     console.log("Submitting Form 2 data:", dataToSend);
 
-    const response = await axios.post(url, formDataSerialized, {
-      headers: { "Content-Type": "application/x-www-form-urlencoded" },
-    });
+    let result;
 
-    console.log("Form 2 Submission response:", response);
+    try {
+      // Use new script format - FormData for POST
+      const formDataToSend = new FormData();
+      Object.keys(dataToSend).forEach(key => {
+        formDataToSend.append(key, dataToSend[key] || '');
+      });
 
-    // Adjust success check based on your actual script response
-    if (
-      response.status === 200 &&
-      response.data &&
-      typeof response.data === "string" &&
-      response.data.toLowerCase().includes("success")
-    ) {
-      modalSuccessMessage.value = response.data;
+      const response = await fetch(GOOGLE_SCRIPT_URL, {
+        method: 'POST',
+        body: formDataToSend
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      result = await response.json();
+    } catch (fetchError) {
+      console.warn('Regular fetch failed, trying JSONP fallback:', fetchError.message);
+
+      // Convert FormData to URL parameters for JSONP fallback
+      const params = new URLSearchParams(dataToSend).toString();
+      result = await fetchWithJsonp(`${GOOGLE_SCRIPT_URL}?${params}&callback=`);
+    }
+
+    console.log("Form 2 Submission response:", result);
+
+    if (result.status === "success") {
+      modalSuccessMessage.value = result.message || "Form 2 submitted successfully!";
       setTimeout(() => {
         isReviewModalVisible.value = false;
-        setFinalMessage(
-          response.data || "Form 2 submitted successfully!",
-          "success"
-        );
+        setFinalMessage(result.message || "Form 2 submitted successfully!", "success");
         clearForm();
         statusMessage.value = "";
         statusClass.value = "";
@@ -1726,8 +2037,7 @@ const confirmAndSubmit = async () => {
         modalSuccessMessage.value = "";
       }, SUBMIT_SUCCESS_DELAY);
     } else {
-      modalErrorMessage.value =
-        response.data || "Submission failed. Unexpected response from server.";
+      modalErrorMessage.value = result.message || "Submission failed.";
     }
   } catch (error) {
     console.error("Form 2 Submission error:", error);
@@ -1778,6 +2088,10 @@ const clearForm = () => {
   // Clear general messages if used
   successMessage.value = "";
   errorMessage.value = "";
+
+  // Reset prefill states
+  isPrefilled.value = false;
+  isDeletingRecord.value = false;
 };
 
 // Get Logged-In User Details

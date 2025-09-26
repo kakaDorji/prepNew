@@ -1,3 +1,4 @@
+//cliniform
 <template>
   <!-- Clinical Data Form -->
   <form @submit.prevent="showReviewModal">
@@ -16,22 +17,93 @@
         <label for="dateInput">Date:</label>
         <input type="date" id="dateInput" v-model="formData.date" name="date" readonly />
 
-        <!-- Type of Visit -->
-        <label style="margin-top: 1rem">TYPE OF VISIT: (Please tick a √ mark to indicate the visit)</label>
-        <div class="radio-group-vertical" style="border: none; padding: 0; background: none">
-          <label><input type="radio" v-model="formData.visit_type" name="visit_type" value="Screening Visit MO"
-              required />
-            SCREENING VISIT MO</label>
-          <label><input type="radio" v-model="formData.visit_type" name="visit_type" value="End of M1" required />
-            END OF M1</label>
-          <label><input type="radio" v-model="formData.visit_type" name="visit_type" value="End of M3" required />
-            END OF M3</label>
-          <label><input type="radio" v-model="formData.visit_type" name="visit_type" value="End of M6" required />
-            END OF M6</label>
-          <label><input type="radio" v-model="formData.visit_type" name="visit_type" value="End of M9" required />
-            END OF M9</label>
-          <label><input type="radio" v-model="formData.visit_type" name="visit_type" value="Exit Visit M12" required />
-            EXIT VISIT M12</label>
+        <!-- Visit Type Selection -->
+        <div v-if="formData.participant_uid && validateUid(formData.participant_uid)">
+
+          <!-- Loading check -->
+          <div v-if="isCheckingVisits" style="text-align: center; padding: 1rem; color: #3498db;">
+            <span class="uid-spinner"><i class="fas fa-spinner fa-spin"></i> Checking visits...</span>
+          </div>
+
+          <!-- Visit Selection -->
+          <div v-else>
+            <label style="margin-top: 1rem">TYPE OF VISIT:</label>
+
+            <!-- Debug Info -->
+            <div style="background: #f0f0f0; padding: 10px; margin: 10px 0; border-radius: 4px; font-size: 0.8em;">
+              <strong>Debug Info:</strong><br>
+              UID: {{ formData.participant_uid }}<br>
+              Is Valid: {{ validateUid(formData.participant_uid) }}<br>
+              Available Visits: {{ availableVisits.length > 0 ? availableVisits.join(', ') : 'None found' }}<br>
+              Current Selection: {{ formData.visit_type || 'None' }}<br>
+              Is Prefilled: {{ isPrefilled }}
+            </div>
+
+            <!-- Show existing visits if any -->
+            <div v-if="availableVisits.length > 0" style="margin-bottom: 1rem;">
+              <p style="font-size: 0.9em; color: #3498db; margin-bottom: 0.5rem;">
+                <strong>UPDATE existing data:</strong> ({{ availableVisits.length }} visit(s) found)
+              </p>
+              <!-- Debug info -->
+              <p style="font-size: 0.8em; color: #666; margin-bottom: 0.5rem;">n
+                Available visits: {{ availableVisits.join(', ') }}
+              </p>
+              <div class="radio-group-vertical"
+                style="border: 1px solid #3498db; padding: 10px; background: #f0f8ff; border-radius: 5px;">
+                <div v-for="visit in visitOptions.filter(v => availableVisits.includes(v.value))"
+                  :key="'update-' + visit.value"
+                  style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 5px;">
+                  <label style="margin: 0; flex: 1; display: flex; align-items: center;">
+                    <input type="radio" v-model="formData.visit_type" name="visit_type" :value="visit.value"
+                      @click="loadVisitData(visit.value)" required />
+                    {{ visit.label }}
+                    <span style="color: #28a745; font-size: 0.85em; margin-left: 8px;">✓ Has Data</span>
+                    <span v-if="isLoadingVisit === visit.value" style="margin-left: 10px;">
+                      <i class="fas fa-spinner fa-spin"></i>
+                    </span>
+                  </label>
+                  <button type="button" @click="confirmDeleteVisit(visit.value)"
+                    :disabled="isDeletingVisit === visit.value" class="delete-visit-btn"
+                    :title="`Delete ${visit.label} record`">
+                    <span v-if="isDeletingVisit === visit.value">
+                      Deleting...
+                    </span>
+                    <span v-else>
+                      Delete
+                    </span>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Create new visit -->
+            <div>
+              <p style="font-size: 0.9em; color: #856404; margin-bottom: 0.5rem;">
+                <strong>CREATE new visit data:</strong>
+              </p>
+              <div class="radio-group-vertical"
+                style="border: 1px solid #ffc107; padding: 10px; background: #fffbf0; border-radius: 5px;">
+                <label v-for="visit in visitOptions" :key="'create-' + visit.value">
+                  <input type="radio" v-model="formData.visit_type" name="visit_type" :value="visit.value"
+                    @click="createNewVisit(visit.value)" required />
+                  {{ visit.label }}
+                  <span style="color: #ffc107; font-size: 0.85em;">
+                    {{ availableVisits.includes(visit.value) ? '+ Create Another' : '+ New' }}
+                  </span>
+                </label>
+              </div>
+            </div>
+
+            <!-- Current mode display -->
+            <div v-if="formData.visit_type"
+              style="margin-top: 1rem; padding: 8px 12px; border-radius: 4px; font-size: 0.9em; text-align: center;"
+              :style="isPrefilled ? 'background: #d4edda; color: #155724; border: 1px solid #c3e6cb;' : 'background: #fff3cd; color: #856404; border: 1px solid #ffeaa7;'">
+              <strong>Selected:</strong> {{ formData.visit_type }}
+              <span v-if="isPrefilled">(UPDATE MODE)</span>
+              <span v-else>(CREATE MODE)</span>
+            </div>
+
+          </div>
         </div>
 
         <!-- Acute HIV Infection Section -->
@@ -816,10 +888,17 @@
       </div>
 
 
-      <!-- Submit Button outside the last container -->
-      <button type="submit" class="submit-btn" :disabled="submitDisabled || isSubmitting">
-        {{ isSubmitting ? "Submitting..." : "Review Data" }}
-      </button>
+      <!-- Submit/Update Button outside the last container -->
+      <div class="button-container">
+        <button type="submit" class="submit-btn" :disabled="submitDisabled || isSubmitting">
+          {{ getSubmitButtonText() }}
+        </button>
+
+        <!-- Show status if form was prefilled -->
+        <div v-if="isPrefilled" class="prefill-status">
+          <i class="fas fa-info-circle"></i> Form loaded with existing data for {{ formData.participant_uid }}
+        </div>
+      </div>
     </div>
     <!-- End .container -->
   </form>
@@ -853,9 +932,9 @@ import axios from "axios";
 import Form3_ConfirmationModal from "./Form3_ConfirmationModal.vue";
 
 // // --- Configuration ---
-const GOOGLE_SCRIPT_URL =
-  "https://script.google.com/macros/s/AKfycbyTRBjdyQBUxWvo6HDNNSbhVLAXjkHMK8_gG1uLMce3jfONVrUQ5frhY1RqUmvRfJngIg/exec";
-
+// const GOOGLE_SCRIPT_URL =
+//   "https://script.google.com/macros/s/AKfycbyTRBjdyQBUxWvo6HDNNSbhVLAXjkHMK8_gG1uLMce3jfONVrUQ5frhY1RqUmvRfJngIg/exec";
+const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyrCclmQ__KN8hAq-Dm93ef18qGCKDzKBgHRMYgluO9Q6DGJm-vHUi6G3uD_BnR2K-TxA/exec';
 const CSV_DATA_URL =
   "https://docs.google.com/spreadsheets/d/e/2PACX-1vSfG6e5EIcHDaXopn9DxMZnTwVFGi5CiQxmKlEIPsd7uPtZiQIikYb46UdN78UhZlJfocCfl_s0hGGX/pub?gid=0&single=true&output=csv";
 const UID_MIN_LENGTH = 5;
@@ -865,10 +944,8 @@ const SUBMIT_SUCCESS_DELAY = 2500;
 const formData = ref({
   participant_uid: "",
   date: "",
-  visit_type: "",
   // Acute HIV Symptoms
   fever: "",
-  fever_specify: "",
   fever_start_date: "",
   fever_ongoing: false,
   fever_resolved: false,
@@ -999,6 +1076,13 @@ const finalSubmitMessage = ref("");
 const finalSubmitClass = ref("");
 const successMessage = ref("");
 const errorMessage = ref("");
+const isPrefilled = ref(false); // Track if form was prefilled with existing data
+const previousVisitType = ref(""); // Store the previous visit type from prefilled data
+const isLoadingVisit = ref(null); // Track which visit is being loaded
+const visitDataStatus = ref({}); // Track which visits have data: { 'End of M1': 'Has Data', 'End of M3': 'No Data' }
+const availableVisits = ref([]); // Store which visit types have data for current UID
+const isCheckingVisits = ref(false); // Track when checking for available visits
+const isDeletingVisit = ref(null); // Track which visit is being deleted
 let csvData = [];
 
 // --- Functions ---
@@ -1072,10 +1156,14 @@ const validateUidOnInput = (newUid) => {
       statusMessage.value = "Participant UID found!";
       statusClass.value = "success";
       submitDisabled.value = false;
+
+      // Check available visits for this UID
+      checkAvailableVisits(newUid);
     } else {
       statusMessage.value = "Participant UID not found.";
       statusClass.value = "error";
       submitDisabled.value = true;
+      availableVisits.value = []; // Clear available visits
     }
   }
 };
@@ -1256,6 +1344,8 @@ const clearForm = () => {
   clearFinalMessage();
   successMessage.value = "";
   errorMessage.value = "";
+  isPrefilled.value = false; // Reset prefill status
+  previousVisitType.value = ""; // Reset previous visit type
 };
 
 // Logged In User
@@ -1278,6 +1368,274 @@ function clearFinalMessage() {
   finalSubmitClass.value = "";
 }
 
+// Dynamic button text based on form state
+const getSubmitButtonText = () => {
+  if (isSubmitting.value) {
+    return isPrefilled.value ? "Updating..." : "Submitting...";
+  }
+  return isPrefilled.value ? "Update Data" : "Review Data";
+};
+
+// === VISIT TYPE OPTIONS ===
+const visitOptions = [
+  { value: "Screening Visit MO", label: "SCREENING VISIT MO", icon: "🩺" },
+  { value: "End of M1", label: "END OF M1", icon: "1️⃣" },
+  { value: "End of M3", label: "END OF M3", icon: "3️⃣" },
+  { value: "End of M6", label: "END OF M6", icon: "6️⃣" },
+  { value: "End of M9", label: "END OF M9", icon: "9️⃣" },
+  { value: "Exit Visit M12", label: "EXIT VISIT M12", icon: "🏁" }
+];
+
+// === LOAD VISIT DATA FUNCTION ===
+// Load data for a specific visit type
+const loadVisitData = async (visitType) => {
+  if (!formData.value.participant_uid || !validateUid(formData.value.participant_uid)) {
+    alert('Please enter a valid UID first');
+    return;
+  }
+
+  isLoadingVisit.value = visitType;
+
+  try {
+    // Send request to get data for specific UID + Visit Type combination
+    const params = new URLSearchParams({
+      participant_uid: formData.value.participant_uid,
+      visit_type: visitType,
+      action: 'getVisitData'
+    }).toString();
+
+    console.log(`Loading data for ${visitType} - UID: ${formData.value.participant_uid}`);
+
+    const response = await fetch(`${GOOGLE_SCRIPT_URL}?${params}`);
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const result = await response.json();
+    console.log(`${visitType} response:`, result);
+
+    // Set the current visit type
+    formData.value.visit_type = visitType;
+
+    if (result.status === "success" && result.prefill) {
+      // Found existing data for this visit type - PREFILL
+      Object.keys(result.prefill).forEach(key => {
+        if (key in formData.value && key !== 'participant_uid') {
+          // Don't overwrite UID, but fill everything else
+          if (key.includes('date') && result.prefill[key]) {
+            const dateValue = new Date(result.prefill[key]);
+            if (!isNaN(dateValue.getTime())) {
+              formData.value[key] = dateValue.toISOString().split('T')[0];
+            } else {
+              formData.value[key] = result.prefill[key];
+            }
+          } else {
+            formData.value[key] = result.prefill[key];
+          }
+        }
+      });
+
+      visitDataStatus.value[visitType] = 'Has Data';
+      statusMessage.value = `Loaded existing ${visitType} data for ${formData.value.participant_uid}`;
+      statusClass.value = "success";
+      isPrefilled.value = true;
+
+    } else {
+      // No existing data for this visit type - CLEAR FORM FOR NEW ENTRY
+      clearFormExceptUID();
+      formData.value.visit_type = visitType; // Set the visit type
+
+      visitDataStatus.value[visitType] = 'No Data';
+      statusMessage.value = `Creating new ${visitType} record for ${formData.value.participant_uid}`;
+      statusClass.value = "";
+      isPrefilled.value = false;
+    }
+
+  } catch (err) {
+    console.error(`Error loading ${visitType} data:`, err);
+    statusMessage.value = `Error loading ${visitType} data: ` + err.message;
+    statusClass.value = "error";
+  } finally {
+    isLoadingVisit.value = null;
+  }
+};
+
+// Clear form except UID and visit type
+const clearFormExceptUID = () => {
+  const preserveFields = ['participant_uid', 'visit_type', 'clinician_name', 'designation', 'bhmc_registration', 'date'];
+
+  Object.keys(formData.value).forEach((key) => {
+    if (!preserveFields.includes(key)) {
+      if (Array.isArray(formData.value[key])) formData.value[key] = [];
+      else if (typeof formData.value[key] === "boolean") formData.value[key] = false;
+      else if (typeof formData.value[key] === "number") formData.value[key] = null;
+      else formData.value[key] = "";
+    }
+  });
+};
+
+// === CREATE NEW VISIT FUNCTION ===
+// Create a new visit record (clear form and set visit type)
+const createNewVisit = async (visitType) => {
+  if (!formData.value.participant_uid || !validateUid(formData.value.participant_uid)) {
+    alert('Please enter a valid UID first');
+    return;
+  }
+
+  // Clear form except UID and system fields
+  clearFormExceptUID();
+
+  // Set the visit type for new record
+  formData.value.visit_type = visitType;
+
+  // Set states
+  isPrefilled.value = false;
+  isLoadingVisit.value = null;
+
+  statusMessage.value = `Creating new ${visitType} record for ${formData.value.participant_uid}`;
+  statusClass.value = "";
+
+  console.log(`Creating new visit: ${visitType} for UID: ${formData.value.participant_uid}`);
+};
+
+// === DELETE VISIT FUNCTIONS ===
+// Confirm before deleting a visit record
+const confirmDeleteVisit = (visitType) => {
+  const confirmMessage = `Are you sure you want to DELETE the ${visitType} record for ${formData.value.participant_uid}?\n\n⚠️ This action CANNOT be undone!\n\nThe record will be permanently removed from the database.`;
+
+  if (confirm(confirmMessage)) {
+    deleteVisitRecord(visitType);
+  }
+};
+
+// Delete a specific visit record
+const deleteVisitRecord = async (visitType) => {
+  if (!formData.value.participant_uid || !validateUid(formData.value.participant_uid)) {
+    alert('Invalid UID');
+    return;
+  }
+
+  isDeletingVisit.value = visitType;
+
+  try {
+    // Send delete request to Google Apps Script
+    const params = new URLSearchParams({
+      participant_uid: formData.value.participant_uid,
+      visit_type: visitType,
+      action: 'deleteVisitRecord'
+    }).toString();
+
+    console.log(`Deleting ${visitType} record for UID: ${formData.value.participant_uid}`);
+
+    const response = await fetch(`${GOOGLE_SCRIPT_URL}?${params}`, {
+      method: 'POST'
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const result = await response.json();
+    console.log('Delete response:', result);
+
+    if (result.status === "success") {
+      // Remove from available visits
+      availableVisits.value = availableVisits.value.filter(v => v !== visitType);
+
+      // If currently selected visit was deleted, clear form
+      if (formData.value.visit_type === visitType) {
+        clearFormExceptUID();
+        formData.value.visit_type = "";
+        isPrefilled.value = false;
+      }
+
+      statusMessage.value = `${visitType} record deleted successfully for ${formData.value.participant_uid}`;
+      statusClass.value = "success";
+
+      // Show success message briefly
+      setTimeout(() => {
+        if (statusMessage.value.includes('deleted successfully')) {
+          statusMessage.value = availableVisits.value.length > 0
+            ? `${availableVisits.value.length} visit record(s) remaining for ${formData.value.participant_uid}`
+            : `No visit records remaining for ${formData.value.participant_uid}`;
+        }
+      }, 3000);
+
+    } else {
+      statusMessage.value = `Failed to delete ${visitType}: ` + (result.message || 'Unknown error');
+      statusClass.value = "error";
+    }
+
+  } catch (err) {
+    console.error(`Error deleting ${visitType} record:`, err);
+    statusMessage.value = `Error deleting ${visitType}: ` + err.message;
+    statusClass.value = "error";
+  } finally {
+    isDeletingVisit.value = null;
+  }
+};
+
+// === CHECK AVAILABLE VISITS FOR UID ===
+const checkAvailableVisits = async (uid) => {
+  if (!uid || uid.length < UID_MIN_LENGTH) {
+    availableVisits.value = [];
+    return;
+  }
+
+  isCheckingVisits.value = true;
+  try {
+    // Send request to get all available visit types for this UID
+    const params = new URLSearchParams({
+      participant_uid: uid,
+      action: 'checkAvailableVisits'
+    }).toString();
+
+    console.log(`Checking available visits for UID: ${uid}`);
+
+    const response = await fetch(`${GOOGLE_SCRIPT_URL}?${params}`);
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const result = await response.json();
+    console.log('Available visits response:', result);
+    console.log('Response status:', result.status);
+    console.log('Available visits from server:', result.availableVisits);
+
+    if (result.status === "success" && result.availableVisits) {
+      availableVisits.value = result.availableVisits;
+      console.log('Set availableVisits.value to:', availableVisits.value);
+
+      // Update visit status for each visit type
+      visitOptions.forEach(visit => {
+        if (result.availableVisits.includes(visit.value)) {
+          visitDataStatus.value[visit.value] = 'Has Data';
+        } else {
+          visitDataStatus.value[visit.value] = 'No Data';
+        }
+      });
+
+      statusMessage.value = `Found ${result.availableVisits.length} visit record(s) for ${uid}`;
+      statusClass.value = "success";
+
+    } else {
+      availableVisits.value = [];
+      statusMessage.value = `No visit records found for ${uid}`;
+      statusClass.value = "";
+    }
+
+  } catch (err) {
+    console.error('Error checking available visits:', err);
+    availableVisits.value = [];
+    statusMessage.value = "Error checking available visits: " + err.message;
+    statusClass.value = "error";
+  } finally {
+    isCheckingVisits.value = false;
+  }
+};
+
 // onMounted
 
 onMounted(() => {
@@ -1294,6 +1652,102 @@ onMounted(() => {
     formData.value.bhmc_registration = "";
   }
 });
+
+// --- Prefill Function ---
+// Fetch existing data from Google Sheet if UID exists
+const fetchPrefillData = async (uid) => {
+  if (!uid || uid.length < UID_MIN_LENGTH) return;
+
+  isCheckingUid.value = true;
+  try {
+    // Send UID to your Google Apps Script with explicit action parameter
+    const params = new URLSearchParams({
+      participant_uid: uid,
+      action: 'getPrefillData'
+    }).toString();
+
+    console.log('Fetching prefill data for UID:', uid);
+    console.log('Request URL:', `${GOOGLE_SCRIPT_URL}?${params}`);
+
+    const response = await fetch(`${GOOGLE_SCRIPT_URL}?${params}`);
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const result = await response.json();
+    console.log('Prefill response received:', result);
+
+    // If the script returns existing data, prefill form
+    if (result.status === "success" && result.prefill) {
+      // Clear existing form data first (except system fields)
+      const preserveFields = ['clinician_name', 'designation', 'bhmc_registration', 'date'];
+
+      // Prefill form carefully, field by field
+      Object.keys(result.prefill).forEach(key => {
+        if (key in formData.value) {
+          // Convert date strings to proper format if needed
+          if (key.includes('date') && result.prefill[key]) {
+            const dateValue = new Date(result.prefill[key]);
+            if (!isNaN(dateValue.getTime())) {
+              formData.value[key] = dateValue.toISOString().split('T')[0];
+            } else {
+              formData.value[key] = result.prefill[key];
+            }
+          } else {
+            formData.value[key] = result.prefill[key];
+          }
+        } else {
+          console.warn(`Key '${key}' not found in form data structure`);
+        }
+      });
+
+      console.log('Form data after prefill:', formData.value);
+
+      // Store previous visit type for progression logic
+      previousVisitType.value = result.prefill.visit_type || "";
+
+      // Clear the current visit_type so user must select next visit
+      formData.value.visit_type = "";
+
+      statusMessage.value = "UID found! Form prefilled with existing data!";
+      statusClass.value = "success";
+      submitDisabled.value = false; // Allow submission
+      isPrefilled.value = true; // Mark as prefilled
+
+    } else if (result.status === "success" && result.rowData) {
+      // If we got raw row data but no formatted prefill object
+      console.log('Raw row data received:', result.rowData);
+      statusMessage.value = "UID found! Raw data: " + result.rowData.slice(0, 5).join(', ') + '...';
+      statusClass.value = "success";
+      submitDisabled.value = false;
+
+    } else {
+      console.log('No existing data found for UID:', uid);
+      statusMessage.value = validateUid(uid) ? "UID valid but no existing data found." : "UID not found.";
+      statusClass.value = validateUid(uid) ? "success" : "error";
+      submitDisabled.value = !validateUid(uid);
+    }
+
+  } catch (err) {
+    console.error('Prefill fetch error:', err);
+    statusMessage.value = "Error fetching prefill data: " + err.message;
+    statusClass.value = "error";
+    submitDisabled.value = true;
+  } finally {
+    isCheckingUid.value = false;
+  }
+};
+
+// --- Watch UID input ---
+// Every time user types UID, validate it and prefill if exists
+watch(() => formData.value.participant_uid, async (newUid) => {
+  validateUidOnInput(newUid); // Existing CSV validation
+  if (validateUid(newUid)) {
+    await fetchPrefillData(newUid); // Prefill form if UID exists
+  }
+});
+
 </script>
 
 <style>
@@ -1510,5 +1964,215 @@ td input[type="date"] {
   background-color: #f8d7da;
   color: #842029;
   border: 1px solid #f5c2c7;
+}
+
+.button-container {
+  text-align: center;
+  margin-top: 1rem;
+}
+
+.prefill-status {
+  margin-top: 0.5rem;
+  padding: 8px 12px;
+  background-color: #e3f2fd;
+  color: #1565c0;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  display: inline-block;
+  border: 1px solid #bbdefb;
+}
+
+.prefill-status i {
+  margin-right: 5px;
+  color: #2196f3;
+}
+
+.next-visit-indicator {
+  color: #4caf50;
+  font-weight: bold;
+  font-size: 0.85em;
+  margin-left: 8px;
+}
+
+.previous-visit-indicator {
+  color: #ff9800;
+  font-weight: bold;
+  font-size: 0.85em;
+  margin-left: 8px;
+}
+
+.visit-warning {
+  background-color: #fff3cd;
+  color: #856404;
+  padding: 8px 12px;
+  border-radius: 4px;
+  border: 1px solid #ffeaa7;
+  margin-top: 8px;
+  font-size: 0.9em;
+}
+
+.visit-selection-section {
+  background: #f8f9fa;
+  padding: 1.5rem;
+  border-radius: 8px;
+  border: 2px solid #e9ecef;
+  margin: 1rem 0;
+}
+
+.visit-buttons-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+  margin: 1rem 0;
+}
+
+.visit-type-btn {
+  background: #ffffff;
+  border: 2px solid #dee2e6;
+  border-radius: 8px;
+  padding: 1rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  position: relative;
+  text-align: center;
+  min-height: 100px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.visit-type-btn:hover {
+  border-color: #3498db;
+  box-shadow: 0 2px 8px rgba(52, 152, 219, 0.2);
+  transform: translateY(-1px);
+}
+
+.visit-type-btn.selected {
+  border-color: #3498db;
+  background: linear-gradient(135deg, #3498db, #2980b9);
+  color: white;
+  box-shadow: 0 4px 12px rgba(52, 152, 219, 0.3);
+}
+
+.visit-type-btn.loading {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.visit-type-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.visit-icon {
+  font-size: 2rem;
+  margin-bottom: 0.5rem;
+}
+
+.visit-label {
+  font-weight: bold;
+  font-size: 0.9rem;
+  margin-bottom: 0.5rem;
+}
+
+.visit-status {
+  font-size: 0.8rem;
+  opacity: 0.8;
+  background: rgba(0, 0, 0, 0.1);
+  padding: 2px 8px;
+  border-radius: 12px;
+}
+
+.loading-spinner {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 1.5rem;
+  color: #3498db;
+}
+
+.selected-visit-display {
+  margin-top: 1rem;
+}
+
+.visit-info-card {
+  background: #e8f4fd;
+  border: 1px solid #bee5eb;
+  border-radius: 6px;
+  padding: 0.75rem 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.status-badge {
+  padding: 0.25rem 0.75rem;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: bold;
+  text-transform: uppercase;
+}
+
+.status-badge.update {
+  background: #d4edda;
+  color: #155724;
+  border: 1px solid #c3e6cb;
+}
+
+.status-badge.create {
+  background: #fff3cd;
+  color: #856404;
+  border: 1px solid #ffeaa7;
+}
+
+.checking-visits {
+  text-align: center;
+  padding: 1rem;
+  color: #3498db;
+  font-size: 1rem;
+}
+
+.checking-visits i {
+  margin-right: 8px;
+}
+
+.no-visits-found {
+  text-align: center;
+  padding: 1.5rem;
+  background: #f8f9fa;
+  border: 2px dashed #dee2e6;
+  border-radius: 8px;
+  margin: 1rem 0;
+}
+
+.visit-status.has-data {
+  background: #d4edda;
+  color: #155724;
+  border: 1px solid #c3e6cb;
+}
+
+.delete-visit-btn {
+  background-color: #e74c3c;
+  color: #fff;
+  padding: 0.5rem 0.75rem;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 0.8rem;
+  transition: background-color 0.2s ease;
+  margin-left: 8px;
+  min-width: 60px;
+}
+
+.delete-visit-btn:hover:not(:disabled) {
+  background-color: #c0392b;
+}
+
+.delete-visit-btn:disabled {
+  background-color: #bdc3c7;
+  cursor: not-allowed;
+  opacity: 0.7;
 }
 </style>

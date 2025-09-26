@@ -11,21 +11,10 @@
           <input type="text" v-model="formData.orw" name="orw" readonly />
 
           <label>Referring from:</label>
-          <input
-            type="text"
-            v-model="formData.referred_site"
-            name="referred_site"
-            readonly
-          />
+          <input type="text" v-model="formData.referred_site" name="referred_site" readonly />
 
           <label for="date">Date:</label>
-          <input
-            type="date"
-            v-model="formData.date"
-            id="dateInput"
-            name="date"
-            readonly
-          />
+          <input type="date" v-model="formData.date" id="dateInput" name="date" readonly />
 
           <label>Month:</label>
           <select v-model="formData.form_month" name="form_month" required>
@@ -51,51 +40,24 @@
               <tr>
                 <td>1</td>
                 <td>
-                  <input
-                    type="text"
-                    v-model="formData.name"
-                    name="name"
-                    required
-                  />
+                  <input type="text" v-model="formData.name" name="name" required />
                 </td>
                 <td>
-                  <input
-                    type="number"
-                    v-model="formData.mobile_no"
-                    name="mobile_no"
-                  />
+                  <input type="number" v-model="formData.mobile_no" name="mobile_no" />
                 </td>
                 <td>
-                  <input
-                    type="text"
-                    v-model="formData.cid_other"
-                    name="cid_other"
-                    max="8"
-                  />
+                  <input type="text" v-model="formData.cid_other" name="cid_other" max="8" />
                 </td>
                 <td>
-                  <input
-                    type="text"
-                    v-model="formData.participant_uid"
-                    name="participant_uid"
-                    readonly
-                    style="margin-top: 40px"
-                  />
-                  <button
-                    type="button"
-                    class="generatebtn"
-                    @click="generateUID"
-                  >
+                  <input type="text" v-model="formData.participant_uid" name="participant_uid" readonly
+                    style="margin-top: 40px" />
+                  <button type="button" class="generatebtn" @click="generateUID">
                     Generate UID
                   </button>
                   <span v-if="loading" class="loading-status">Loading...</span>
                 </td>
                 <td>
-                  <select
-                    v-model="formData.referral_prep_site"
-                    name="referral_prep_site"
-                    required
-                  >
+                  <select v-model="formData.referral_prep_site" name="referral_prep_site" required>
                     <option value="">--Select Site--</option>
                     <option v-for="site in prepSites" :key="site" :value="site">
                       {{ site }}
@@ -103,23 +65,14 @@
                   </select>
                 </td>
                 <td>
-                  <input
-                    type="date"
-                    v-model="formData.referral_date"
-                    name="referral_date"
-                    required
-                  />
+                  <input type="date" v-model="formData.referral_date" name="referral_date" required />
                 </td>
               </tr>
             </tbody>
           </table>
 
           <!-- Review & Submit Button -->
-          <button
-            type="submit"
-            class="submit-btn"
-            :disabled="isSubmitting || loading"
-          >
+          <button type="submit" class="submit-btn" :disabled="isSubmitting || loading">
             {{ isSubmitting ? "Processing..." : "Review & Submit" }}
           </button>
         </div>
@@ -142,13 +95,8 @@
     </form>
 
     <!-- Use the Confirmation Modal Component -->
-    <ConfirmationModal
-      v-if="showConfirmationModal"
-      :formData="formData"
-      :is-submitting="isSubmitting"
-      @confirm="confirmAndSubmit"
-      @cancel="closeConfirmationModal"
-    />
+    <ConfirmationModal v-if="showConfirmationModal" :formData="formData" :is-submitting="isSubmitting"
+      @confirm="confirmAndSubmit" @cancel="closeConfirmationModal" />
   </div>
 </template>
 

@@ -93,7 +93,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from "vue";
+import { ref, onMounted, markRaw } from "vue";
 import {
   TransitionRoot,
   TransitionChild,
@@ -166,54 +166,54 @@ const router = useRouter();
 const loadComponent = async (card) => {
   switch (card.title) {
     case "SUITABILITY ASSESSMENT":
-      selectedComponent.value = (
+      selectedComponent.value = markRaw((
         await import("@/components/Forms/Form1.vue")
-      ).default;
+      ).default);
       break;
     case "BASELINE BEHAVIOUR TOOL":
-      selectedComponent.value = (
+      selectedComponent.value = markRaw((
         await import("@/components/Forms/Form2.vue")
-      ).default;
+      ).default);
       break;
     case "CLINICAL DATA FORM":
-      selectedComponent.value = (
+      selectedComponent.value = markRaw((
         await import("@/components/Forms/Form3.vue")
-      ).default;
+      ).default);
       break;
     case "FOLLOW-UP TOOL":
-      selectedComponent.value = (
+      selectedComponent.value = markRaw((
         await import("@/components/Forms/Form4.vue")
-      ).default;
+      ).default);
       break;
     case "UNSCHEDULED VISIT":
-      selectedComponent.value = (
+      selectedComponent.value = markRaw((
         await import("@/components/Forms/Form5.vue")
-      ).default;
+      ).default);
       break;
     case "EXIT":
-      selectedComponent.value = (
+      selectedComponent.value = markRaw((
         await import("@/components/Forms/Form6.vue")
-      ).default;
+      ).default);
       break;
     case "SEROCONVERSION":
-      selectedComponent.value = (
+      selectedComponent.value = markRaw((
         await import("@/components/Forms/Form8.vue")
-      ).default;
+      ).default);
       break;
     case "DRUG DISTRIBUTION":
-      selectedComponent.value = (
+      selectedComponent.value = markRaw((
         await import("@/components/Forms/Form9.vue")
-      ).default;
+      ).default);
       break;
     case "ORW FIELD FORMAT":
-      selectedComponent.value = (
+      selectedComponent.value = markRaw((
         await import("@/components/Forms/From10.vue")
-      ).default; // Corrected the typo
+      ).default); // Corrected the typo
       break;
     case "LAB TEST":
-      selectedComponent.value = (
+      selectedComponent.value = markRaw((
         await import("@/components/Forms/LabTest.vue")
-      ).default;
+      ).default);
       break;
     default:
       selectedComponent.value = null;
@@ -241,16 +241,20 @@ onMounted(() => {
   const loggedInUser = JSON.parse(localStorage.getItem("loggedInUser"));
 
   if (loggedInUser && loggedInUser.role === "L4") {
-    // If the user is L4, only show "ORW FIELD FORMAT" and "MONITORING VIEW"
+    // If the user is L4 (Outreach Worker), show specific forms
     mainCards.value = allMainCards.filter(
-      (card) => card.title === "BASELINE BEHAVIOUR TOOL" || card.title === "ORW FIELD FORMAT"
-
+      (card) => card.title === "BASELINE BEHAVIOUR TOOL" || 
+                card.title === "ORW FIELD FORMAT"
     );
     additionalCards.value = allAdditionalCards.filter(
       (card) => card.title === "MONITORING VIEW",
     );
+  } else if (loggedInUser && (loggedInUser.role === "L3" || loggedInUser.role === "prep_health_focal")) {
+    // If the user is L3 (PrEP Health Focal), show all forms including drug distribution
+    mainCards.value = allMainCards;
+    additionalCards.value = allAdditionalCards;
   } else {
-    // For other roles, show all cards
+    // For admin and other roles, show all cards
     mainCards.value = allMainCards;
     additionalCards.value = allAdditionalCards;
   }

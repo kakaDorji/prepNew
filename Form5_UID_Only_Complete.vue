@@ -1,7 +1,6 @@
 <template>
   <!-- Unschedule Form -->
   <form @submit.prevent="showReviewModal">
-    <!-- Changed submit action -->
     <div class="container">
       <!-- Container 1: Basic Info & Reason -->
       <div class="form-container">
@@ -20,27 +19,50 @@
         </div>
         <span v-if="isCheckingUid" class="uid-spinner"><i class="fas fa-spinner fa-spin"></i> Checking...</span>
 
-        <!-- Visit Date Selection for Existing Data -->
-        <div v-if="availableVisitDates.length > 0" class="visit-type-selection">
-          <h4>Existing Data Found:</h4>
+        <!-- Configuration Warning -->
+        <div v-if="!GOOGLE_SCRIPT_URL || GOOGLE_SCRIPT_URL === '' || GOOGLE_SCRIPT_URL.includes('PASTE_YOUR')" class="visit-type-selection" style="border-color: #dc3545; background-color: #f8d7da;">
+          <h4 style="color: #721c24;"><i class="fas fa-exclamation-triangle"></i> Configuration Required</h4>
+          <p style="color: #721c24; margin: 10px 0;">Google Apps Script URL is not configured. Please:</p>
+          <ol style="color: #721c24; margin-left: 20px;">
+            <li>Deploy your Google Apps Script as a web app</li>
+            <li>Copy the web app URL</li>
+            <li>Replace the placeholder URL in line 343 with your actual URL</li>
+          </ol>
+          <p style="color: #721c24; margin: 10px 0; font-weight: bold;">Until configured, data operations (view/edit/delete) will not work.</p>
+        </div>
+
+        <!-- Data Status Display -->
+        <div v-if="hasExistingData && !isPrefilled" class="visit-type-selection">
+          <h4>Existing Record for {{ formData.participant_uid }}</h4>
           <div class="visit-buttons">
-            <button v-for="visitDate in availableVisitDates" :key="visitDate" type="button" class="visit-btn"
-              :class="{ 'selected': selectedVisitDate === visitDate }" @click="loadVisitData(visitDate)">
-              {{ visitDate === 'existing' ? 'Edit Existing Data' : formatDateShort(visitDate) }}
+            <button type="button" class="visit-btn" :class="{ 'selected': isPrefilled }" @click="loadExistingData()">
+              <i class="fas fa-eye"></i> View/Edit Record
             </button>
-            <!-- Removed Add New button - only show Update mode when data exists -->
+            <button type="button" class="visit-btn new-visit" @click="startNewVisit()">
+              <i class="fas fa-plus"></i> Clear & Start Over
+            </button>
           </div>
         </div>
 
-        <!-- Show UPDATE/DELETE only if specific data is selected and loaded -->
-        <div v-if="isPrefilled && selectedVisitDate" class="prefill-status">
+        <!-- Auto-loaded Data Status -->
+        <div v-if="isPrefilled" class="visit-type-selection">
+          <h4><i class="fas fa-check-circle" style="color: #28a745;"></i> Data Loaded for {{ formData.participant_uid }}</h4>
+          <div class="visit-buttons">
+            <button type="button" class="visit-btn new-visit" @click="startNewVisit()">
+              <i class="fas fa-plus"></i> Clear & Start Over
+            </button>
+          </div>
+        </div>
+
+        <!-- Prefill Status and Delete Button -->
+        <div v-if="isPrefilled" class="prefill-status">
           <div class="update-mode-banner">
             <i class="fas fa-edit"></i> UPDATE MODE
           </div>
           <button type="button" class="delete-btn" @click="confirmDelete" :disabled="isDeletingRecord">
             <i v-if="isDeletingRecord" class="fas fa-spinner fa-spin"></i>
             <i v-else class="fas fa-trash"></i>
-            {{ isDeletingRecord ? 'Deleting...' : 'DELETE' }}
+            {{ isDeletingRecord ? 'Deleting...' : 'Delete Record' }}
           </button>
         </div>
 
@@ -53,10 +75,8 @@
 
         <label for="dateInput">DATE:</label>
         <input type="date" id="dateInput" name="date" v-model="formData.date" readonly />
-        <!-- Made readonly as it's initialized -->
 
-        <label>1. What is the reason for this visit? (Tick one or more
-          answers)</label>
+        <label>1. What is the reason for this visit? (Tick one or more answers)</label>
         <div class="checkbox-group-vertical">
           <label><input type="checkbox" v-model="formData.reason_visit" value="Side effects from PrEP" />
             Side effects from PrEP</label>
@@ -76,15 +96,12 @@
           <label><input type="checkbox" v-model="formData.reason_visit" value="Other" />
             Other</label>
           <!-- Textarea for "Other" reason -->
-          <div v-if="
-            Array.isArray(formData.reason_visit) &&
-            formData.reason_visit.includes('Other')
-          " style="margin-top: 0px">
+          <div v-if="Array.isArray(formData.reason_visit) && formData.reason_visit.includes('Other')" style="margin-top: 0px">
             <textarea v-model="formData.other_reason_visit" rows="3" placeholder="Describe other reasons..."></textarea>
           </div>
         </div>
 
-        <label style="margin-top: 1rem">2. If answered “Side effects from PrEP above”: Please describe the
+        <label style="margin-top: 1rem">2. If answered "Side effects from PrEP above": Please describe the
           side effects you have experienced. Probe for common side effects e.g.,
           nausea, vomiting, abdominal cramps, fatigue, dizziness,
           headache.</label>
@@ -95,7 +112,6 @@
                 <th>Sl No</th>
                 <th>Side effects</th>
                 <th style="width: 150px">Yes/No</th>
-                <!-- Adjusted width -->
                 <th>Ongoing</th>
                 <th>Resolved</th>
               </tr>
@@ -112,12 +128,12 @@
                   </div>
                 </td>
                 <td>
-                  <input type="checkbox" v-model="formData.nausea_ongoing" :disabled="formData.nausea !== 'Yes' || formData.nausea_resolved
-                    " @change="handleSideEffectCheck('nausea', 'ongoing')" />
+                  <input type="checkbox" v-model="formData.nausea_ongoing" :disabled="formData.nausea !== 'Yes' || formData.nausea_resolved"
+                    @change="handleSideEffectCheck('nausea', 'ongoing')" />
                 </td>
                 <td>
-                  <input type="checkbox" v-model="formData.nausea_resolved" :disabled="formData.nausea !== 'Yes' || formData.nausea_ongoing
-                    " @change="handleSideEffectCheck('nausea', 'resolved')" />
+                  <input type="checkbox" v-model="formData.nausea_resolved" :disabled="formData.nausea !== 'Yes' || formData.nausea_ongoing"
+                    @change="handleSideEffectCheck('nausea', 'resolved')" />
                 </td>
               </tr>
               <tr>
@@ -131,12 +147,12 @@
                   </div>
                 </td>
                 <td>
-                  <input type="checkbox" v-model="formData.vomiting_ongoing" :disabled="formData.vomiting !== 'Yes' || formData.vomiting_resolved
-                    " @change="handleSideEffectCheck('vomiting', 'ongoing')" />
+                  <input type="checkbox" v-model="formData.vomiting_ongoing" :disabled="formData.vomiting !== 'Yes' || formData.vomiting_resolved"
+                    @change="handleSideEffectCheck('vomiting', 'ongoing')" />
                 </td>
                 <td>
-                  <input type="checkbox" v-model="formData.vomiting_resolved" :disabled="formData.vomiting !== 'Yes' || formData.vomiting_ongoing
-                    " @change="handleSideEffectCheck('vomiting', 'resolved')" />
+                  <input type="checkbox" v-model="formData.vomiting_resolved" :disabled="formData.vomiting !== 'Yes' || formData.vomiting_ongoing"
+                    @change="handleSideEffectCheck('vomiting', 'resolved')" />
                 </td>
               </tr>
               <tr>
@@ -152,17 +168,13 @@
                 </td>
                 <td>
                   <input type="checkbox" v-model="formData.abdominal_cramps_ongoing" :disabled="formData.abdominal_cramps !== 'Yes' ||
-                    formData.abdominal_cramps_resolved
-                    " @change="
-                      handleSideEffectCheck('abdominal_cramps', 'ongoing')
-                      " />
+                    formData.abdominal_cramps_resolved"
+                    @change="handleSideEffectCheck('abdominal_cramps', 'ongoing')" />
                 </td>
                 <td>
                   <input type="checkbox" v-model="formData.abdominal_cramps_resolved" :disabled="formData.abdominal_cramps !== 'Yes' ||
-                    formData.abdominal_cramps_ongoing
-                    " @change="
-                      handleSideEffectCheck('abdominal_cramps', 'resolved')
-                      " />
+                    formData.abdominal_cramps_ongoing"
+                    @change="handleSideEffectCheck('abdominal_cramps', 'resolved')" />
                 </td>
               </tr>
               <tr>
@@ -176,12 +188,12 @@
                   </div>
                 </td>
                 <td>
-                  <input type="checkbox" v-model="formData.fatigue_ongoing" :disabled="formData.fatigue !== 'Yes' || formData.fatigue_resolved
-                    " @change="handleSideEffectCheck('fatigue', 'ongoing')" />
+                  <input type="checkbox" v-model="formData.fatigue_ongoing" :disabled="formData.fatigue !== 'Yes' || formData.fatigue_resolved"
+                    @change="handleSideEffectCheck('fatigue', 'ongoing')" />
                 </td>
                 <td>
-                  <input type="checkbox" v-model="formData.fatigue_resolved" :disabled="formData.fatigue !== 'Yes' || formData.fatigue_ongoing
-                    " @change="handleSideEffectCheck('fatigue', 'resolved')" />
+                  <input type="checkbox" v-model="formData.fatigue_resolved" :disabled="formData.fatigue !== 'Yes' || formData.fatigue_ongoing"
+                    @change="handleSideEffectCheck('fatigue', 'resolved')" />
                 </td>
               </tr>
               <tr>
@@ -196,12 +208,12 @@
                 </td>
                 <td>
                   <input type="checkbox" v-model="formData.dizziness_ongoing" :disabled="formData.dizziness !== 'Yes' ||
-                    formData.dizziness_resolved
-                    " @change="handleSideEffectCheck('dizziness', 'ongoing')" />
+                    formData.dizziness_resolved"
+                    @change="handleSideEffectCheck('dizziness', 'ongoing')" />
                 </td>
                 <td>
-                  <input type="checkbox" v-model="formData.dizziness_resolved" :disabled="formData.dizziness !== 'Yes' || formData.dizziness_ongoing
-                    " @change="handleSideEffectCheck('dizziness', 'resolved')" />
+                  <input type="checkbox" v-model="formData.dizziness_resolved" :disabled="formData.dizziness !== 'Yes' || formData.dizziness_ongoing"
+                    @change="handleSideEffectCheck('dizziness', 'resolved')" />
                 </td>
               </tr>
               <tr>
@@ -215,12 +227,12 @@
                   </div>
                 </td>
                 <td>
-                  <input type="checkbox" v-model="formData.headache_ongoing" :disabled="formData.headache !== 'Yes' || formData.headache_resolved
-                    " @change="handleSideEffectCheck('headache', 'ongoing')" />
+                  <input type="checkbox" v-model="formData.headache_ongoing" :disabled="formData.headache !== 'Yes' || formData.headache_resolved"
+                    @change="handleSideEffectCheck('headache', 'ongoing')" />
                 </td>
                 <td>
-                  <input type="checkbox" v-model="formData.headache_resolved" :disabled="formData.headache !== 'Yes' || formData.headache_ongoing
-                    " @change="handleSideEffectCheck('headache', 'resolved')" />
+                  <input type="checkbox" v-model="formData.headache_resolved" :disabled="formData.headache !== 'Yes' || formData.headache_ongoing"
+                    @change="handleSideEffectCheck('headache', 'resolved')" />
                 </td>
               </tr>
               <tr>
@@ -234,12 +246,12 @@
                   </div>
                 </td>
                 <td>
-                  <input type="checkbox" v-model="formData.others_ongoing" :disabled="formData.others !== 'Yes' || formData.others_resolved
-                    " @change="handleSideEffectCheck('others', 'ongoing')" />
+                  <input type="checkbox" v-model="formData.others_ongoing" :disabled="formData.others !== 'Yes' || formData.others_resolved"
+                    @change="handleSideEffectCheck('others', 'ongoing')" />
                 </td>
                 <td>
-                  <input type="checkbox" v-model="formData.others_resolved" :disabled="formData.others !== 'Yes' || formData.others_ongoing
-                    " @change="handleSideEffectCheck('others', 'resolved')" />
+                  <input type="checkbox" v-model="formData.others_resolved" :disabled="formData.others !== 'Yes' || formData.others_ongoing"
+                    @change="handleSideEffectCheck('others', 'resolved')" />
                 </td>
               </tr>
             </tbody>
@@ -251,44 +263,24 @@
         <label style="margin-top: 1rem">3. Have you had any challenges taking your PrEP as per prescribed
           doses?</label>
         <div style="display: flex; gap: 20px; margin-bottom: 1rem">
-          <label style="
-              display: inline-flex;
-              align-items: center;
-              font-weight: normal;
-              margin-bottom: 0;
-            "><input type="radio" v-model="formData.challenges_prep" name="challenges_prep" value="Yes" required />
+          <label style="display: inline-flex; align-items: center; font-weight: normal; margin-bottom: 0;"><input type="radio" v-model="formData.challenges_prep" name="challenges_prep" value="Yes" required />
             Yes</label>
-          <label style="
-              display: inline-flex;
-              align-items: center;
-              font-weight: normal;
-              margin-bottom: 0;
-            "><input type="radio" v-model="formData.challenges_prep" name="challenges_prep" value="No" required
+          <label style="display: inline-flex; align-items: center; font-weight: normal; margin-bottom: 0;"><input type="radio" v-model="formData.challenges_prep" name="challenges_prep" value="No" required
               @click="formData.challenges_details = ''" />
             No</label>
         </div>
         <textarea v-if="formData.challenges_prep === 'Yes'" v-model="formData.challenges_details" rows="3"
           placeholder="If yes, describe the challenges..."></textarea>
 
-        <label>4. If answered “Additional doses of PrEP above”: Please provide more
+        <label>4. If answered "Additional doses of PrEP above": Please provide more
           information (e.g., Loss/theft, travel?)</label>
         <textarea v-model="formData.additional_doses_details" rows="3" placeholder="Provide details..."></textarea>
 
         <label>5. Do you wish to stop taking PrEP or continue?</label>
         <div style="display: flex; gap: 20px; margin-bottom: 1rem">
-          <label style="
-              display: inline-flex;
-              align-items: center;
-              font-weight: normal;
-              margin-bottom: 0;
-            "><input type="radio" v-model="formData.prep_continue" name="prep_continue" value="Stop" required />
+          <label style="display: inline-flex; align-items: center; font-weight: normal; margin-bottom: 0;"><input type="radio" v-model="formData.prep_continue" name="prep_continue" value="Stop" required />
             Stop</label>
-          <label style="
-              display: inline-flex;
-              align-items: center;
-              font-weight: normal;
-              margin-bottom: 0;
-            "><input type="radio" v-model="formData.prep_continue" name="prep_continue" value="Continue" required />
+          <label style="display: inline-flex; align-items: center; font-weight: normal; margin-bottom: 0;"><input type="radio" v-model="formData.prep_continue" name="prep_continue" value="Continue" required />
             Continue</label>
         </div>
 
@@ -321,7 +313,6 @@
         {{ getSubmitButtonText() }}
       </button>
     </div>
-    <!-- End .container -->
   </form>
 
   <!-- Confirmation Modal -->
@@ -359,8 +350,10 @@ import Form5_ConfirmationModal from "./Form5_ConfirmationModal.vue"; // Adjust p
 import { prepSites } from "../location/prepSite";
 
 // --- Configuration ---
-const GOOGLE_SCRIPT_URL =
-  "https://script.google.com/macros/s/AKfycbxdjs7N_zI-LGwi3cc-FpWxldpVRr9eDlvW0RDsrcYilHRw_IdOaK_pwr9zGU36Hn92/exec";
+// TODO: Deploy UnscheduledVisit_Complete_CRUD.gs as web app and replace with your URL
+const GOOGLE_SCRIPT_URL = "PASTE_YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL_HERE"; // Use UnscheduledVisit_Complete_CRUD.gs
+// Set to true to show debugging information
+const DEBUG_MODE = true;
 const CSV_DATA_URL =
   "https://docs.google.com/spreadsheets/d/e/2PACX-1vSfG6e5EIcHDaXopn9DxMZnTwVFGi5CiQxmKlEIPsd7uPtZiQIikYb46UdN78UhZlJfocCfl_s0hGGX/pub?gid=0&single=true&output=csv"; // UID validation source
 const UID_MIN_LENGTH = 5;
@@ -402,7 +395,6 @@ const formData = ref({
   stopping_reasons: "",
   stopping_Preventionmethod: "",
   other_notes: "",
-  // date: '', // Date is already defined above
   interviewer_name: "",
   designation: "",
   bmhc_number: "",
@@ -422,8 +414,7 @@ const successMessage = ref("");
 const errorMessage = ref(""); // General messages
 
 // CRUD State Variables
-const availableVisitDates = ref([]);
-const selectedVisitDate = ref('');
+const hasExistingData = ref(false);
 const isPrefilled = ref(false);
 const isDeletingRecord = ref(false);
 
@@ -433,8 +424,8 @@ let csvData = [];
 const initializeDate = () => {
   formData.value.date = new Date().toISOString().split("T")[0];
 };
+
 const fetchCsvData = async () => {
-  /* ... same as before ... */
   isCheckingUid.value = true;
   statusMessage.value = "Loading validation data...";
   statusClass.value = "";
@@ -448,7 +439,7 @@ const fetchCsvData = async () => {
       .map((row) =>
         row.split(",").map((cell) => cell.trim().replace(/^"|"$/g, ""))
       );
-    console.log("CSV Data Loaded for Form 5");
+    if (DEBUG_MODE) console.log("CSV Data Loaded for Form 5");
     statusMessage.value = "Validation data loaded. Please enter UID.";
     if (formData.value.participant_uid)
       validateUidOnInput(formData.value.participant_uid);
@@ -468,16 +459,16 @@ const fetchCsvData = async () => {
       statusMessage.value = "";
   }
 };
+
 const validateUid = (uid) => {
-  /* ... same as before ... */
   if (!uid || !csvData || csvData.length <= 1) return false;
   const normalizedUid = uid.trim().toLowerCase();
   return csvData
     .slice(1)
     .some((row) => row.length > 1 && row[1]?.toLowerCase() === normalizedUid);
 };
+
 const validateUidOnInput = (newUid) => {
-  /* ... same as before ... */
   clearFinalMessage();
   modalErrorMessage.value = "";
   modalSuccessMessage.value = "";
@@ -512,103 +503,118 @@ const validateUidOnInput = (newUid) => {
     }
   }
 };
-watch(() => formData.value.participant_uid, (newUid) => {
-  console.log('UID changed to:', newUid);
+
+watch(() => formData.value.participant_uid, async (newUid) => {
   validateUidOnInput(newUid);
   if (newUid && csvData.length > 1 && validateUid(newUid)) {
-    console.log('UID validated, loading visit dates for:', newUid);
-    loadAvailableVisitDates(newUid);
+    await checkExistingData(newUid);
   } else {
-    console.log('UID not validated or no CSV data');
-    availableVisitDates.value = [];
-    selectedVisitDate.value = '';
+    hasExistingData.value = false;
     isPrefilled.value = false;
   }
 });
 
 // CRUD Functions
-// Format date to be shorter (YYYY-MM-DD)
-const formatDateShort = (dateString) => {
-  if (!dateString) return '';
-  try {
-    // If it's already in YYYY-MM-DD format, return as is
-    if (/^\d{4}-\d{2}-\d{2}$/.test(dateString)) {
-      return dateString;
-    }
-    // Otherwise, parse and format to YYYY-MM-DD
-    const date = new Date(dateString);
-    return date.toISOString().split('T')[0];
-  } catch (error) {
-    return dateString; // Return original if parsing fails
-  }
-};
-
 // Get submit button text based on state
 const getSubmitButtonText = () => {
   if (isSubmitting.value) return 'Submitting...';
-  if (isPrefilled.value && selectedVisitDate.value) return `Update Existing Data`;
-  return 'Add New Visit Data';
+  if (isPrefilled.value) return 'Update Data';
+  return 'Review Data';
 };
 
-// Load available visit dates for UID
-const loadAvailableVisitDates = async (uid) => {
-  console.log('=== Loading visit dates for UID:', uid, '===');
-  console.log('Using Google Script URL:', GOOGLE_SCRIPT_URL);
+// Check if data exists for UID
+const checkExistingData = async (uid) => {
   try {
+    if (DEBUG_MODE) console.log('=== CHECKING EXISTING DATA ===');
+    if (DEBUG_MODE) console.log('UID:', uid);
+    if (DEBUG_MODE) console.log('GOOGLE_SCRIPT_URL:', GOOGLE_SCRIPT_URL);
+    
+    if (!GOOGLE_SCRIPT_URL || GOOGLE_SCRIPT_URL === '' || GOOGLE_SCRIPT_URL.includes('PASTE_YOUR')) {
+      console.error('❌ Google Script URL not configured!');
+      statusMessage.value = '❌ Google Script URL not configured. Please deploy your script and update line 354!';
+      statusClass.value = 'error';
+      hasExistingData.value = false;
+      return;
+    }
+    
     const response = await axios.get(GOOGLE_SCRIPT_URL, {
-      params: { action: 'getVisitDates', uid: uid },
+      params: { action: 'checkData', uid: uid },
       timeout: 10000
     });
 
-    console.log('GetVisitDates response:', response.data);
+    if (DEBUG_MODE) console.log('checkExistingData response:', response.data);
 
     if (response.data.status === 'success') {
-      const visits = response.data.availableVisits || [];
-      if (visits.length > 0) {
-        // Instead of showing dates, just show "Edit Existing"
-        availableVisitDates.value = ['existing'];
-        statusMessage.value = `Existing unscheduled visit data found. Click to update.`;
+      hasExistingData.value = response.data.hasData;
+      if (hasExistingData.value) {
+        statusMessage.value = `Existing record found for ${uid}. Auto-loading data...`;
+        statusClass.value = 'success';
+        // Automatically load existing data
+        await loadExistingData();
       } else {
-        availableVisitDates.value = [];
         statusMessage.value = `Ready to add unscheduled visit for ${uid}`;
+        statusClass.value = 'success';
       }
     } else {
-      console.error('GetVisitDates error:', response.data.message);
-      availableVisitDates.value = [];
-      statusMessage.value = response.data.message || 'Error loading visit dates';
+      console.error('checkExistingData error response:', response.data);
+      statusMessage.value = response.data.message || 'Error checking existing data';
+      statusClass.value = 'error';
+      hasExistingData.value = false;
     }
   } catch (error) {
-    console.error('Error loading visit dates:', error);
-    availableVisitDates.value = [];
-    statusMessage.value = 'Error checking for existing data';
+    console.error('Error checking existing data:', error);
+    if (error.response) {
+      console.error('Error response:', error.response.data);
+      statusMessage.value = `Server error: ${error.response.status}`;
+    } else if (error.request) {
+      console.error('Network error:', error.request);
+      statusMessage.value = 'Network error - cannot reach server';
+    } else {
+      console.error('Error message:', error.message);
+      statusMessage.value = 'Error checking data: ' + error.message;
+    }
+    statusClass.value = 'error';
+    hasExistingData.value = false;
   }
 };
 
-// Load data for specific visit date
-const loadVisitData = async (visitDate) => {
+// Load existing data for UID
+const loadExistingData = async () => {
   try {
-    statusMessage.value = 'Loading visit data...';
-    selectedVisitDate.value = visitDate;
-
-    // For 'existing', we don't pass visitDate - let backend find the first record
-    const params = { action: 'prefill', uid: formData.value.participant_uid };
-    if (visitDate !== 'existing') {
-      params.visitDate = visitDate;
+    if (DEBUG_MODE) console.log('=== LOADING EXISTING DATA ===');
+    if (DEBUG_MODE) console.log('UID:', formData.value.participant_uid);
+    if (DEBUG_MODE) console.log('GOOGLE_SCRIPT_URL:', GOOGLE_SCRIPT_URL);
+    
+    if (!GOOGLE_SCRIPT_URL || GOOGLE_SCRIPT_URL === '' || GOOGLE_SCRIPT_URL.includes('PASTE_YOUR')) {
+      console.error('❌ Google Script URL not configured for prefill!');
+      statusMessage.value = '❌ Cannot prefill - Google Script URL not set!';
+      statusClass.value = 'error';
+      return;
     }
 
+    statusMessage.value = '🔄 Loading existing data...';
+    statusClass.value = 'info';
+
+    if (DEBUG_MODE) console.log('Making prefill request...');
+
     const response = await axios.get(GOOGLE_SCRIPT_URL, {
-      params: params,
-      timeout: 10000
+      params: { action: 'prefill', uid: formData.value.participant_uid },
+      timeout: 15000
     });
 
-    console.log('Prefill response:', response.data);
+    if (DEBUG_MODE) console.log('Prefill response:', response.data);
 
     if (response.data.status === 'success') {
       const prefillData = response.data.data;
-      console.log('Prefill data received:', prefillData);
 
-      // Map the backend field names to frontend field names (matching EXACT spreadsheet headers)
-      const fieldMapping = {
+      if (DEBUG_MODE) {
+        console.log('✅ Prefill successful!');
+        console.log('📦 Prefill data received:', prefillData);
+        console.log('🔢 Number of fields:', Object.keys(prefillData).length);
+      }
+
+      // Map backend column names to frontend field names
+      const columnToFieldMap = {
         'uid': 'participant_uid',
         'prep_site': 'prep_site',
         'date': 'date',
@@ -622,13 +628,13 @@ const loadVisitData = async (visitDate) => {
         'Vomiting_Resolved': 'vomiting_resolved',
         'Abdominalcramps': 'abdominal_cramps',
         'Abdominalcramps_Ongoing': 'abdominal_cramps_ongoing',
-        'Abdominalcramps_ Resolved': 'abdominal_cramps_resolved', // Note the space
+        'Abdominalcramps_Resolved': 'abdominal_cramps_resolved',
         'Fatigue': 'fatigue',
         'Fatigue_Ongoing': 'fatigue_ongoing',
         'Fatigue_Resolved': 'fatigue_resolved',
         'Dizziness': 'dizziness',
         'Dizziness_Ongoing': 'dizziness_ongoing',
-        'Resolved': 'dizziness_resolved', // Note: just 'Resolved'
+        'Dizziness_Resolved': 'dizziness_resolved',
         'Headache': 'headache',
         'Headache_Ongoing': 'headache_ongoing',
         'Headache_Resolved': 'headache_resolved',
@@ -641,55 +647,63 @@ const loadVisitData = async (visitDate) => {
         'Additional_doses_above': 'additional_doses_details',
         'stop_or_continue': 'prep_continue',
         'stopping_reason': 'stopping_reasons',
-        'stopping_indicatte_reasons_ preferred_method': 'stopping_Preventionmethod', // Note the space
+        'stopping_indicate_reasons_preferred_method': 'stopping_Preventionmethod',
         'Other_notes': 'other_notes',
-        'Date': 'date', // Interviewer date
+        'Date': 'interviewer_date',
         'Name': 'interviewer_name',
         'Designation': 'designation',
-        'BMHC Number:': 'bmhc_number' // Note the colon
+        'BMHC Number': 'bmhc_number'
       };
 
-      // Populate form fields
-      Object.keys(prefillData).forEach(backendKey => {
-        const frontendKey = fieldMapping[backendKey] || backendKey;
-        console.log(`Mapping ${backendKey} -> ${frontendKey}:`, prefillData[backendKey]);
-
-        if (formData.value.hasOwnProperty(frontendKey)) {
-          // Handle arrays (reason_visit)
-          if (Array.isArray(formData.value[frontendKey]) && typeof prefillData[backendKey] === 'string') {
-            formData.value[frontendKey] = prefillData[backendKey] ? prefillData[backendKey].split('; ') : [];
+      Object.keys(prefillData).forEach(columnName => {
+        const fieldName = columnToFieldMap[columnName];
+        if (fieldName && formData.value.hasOwnProperty(fieldName)) {
+          const value = prefillData[columnName];
+          
+          if (DEBUG_MODE) console.log(`Mapping ${columnName} to ${fieldName}:`, value, typeof value);
+          
+          // Handle different data types
+          if (Array.isArray(formData.value[fieldName])) {
+            // Handle arrays (reason_visit comes as array from backend)
+            formData.value[fieldName] = Array.isArray(value) ? value : (value ? [value] : []);
           }
-          // Handle booleans
-          else if (typeof formData.value[frontendKey] === 'boolean') {
-            formData.value[frontendKey] = prefillData[backendKey] === true || prefillData[backendKey] === 'Yes' || prefillData[backendKey] === 'TRUE';
+          else if (typeof formData.value[fieldName] === 'boolean') {
+            // Handle booleans (backend sends true/false)
+            formData.value[fieldName] = value === true || value === 'true' || value === 'Yes';
           }
-          // Handle regular values
           else {
-            formData.value[frontendKey] = prefillData[backendKey] || '';
+            // Handle regular values (strings, dates, etc.)
+            formData.value[fieldName] = value || '';
           }
         } else {
-          console.warn(`Form field '${frontendKey}' not found in formData`);
+          if (DEBUG_MODE) console.log(`Column ${columnName} not mapped to any field`);
         }
       });
 
       isPrefilled.value = true;
-      statusMessage.value = `Existing data loaded successfully!`;
+      statusMessage.value = 'Data auto-loaded! Ready to update or delete.';
       statusClass.value = 'success';
       submitDisabled.value = false;
 
     } else {
-      statusMessage.value = response.data.message || `Error loading visit data`;
+      console.error('Prefill error:', response.data);
+      statusMessage.value = response.data.message || 'Error loading data';
       statusClass.value = 'error';
-      console.error('Prefill error:', response.data.message);
     }
   } catch (error) {
-    console.error('Error loading visit data:', error);
-    statusMessage.value = `Error loading visit data: ${error.message}`;
+    console.error('Error loading data:', error);
+    if (error.response) {
+      statusMessage.value = `Server error: ${error.response.status} - ${error.response.data?.message || 'Unknown error'}`;
+    } else if (error.request) {
+      statusMessage.value = 'Network error - cannot reach server. Check your Google Script URL.';
+    } else {
+      statusMessage.value = 'Error loading data: ' + error.message;
+    }
     statusClass.value = 'error';
   }
 };
 
-// Start new visit (clear form and prepare for new entry)
+// Start new entry (clear form and prepare for new entry)
 const startNewVisit = () => {
   // Clear form but keep basic info
   const basicInfo = {
@@ -707,18 +721,16 @@ const startNewVisit = () => {
   // Restore basic info
   Object.assign(formData.value, basicInfo);
 
-  // Clear selection states to hide UPDATE/DELETE buttons
-  selectedVisitDate.value = '';
   isPrefilled.value = false;
 
-  statusMessage.value = `Adding new unscheduled visit`;
+  statusMessage.value = 'Ready to add new unscheduled visit';
   statusClass.value = 'info';
   submitDisabled.value = false;
 };
 
 // Confirm delete action
 const confirmDelete = () => {
-  if (confirm(`Are you sure you want to delete the unscheduled visit record for UID: ${formData.value.participant_uid} on ${selectedVisitDate.value}?\n\nThis action cannot be undone.`)) {
+  if (confirm(`Are you sure you want to delete the unscheduled visit record for UID: ${formData.value.participant_uid}?\n\nThis action cannot be undone.`)) {
     deleteRecord();
   }
 };
@@ -731,8 +743,7 @@ const deleteRecord = async () => {
     const response = await axios.post(GOOGLE_SCRIPT_URL,
       new URLSearchParams({
         action: 'delete',
-        uid: formData.value.participant_uid,
-        visitDate: selectedVisitDate.value
+        uid: formData.value.participant_uid
       }).toString(),
       {
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
@@ -744,13 +755,13 @@ const deleteRecord = async () => {
       statusMessage.value = response.data.message || 'Record deleted successfully!';
       statusClass.value = 'success';
 
-      // Refresh available visits
-      await loadAvailableVisitDates(formData.value.participant_uid);
+      // Refresh data status
+      await checkExistingData(formData.value.participant_uid);
 
       // Clear current form
       clearForm();
       isPrefilled.value = false;
-      selectedVisitDate.value = '';
+      hasExistingData.value = false;
     } else {
       statusMessage.value = response.data.message || 'Failed to delete record';
       statusClass.value = 'error';
@@ -792,50 +803,50 @@ const confirmAndSubmit = async () => {
     const dataToSend = { ...formData.value };
 
     // Add action parameter if updating
-    if (isPrefilled.value && selectedVisitDate.value) {
+    if (isPrefilled.value) {
       dataToSend.action = 'update';
     }
 
-    // Map frontend field names to backend field names
+    // Map frontend field names to backend column names (matching Google Script exactly)
     const backendData = {
       uid: dataToSend.participant_uid,
       prep_site: dataToSend.prep_site,
       date: dataToSend.date,
       reason_for_this_visit: Array.isArray(dataToSend.reason_visit) ? dataToSend.reason_visit.join('; ') : dataToSend.reason_visit,
-      other_describe: dataToSend.other_reason_visit,
-      nausea: dataToSend.nausea,
-      nausea_ongoing: dataToSend.nausea_ongoing ? 'Yes' : 'No',
-      nausea_resolved: dataToSend.nausea_resolved ? 'Yes' : 'No',
-      vomiting: dataToSend.vomiting,
-      vomiting_ongoing: dataToSend.vomiting_ongoing ? 'Yes' : 'No',
-      vomiting_resolved: dataToSend.vomiting_resolved ? 'Yes' : 'No',
-      abdominal_cramps: dataToSend.abdominal_cramps,
-      abdominal_cramps_ongoing: dataToSend.abdominal_cramps_ongoing ? 'Yes' : 'No',
-      abdominal_cramps_resolved: dataToSend.abdominal_cramps_resolved ? 'Yes' : 'No',
-      fatigue: dataToSend.fatigue,
-      fatigue_ongoing: dataToSend.fatigue_ongoing ? 'Yes' : 'No',
-      fatigue_resolved: dataToSend.fatigue_resolved ? 'Yes' : 'No',
-      dizziness: dataToSend.dizziness,
-      dizziness_ongoing: dataToSend.dizziness_ongoing ? 'Yes' : 'No',
-      dizziness_resolved: dataToSend.dizziness_resolved ? 'Yes' : 'No',
-      headache: dataToSend.headache,
-      headache_ongoing: dataToSend.headache_ongoing ? 'Yes' : 'No',
-      headache_resolved: dataToSend.headache_resolved ? 'Yes' : 'No',
-      others: dataToSend.others,
-      others_ongoing: dataToSend.others_ongoing ? 'Yes' : 'No',
-      others_resolved: dataToSend.others_resolved ? 'Yes' : 'No',
-      others_please_describe_below: dataToSend.others_description,
-      challenges_taking_prep: dataToSend.challenges_prep,
+      Other_describe: dataToSend.other_reason_visit,
+      Nausea: dataToSend.nausea,
+      Nausea_Ongoing: dataToSend.nausea_ongoing ? 'Yes' : 'No',
+      Nausea_Resolved: dataToSend.nausea_resolved ? 'Yes' : 'No',
+      Vomiting: dataToSend.vomiting,
+      Vomiting_Ongoing: dataToSend.vomiting_ongoing ? 'Yes' : 'No',
+      Vomiting_Resolved: dataToSend.vomiting_resolved ? 'Yes' : 'No',
+      Abdominalcramps: dataToSend.abdominal_cramps,
+      Abdominalcramps_Ongoing: dataToSend.abdominal_cramps_ongoing ? 'Yes' : 'No',
+      Abdominalcramps_Resolved: dataToSend.abdominal_cramps_resolved ? 'Yes' : 'No',
+      Fatigue: dataToSend.fatigue,
+      Fatigue_Ongoing: dataToSend.fatigue_ongoing ? 'Yes' : 'No',
+      Fatigue_Resolved: dataToSend.fatigue_resolved ? 'Yes' : 'No',
+      Dizziness: dataToSend.dizziness,
+      Dizziness_Ongoing: dataToSend.dizziness_ongoing ? 'Yes' : 'No',
+      Dizziness_Resolved: dataToSend.dizziness_resolved ? 'Yes' : 'No',
+      Headache: dataToSend.headache,
+      Headache_Ongoing: dataToSend.headache_ongoing ? 'Yes' : 'No',
+      Headache_Resolved: dataToSend.headache_resolved ? 'Yes' : 'No',
+      Others: dataToSend.others,
+      Others_Ongoing: dataToSend.others_ongoing ? 'Yes' : 'No',
+      Others_Resolved: dataToSend.others_resolved ? 'Yes' : 'No',
+      Others_please_describe_below: dataToSend.others_description,
+      challenges_taking_PrEP: dataToSend.challenges_prep,
       comments_challenges_faced: dataToSend.challenges_details,
-      additional_doses_above: dataToSend.additional_doses_details,
+      Additional_doses_above: dataToSend.additional_doses_details,
       stop_or_continue: dataToSend.prep_continue,
       stopping_reason: dataToSend.stopping_reasons,
       stopping_indicate_reasons_preferred_method: dataToSend.stopping_Preventionmethod,
-      other_notes: dataToSend.other_notes,
-      interviewer_date: dataToSend.date, // Use same date for interviewer
-      interviewer_name: dataToSend.interviewer_name,
-      designation: dataToSend.designation,
-      bmhc_number: dataToSend.bmhc_number
+      Other_notes: dataToSend.other_notes,
+      Date: dataToSend.date, // Interviewer date
+      Name: dataToSend.interviewer_name,
+      Designation: dataToSend.designation,
+      'BMHC Number': dataToSend.bmhc_number
     };
 
     // Add action if updating
@@ -844,14 +855,17 @@ const confirmAndSubmit = async () => {
     }
 
     const formDataSerialized = new URLSearchParams(backendData).toString();
-    console.log("Submitting Form 5 data:", dataToSend); // Log object
+    if (DEBUG_MODE) {
+      console.log("Submitting Unscheduled Visit data:", backendData); 
+      console.log("Serialized data:", formDataSerialized);
+    }
 
     // Use Axios as in the original script
     const response = await axios.post(url, formDataSerialized, {
       headers: { "Content-Type": "application/x-www-form-urlencoded" },
       timeout: 15000
     });
-    console.log("Unscheduled Visit Response:", response);
+    if (DEBUG_MODE) console.log("Unscheduled Visit Response:", response);
 
     if (response.data.status === 'success') {
       modalSuccessMessage.value = response.data.message;
@@ -859,9 +873,9 @@ const confirmAndSubmit = async () => {
         isReviewModalVisible.value = false;
         setFinalMessage(response.data.message, "success");
 
-        // After successful submission, refresh the available visits if we have a UID
+        // After successful submission, refresh the data status if we have a UID
         if (formData.value.participant_uid) {
-          await loadAvailableVisitDates(formData.value.participant_uid);
+          await checkExistingData(formData.value.participant_uid);
         }
 
         clearForm();
@@ -870,14 +884,14 @@ const confirmAndSubmit = async () => {
         submitDisabled.value = true;
         modalSuccessMessage.value = "";
         isPrefilled.value = false;
-        selectedVisitDate.value = '';
+        hasExistingData.value = false;
       }, SUBMIT_SUCCESS_DELAY);
     } else {
       modalErrorMessage.value = response.data.message || 'Submission failed';
     }
   } catch (error) {
-    console.error("Form 5 Submit Error:", error);
-    let detailedError = "Error submitting Form 5.";
+    console.error("Unscheduled Visit Submit Error:", error);
+    let detailedError = "Error submitting Unscheduled Visit.";
     if (error.response) detailedError += ` (Status: ${error.response.status})`;
     else if (error.request) detailedError += " (No response)";
     else detailedError += ` (${error.message})`;
@@ -927,7 +941,6 @@ const clearForm = () => {
 
 // Logged In User
 const getLoggedInUser = () => {
-  /* ... same as before ... */
   try {
     const user = localStorage.getItem("loggedInUser");
     return user ? JSON.parse(user) : null;
@@ -952,25 +965,17 @@ onMounted(() => {
   initializeDate();
   fetchCsvData();
 
-  // --- FIX IS HERE ---
-  // 1. Get the user data string from localStorage
+  // Get the user data from localStorage
   const storedUser = localStorage.getItem("loggedInUser");
-
-  // 2. Parse the string into a JavaScript object. This creates the 'loggedInUser' variable.
   const loggedInUser = storedUser ? JSON.parse(storedUser) : null;
-  // --- END OF FIX ---
 
-
-  // Now this part of your code will work perfectly
+  // Populate interviewer details if user is logged in
   if (loggedInUser) {
-    // Make sure 'fullname', 'designation', and 'bhc_no' are the exact names
-    // your API sends back for the user object.
     formData.value.interviewer_name = loggedInUser.fullname || "";
     formData.value.designation = loggedInUser.designation || "";
     formData.value.bmhc_number = loggedInUser.bhc_no || "";
   } else {
     console.warn("Form 5: Logged in user details not found.");
-    // This part is also good practice, in case someone is not logged in
     formData.value.interviewer_name = "";
     formData.value.designation = "";
     formData.value.bmhc_number = "";
@@ -1010,6 +1015,9 @@ onMounted(() => {
   font-weight: 500;
   transition: all 0.2s ease;
   font-size: 0.9rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
 }
 
 .visit-btn:hover {
@@ -1036,7 +1044,7 @@ onMounted(() => {
   border-style: solid;
 }
 
-/* Prefill Status Styles - Matching Form4 */
+/* Prefill Status Styles - Fixed alignment */
 .prefill-status {
   margin: 15px 0;
   display: flex;
@@ -1139,51 +1147,46 @@ label>input[type="checkbox"] {
   margin-bottom: 0;
 }
 
-.checkbox-group-vertical {
+.checkbox-group-vertical,
+.radio-group-vertical {
   display: flex;
   flex-direction: column;
   gap: 8px;
-  margin-bottom: 15px;
-  padding: 10px;
-  border: 1px solid #eee;
-  border-radius: 5px;
-  background-color: #fdfdfd;
 }
 
-.checkbox-group-vertical label {
-  font-weight: normal;
-  display: inline-flex;
+.checkbox-group-vertical label,
+.radio-group-vertical label {
+  display: flex;
   align-items: center;
+  font-weight: normal;
   margin-bottom: 0;
 }
 
-.section-title {
-  font-size: 1.5rem;
-  color: #3498db;
-  margin-top: 25px;
-  margin-bottom: 15px;
-  padding-bottom: 5px;
-  border-bottom: 1px solid #eee;
+.container {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 20px;
 }
 
-.section-title:first-of-type {
-  margin-top: 0;
+.section-title {
+  color: #2c3e50;
+  border-bottom: 2px solid #3498db;
+  padding-bottom: 10px;
+  margin-bottom: 20px;
 }
 
 .submit-btn {
   background-color: #3498db;
-  color: #fff;
-  padding: 0.75rem 1.5rem;
+  color: white;
+  padding: 12px 30px;
   border: none;
   border-radius: 5px;
   cursor: pointer;
   font-size: 1rem;
-  transition: background-color 0.2s ease;
-  margin-top: 1rem;
-  display: block;
-  width: auto;
-  margin-left: auto;
-  margin-right: auto;
+  font-weight: bold;
+  transition: background-color 0.3s;
+  width: 100%;
+  margin-top: 20px;
 }
 
 .submit-btn:hover:not(:disabled) {
@@ -1191,138 +1194,128 @@ label>input[type="checkbox"] {
 }
 
 .submit-btn:disabled {
-  background-color: #bdc3c7;
+  background-color: #95a5a6;
   cursor: not-allowed;
-  opacity: 0.7;
 }
 
+/* Status messages */
 #status-message {
-  margin-top: -10px;
-  margin-bottom: 15px;
-  padding: 8px 10px;
+  padding: 8px 12px;
   border-radius: 4px;
-  font-size: 0.9em;
-  border-width: 1px;
-  border-style: solid;
+  margin-bottom: 10px;
+  font-size: 0.9rem;
 }
 
 #status-message.success {
-  background-color: #dff0d8;
-  color: #3c763d;
-  border-color: #d6e9c6;
+  background-color: #d4edda;
+  color: #155724;
+  border: 1px solid #c3e6cb;
 }
 
 #status-message.error {
-  background-color: #f2dede;
-  color: #a94442;
-  border-color: #ebccd1;
+  background-color: #f8d7da;
+  color: #721c24;
+  border: 1px solid #f5c6cb;
+}
+
+#status-message.info {
+  background-color: #d9edf7;
+  color: #31708f;
+  border-color: #bce8f1;
 }
 
 .uid-spinner {
-  margin-left: 10px;
-  color: #3498db;
-  font-size: 0.9em;
-}
-
-.table-responsive {
-  overflow-x: auto;
-  margin-bottom: 1rem;
-}
-
-table {
-  border-collapse: collapse;
-  width: 100%;
-  margin-bottom: 1rem;
+  color: #007bff;
   font-size: 0.9rem;
+  margin-left: 10px;
 }
 
-th,
-td {
-  border: 1px solid #ccc;
-  padding: 8px;
-  text-align: left;
-  vertical-align: middle;
-}
-
-th {
-  background-color: #f2f2f2;
-  font-weight: bold;
+/* Final messages */
+.final-message {
+  margin-top: 20px;
+  padding: 15px;
+  border-radius: 5px;
   text-align: center;
 }
 
-td input[type="radio"],
-td input[type="checkbox"] {
-  display: block;
-  margin: 0 auto;
+.success-final {
+  background-color: #d4edda;
+  color: #155724;
+  border: 1px solid #c3e6cb;
 }
 
-/* Specific style for yes/no radios in table */
+.error-final {
+  background-color: #f8d7da;
+  color: #721c24;
+  border: 1px solid #f5c6cb;
+}
+
+/* Table styles for symptoms */
+.table-responsive {
+  overflow-x: auto;
+  margin: 1rem 0;
+}
+
+.symptoms-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1rem 0;
+}
+
+.symptoms-table th,
+.symptoms-table td {
+  border: 1px solid #ddd;
+  padding: 8px;
+  text-align: left;
+}
+
+.symptoms-table th {
+  background-color: #f8f9fa;
+  font-weight: bold;
+}
+
 .yes-no-radio {
   display: flex;
+  gap: 1rem;
   justify-content: center;
-  gap: 15px;
 }
 
 .yes-no-radio label {
-  margin-bottom: 0;
+  display: flex;
+  align-items: center;
   font-weight: normal;
-}
-
-td input[type="text"],
-td input[type="date"] {
-  width: 95%;
-  padding: 0.3rem 0.4rem;
   margin-bottom: 0;
-  font-size: 0.9rem;
 }
 
-.success-message {
-  color: green;
-  text-align: center;
-  font-weight: bold;
-  margin-top: 15px;
-}
+/* Responsive design */
+@media (max-width: 768px) {
+  .container {
+    padding: 10px;
+  }
 
-.error-message {
-  color: red;
-  text-align: center;
-  font-weight: bold;
-  margin-top: 15px;
-}
+  .form-container {
+    padding: 1rem;
+  }
 
-.submitting-indicator {
-  margin-top: 20px;
-  text-align: center;
-  font-size: 1.2rem;
-  color: #3498db;
-}
+  .visit-buttons {
+    flex-direction: column;
+  }
 
-.final-message {
-  max-width: 700px;
-  margin: 20px auto;
-  padding: 15px 20px;
-  border-radius: 5px;
-  text-align: center;
-  font-weight: 500;
-}
+  .visit-btn {
+    width: 100%;
+    text-align: center;
+    justify-content: center;
+  }
 
-.final-message.success-final {
-  background-color: #d1e7dd;
-  color: #0f5132;
-  border: 1px solid #badbcc;
-}
+  .prefill-status {
+    flex-direction: column;
+    align-items: stretch;
+  }
 
-.final-message.error-final {
-  background-color: #f8d7da;
-  color: #842029;
-  border: 1px solid #f5c2c7;
-}
-
-.conditional-section {
-  margin-left: 15px;
-  padding-left: 15px;
-  border-left: 2px solid #e0e0e0;
-  margin-top: 10px;
-  padding-top: 10px;
+  .delete-btn {
+    width: 100%;
+    justify-content: center;
+    margin-top: 10px;
+  }
 }
 </style>

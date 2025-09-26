@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Debug Google Apps Script - Form1</title>
+</head>
+<body>
+    <h1>Debug Google Apps Script - Form1</h1>
+    
+    <div>
+        <h2>Test 1: Basic Connection Test</h2>
+        <button onclick="testBasicConnection()">Test Basic Connection</button>
+        <div id="basicResult"></div>
+    </div>
+    
+    <div>
+        <h2>Test 2: Prefill Test</h2>
+        <input type="text" id="testUid" placeholder="Enter UID to test" value="THI0009">
+        <button onclick="testPrefill()">Test Prefill</button>
+        <div id="prefillResult"></div>
+    </div>
+    
+    <div>
+        <h2>Test 3: JSONP Test</h2>
+        <button onclick="testJsonp()">Test JSONP</button>
+        <div id="jsonpResult"></div>
+    </div>
+
+    <script>
+        // Use the same URL from your Form1.vue
+        const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyaRD1xCGQMRgbKcFTB9iTwA6hq_DKbEfisDwZOOjtxctRTx_w_nxVKNtRv8QBtaroZ8A/exec";
+        
+        async function testBasicConnection() {
+            const resultDiv = document.getElementById('basicResult');
+            resultDiv.innerHTML = '<p>Testing basic connection...</p>';
+            
+            try {
+                const response = await fetch(GOOGLE_SCRIPT_URL);
+                const text = await response.text();
+                resultDiv.innerHTML = `
+                    <p><strong>✅ Connection successful!</strong></p>
+                    <p><strong>Status:</strong> ${response.status}</p>
+                    <p><strong>Response:</strong></p>
+                    <pre>${text}</pre>
+                `;
+            } catch (error) {
+                resultDiv.innerHTML = `
+                    <p><strong>❌ Connection failed!</strong></p>
+                    <p><strong>Error:</strong> ${error.message}</p>
+                `;
+            }
+        }
+        
+        async function testPrefill() {
+            const uid = document.getElementById('testUid').value;
+            const resultDiv = document.getElementById('prefillResult');
+            resultDiv.innerHTML = '<p>Testing prefill...</p>';
+            
+            if (!uid) {
+                resultDiv.innerHTML = '<p>❌ Please enter a UID</p>';
+                return;
+            }
+            
+            try {
+                const url = `${GOOGLE_SCRIPT_URL}?action=prefill&uid=${encodeURIComponent(uid)}`;
+                console.log('Testing URL:', url);
+                
+                const response = await fetch(url);
+                const text = await response.text();
+                
+                try {
+                    const json = JSON.parse(text);
+                    resultDiv.innerHTML = `
+                        <p><strong>✅ Prefill test successful!</strong></p>
+                        <p><strong>Status:</strong> ${response.status}</p>
+                        <p><strong>Response:</strong></p>
+                        <pre>${JSON.stringify(json, null, 2)}</pre>
+                    `;
+                } catch (parseError) {
+                    resultDiv.innerHTML = `
+                        <p><strong>⚠️ Response not JSON:</strong></p>
+                        <p><strong>Status:</strong> ${response.status}</p>
+                        <p><strong>Raw Response:</strong></p>
+                        <pre>${text}</pre>
+                    `;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `
+                    <p><strong>❌ Prefill test failed!</strong></p>
+                    <p><strong>Error:</strong> ${error.message}</p>
+                `;
+            }
+        }
+        
+        function testJsonp() {
+            const uid = document.getElementById('testUid').value;
+            const resultDiv = document.getElementById('jsonpResult');
+            resultDiv.innerHTML = '<p>Testing JSONP...</p>';
+            
+            if (!uid) {
+                resultDiv.innerHTML = '<p>❌ Please enter a UID</p>';
+                return;
+            }
+            
+            const callbackName = 'test_callback_' + Math.round(100000 * Math.random());
+            
+            window[callbackName] = function(data) {
+                delete window[callbackName];
+                document.body.removeChild(script);
+                
+                resultDiv.innerHTML = `
+                    <p><strong>✅ JSONP test successful!</strong></p>
+                    <p><strong>Response:</strong></p>
+                    <pre>${JSON.stringify(data, null, 2)}</pre>
+                `;
+            };
+            
+            const script = document.createElement('script');
+            script.src = `${GOOGLE_SCRIPT_URL}?action=prefill&uid=${encodeURIComponent(uid)}&callback=${callbackName}`;
+            
+            script.onerror = () => {
+                delete window[callbackName];
+                document.body.removeChild(script);
+                resultDiv.innerHTML = '<p><strong>❌ JSONP test failed!</strong></p>';
+            };
+            
+            document.body.appendChild(script);
+            
+            setTimeout(() => {
+                if (window[callbackName]) {
+                    delete window[callbackName];
+                    document.body.removeChild(script);
+                    resultDiv.innerHTML = '<p><strong>⏰ JSONP test timeout!</strong></p>';
+                }
+            }, 10000);
+        }
+    </script>
+    
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        div { margin: 20px 0; padding: 15px; border: 1px solid #ccc; border-radius: 5px; }
+        button { padding: 10px 15px; margin: 5px; cursor: pointer; }
+        input { padding: 8px; margin: 5px; width: 200px; }
+        pre { background-color: #f5f5f5; padding: 10px; border-radius: 3px; overflow-x: auto; }
+        h1, h2 { color: #333; }
+    </style>
+</body>
+</html>

@@ -19,6 +19,33 @@
         <div v-if="statusMessage" id="status-message" :class="statusClass">{{ statusMessage }}</div>
         <span v-if="isCheckingUid" class="uid-spinner"><i class="fas fa-spinner fa-spin"></i> Checking...</span>
 
+        <!-- Visit Type Selection for Existing Data -->
+        <div v-if="availableVisitTypes.length > 0" class="visit-type-selection">
+          <h4>Available Visits for {{ formData.uid }}:</h4>
+          <div class="visit-buttons">
+            <button v-for="visitType in availableVisitTypes" :key="visitType" type="button" class="visit-btn"
+              :class="{ 'selected': selectedVisitType === visitType }" @click="loadVisitData(visitType)">
+              {{ visitType }}
+            </button>
+            <button v-for="newVisit in getAvailableNewVisits()" :key="newVisit" type="button"
+              class="visit-btn new-visit" @click="startNewVisit(newVisit)">
+              + Add {{ newVisit }}
+            </button>
+          </div>
+        </div>
+
+        <!-- Prefill Status and Delete Button -->
+        <div v-if="isPrefilled" class="prefill-status">
+          <div class="update-mode-banner">
+            <i class="fas fa-edit"></i> UPDATE MODE - {{ selectedVisitType }}
+          </div>
+          <button type="button" class="delete-btn" @click="confirmDelete" :disabled="isDeletingRecord">
+            <i v-if="isDeletingRecord" class="fas fa-spinner fa-spin"></i>
+            <i v-else class="fas fa-trash"></i>
+            {{ isDeletingRecord ? 'Deleting...' : `Delete ${selectedVisitType} Record` }}
+          </button>
+        </div>
+
         <label>Medic taking for:</label>
         <div class="radio-group-vertical" style="border: none; padding: 0; background: none;">
           <label><input type="radio" v-model="formData.medication" value="M1" required @change="updateSignatures" />
@@ -52,94 +79,22 @@
               </tr>
             </thead>
             <tbody>
-              <!-- Month 1 -->
-              <tr v-if="formData.medication === 'M1'">
-                <td>Month 1</td>
-                <td><input type="date" v-model="formData.m1_date" required></td>
-                <td><input type="text" v-model="formData.m1_bottles" placeholder="e.g., 1 (AB123)" required></td>
-                <td><input type="date" v-model="formData.m1_next_due_date" required></td>
-                <td><input type="text" v-model="formData.m1_dispenser_signature" readonly></td>
+              <!-- Single row for current selected medication -->
+              <tr v-if="formData.medication">
+                <td>{{ formatVisitType(formData.medication) }}</td>
+                <td><input type="date" v-model="formData.visit_date" required></td>
+                <td><input type="text" v-model="formData.bottles" placeholder="e.g., 1 (AB123)" required></td>
+                <td><input type="date" v-model="formData.next_due_date" required></td>
+                <td><input type="text" v-model="formData.dispenser_signature" readonly></td>
                 <td>
-                  <select v-model="formData.regimen_m1" required>
+                  <select v-model="formData.regimen" required>
                     <option value="">Select</option>
                     <option value="Daily PrEP">Daily PrEP</option>
                     <option value="ED-PrEP">ED-PrEP</option>
                   </select>
                 </td>
-                <td><input type="text" v-model="formData.m1_recipient_signature" readonly></td>
-                <td><input type="text" v-model="formData.m1_remarks"></td>
-              </tr>
-
-              <!-- Month 3 -->
-              <tr v-if="formData.medication === 'M3'">
-                <td>Month 3</td>
-                <td><input type="date" v-model="formData.m3_date" required></td>
-                <td><input type="text" v-model="formData.m3_bottles" placeholder="e.g., 1 (CD456)" required></td>
-                <td><input type="date" v-model="formData.m3_next_due_date" required></td>
-                <td><input type="text" v-model="formData.m3_dispenser_signature" readonly></td>
-                <td>
-                  <select v-model="formData.regimen_m3" required>
-                    <option value="">Select</option>
-                    <option value="Daily PrEP">Daily PrEP</option>
-                    <option value="ED-PrEP">ED-PrEP</option>
-                  </select>
-                </td>
-                <td><input type="text" v-model="formData.m3_recipient_signature" readonly></td>
-                <td><input type="text" v-model="formData.m3_remarks"></td>
-              </tr>
-
-              <!-- Month 6 -->
-              <tr v-if="formData.medication === 'M6'">
-                <td>Month 6</td>
-                <td><input type="date" v-model="formData.m6_date" required></td>
-                <td><input type="text" v-model="formData.m6_bottles" placeholder="e.g., 1 (EF789)" required></td>
-                <td><input type="date" v-model="formData.m6_next_due_date" required></td>
-                <td><input type="text" v-model="formData.m6_dispenser_signature" readonly></td>
-                <td>
-                  <select v-model="formData.regimen_m6" required>
-                    <option value="">Select</option>
-                    <option value="Daily PrEP">Daily PrEP</option>
-                    <option value="ED-PrEP">ED-PrEP</option>
-                  </select>
-                </td>
-                <td><input type="text" v-model="formData.m6_recipient_signature" readonly></td>
-                <td><input type="text" v-model="formData.m6_remarks"></td>
-              </tr>
-
-              <!-- Month 9 -->
-              <tr v-if="formData.medication === 'M9'">
-                <td>Month 9</td>
-                <td><input type="date" v-model="formData.m9_date" required></td>
-                <td><input type="text" v-model="formData.m9_bottles" placeholder="e.g., 1 (GH012)" required></td>
-                <td><input type="date" v-model="formData.m9_next_due_date" required></td>
-                <td><input type="text" v-model="formData.m9_dispenser_signature" readonly></td>
-                <td>
-                  <select v-model="formData.regimen_m9" required>
-                    <option value="">Select</option>
-                    <option value="Daily PrEP">Daily PrEP</option>
-                    <option value="ED-PrEP">ED-PrEP</option>
-                  </select>
-                </td>
-                <td><input type="text" v-model="formData.m9_recipient_signature" readonly></td>
-                <td><input type="text" v-model="formData.m9_remarks"></td>
-              </tr>
-
-              <!-- Month 12 -->
-              <tr v-if="formData.medication === 'M12'">
-                <td>Month 12</td>
-                <td><input type="date" v-model="formData.m12_date" required></td>
-                <td><input type="text" v-model="formData.m12_bottles" placeholder="e.g., 1 (IJ345)" required></td>
-                <td><input type="date" v-model="formData.m12_next_due_date" required></td>
-                <td><input type="text" v-model="formData.m12_dispenser_signature" readonly></td>
-                <td>
-                  <select v-model="formData.regimen_m12" required>
-                    <option value="">Select</option>
-                    <option value="Daily PrEP">Daily PrEP</option>
-                    <option value="ED-PrEP">ED-PrEP</option>
-                  </select>
-                </td>
-                <td><input type="text" v-model="formData.m12_recipient_signature" readonly></td>
-                <td><input type="text" v-model="formData.m12_remarks"></td>
+                <td><input type="text" v-model="formData.recipient_signature" readonly></td>
+                <td><input type="text" v-model="formData.remarks"></td>
               </tr>
 
               <tr v-if="!formData.medication">
@@ -151,7 +106,7 @@
         </div>
       </div>
       <button type="submit" class="submit-btn" :disabled="submitDisabled || isSubmitting || !formData.medication">
-        {{ isSubmitting ? 'Submitting...' : 'Review Data' }}
+        {{ getSubmitButtonText() }}
       </button>
     </div>
   </form>
@@ -167,52 +122,24 @@ import { ref, onMounted, watch } from 'vue';
 import axios from 'axios';
 import Form9_ConfirmationModal from './Form9_ConfirmationModal.vue';
 
-const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbw7q0hOBNlScij1QbZonYKU2w_8eKnb2-PJIZYxMiC7LelIcoRH_pSuorC79Cbgmm8E/exec';
+const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwzVoucfZMnPLD7SKarMkoxqtKrSukGhXFGaT6NEWCCVhie07sW5huZ2dVeJR6AaIcH/exec';
 const CSV_DATA_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSfG6e5EIcHDaXopn9DxMZnTwVFGi5CiQxmKlEIPsd7uPtZiQIikYb46UdN78UhZlJfocCfl_s0hGGX/pub?output=csv";
 const UID_MIN_LENGTH = 5;
 
-// --- CORRECTED formData TO MATCH YOUR GOOGLE SHEET ---
+// Form Data - Simplified for multi-row approach (one row per visit)
 const formData = ref({
-  person_dispensing: '',
+  person_dispensing: 'Pre-load: The logged-in user',
   orw_followup: '',
   client_receiving: '',
   uid: '',
   medication: '',
-  m1_date: '',
-  regimen_m1: '',
-  m1_bottles: '',
-  m1_next_due_date: '',
-  m1_dispenser_signature: '',
-  m1_recipient_signature: '',
-  m1_remarks: '',
-  m3_date: '',
-  regimen_m3: '',
-  m3_bottles: '',
-  m3_next_due_date: '',
-  m3_dispenser_signature: '',
-  m3_recipient_signature: '',
-  m3_remarks: '',
-  m6_date: '',
-  regimen_m6: '',
-  m6_bottles: '',
-  m6_next_due_date: '',
-  m6_dispenser_signature: '',
-  m6_recipient_signature: '',
-  m6_remarks: '',
-  m9_date: '',
-  regimen_m9: '',
-  m9_bottles: '',
-  m9_next_due_date: '',
-  m9_dispenser_signature: '',
-  m9_recipient_signature: '',
-  m9_remarks: '',
-  m12_date: '',
-  regimen_m12: '',
-  m12_bottles: '',
-  m12_next_due_date: '',
-  m12_dispenser_signature: '',
-  m12_recipient_signature: '',
-  m12_remarks: '',
+  visit_date: '',
+  regimen: '',
+  bottles: '',
+  next_due_date: '',
+  dispenser_signature: '',
+  recipient_signature: '',
+  remarks: ''
 });
 
 // Feedback & Control State
@@ -224,20 +151,42 @@ const isSubmitting = ref(false);
 const isReviewModalVisible = ref(false);
 const modalSuccessMessage = ref('');
 const modalErrorMessage = ref('');
+
+// Advanced state for prefill and multi-visit support
+const availableVisitTypes = ref([]);
+const selectedVisitType = ref('');
+const isPrefilled = ref(false);
+const isDeletingRecord = ref(false);
+const allVisitTypes = ['M1', 'M3', 'M6', 'M9', 'M12'];
+
 let csvData = [];
 
-// --- CORRECTED: Signature logic now creates the right key names ---
+// Simplified signature logic for multi-row approach
 const updateSignatures = () => {
-  if (!formData.value.medication || !formData.value.uid) return;
-  const monthNumber = formData.value.medication.substring(1); // 'M1' -> '1'
+  if (!formData.value.uid) return;
   const uid = formData.value.uid;
   const dispenser = formData.value.person_dispensing;
-  formData.value[`m${monthNumber}_recipient_signature`] = uid;
-  formData.value[`m${monthNumber}_dispenser_signature`] = dispenser;
+
+  formData.value.recipient_signature = uid;
+  formData.value.dispenser_signature = dispenser;
   formData.value.client_receiving = uid;
-  if (!formData.value[`m${monthNumber}_date`]) {
-    formData.value[`m${monthNumber}_date`] = new Date().toISOString().split('T')[0];
+
+  // Set default date if not already set
+  if (!formData.value.visit_date) {
+    formData.value.visit_date = new Date().toISOString().split('T')[0];
   }
+};
+
+// Format visit type for display
+const formatVisitType = (visitType) => {
+  const mapping = {
+    'M1': 'Month 1',
+    'M3': 'Month 3',
+    'M6': 'Month 6',
+    'M9': 'Month 9',
+    'M12': 'Month 12'
+  };
+  return mapping[visitType] || visitType;
 };
 
 // --- CORRECTED: Watchers now observe the new 'uid' property ---
@@ -277,21 +226,189 @@ const validateUidOnInput = (newUid) => {
   if (!newUid) {
     statusMessage.value = '';
     submitDisabled.value = true;
+    availableVisitTypes.value = [];
+    selectedVisitType.value = '';
+    isPrefilled.value = false;
     return;
   }
+
   const pattern = new RegExp(`^[A-Za-z0-9]{${UID_MIN_LENGTH},}$`);
   if (!pattern.test(newUid)) {
     statusMessage.value = `UID must be at least ${UID_MIN_LENGTH} alphanumeric characters.`;
     statusClass.value = 'error';
     submitDisabled.value = true;
-  } else if (validateUid(newUid)) {
-    statusMessage.value = 'UID found!';
+    availableVisitTypes.value = [];
+    return;
+  }
+
+  if (validateUid(newUid)) {
+    statusMessage.value = 'UID found! Loading available visits...';
     statusClass.value = 'success';
     submitDisabled.value = false;
+    loadAvailableVisits(newUid);
   } else {
-    statusMessage.value = 'UID not found in registration list.';
+    statusMessage.value = `Add data for ${newUid}`;
+    statusClass.value = 'info';
+    submitDisabled.value = false;
+    availableVisitTypes.value = [];
+    isPrefilled.value = false;
+  }
+};
+
+// Get submit button text based on state
+const getSubmitButtonText = () => {
+  if (isSubmitting.value) return 'Submitting...';
+  if (isPrefilled.value && selectedVisitType.value) return `Update ${selectedVisitType.value} Data`;
+  if (formData.value.medication) return `Add ${formData.value.medication} Data`;
+  return 'Review Data';
+};
+
+// Get available new visit types (not yet created)
+const getAvailableNewVisits = () => {
+  return allVisitTypes.filter(visit => !availableVisitTypes.value.includes(visit));
+};
+
+// Load available visit types for UID
+const loadAvailableVisits = async (uid) => {
+  try {
+    const response = await axios.get(GOOGLE_SCRIPT_URL, {
+      params: { action: 'getVisitTypes', uid: uid },
+      timeout: 10000
+    });
+
+    if (response.data.status === 'success') {
+      availableVisitTypes.value = response.data.availableVisits || [];
+      if (availableVisitTypes.value.length > 0) {
+        statusMessage.value = `Found ${availableVisitTypes.value.length} existing visits. Select one to edit or add new.`;
+      } else {
+        statusMessage.value = `Add first visit for ${uid}`;
+      }
+    }
+  } catch (error) {
+    console.error('Error loading visits:', error);
+    availableVisitTypes.value = [];
+  }
+};
+
+// Load data for specific visit type
+const loadVisitData = async (visitType) => {
+  try {
+    statusMessage.value = 'Loading visit data...';
+    selectedVisitType.value = visitType;
+
+    const response = await axios.get(GOOGLE_SCRIPT_URL, {
+      params: { action: 'prefill', uid: formData.value.uid, visitType: visitType },
+      timeout: 10000
+    });
+
+    if (response.data.status === 'success') {
+      const prefillData = response.data.data;
+
+      // Populate form fields
+      Object.keys(prefillData).forEach(key => {
+        if (formData.value.hasOwnProperty(key)) {
+          formData.value[key] = prefillData[key];
+        }
+      });
+
+      isPrefilled.value = true;
+      statusMessage.value = `${visitType} data loaded successfully!`;
+      statusClass.value = 'success';
+
+      // Auto-select the medication radio button
+      formData.value.medication = visitType;
+      updateSignatures();
+
+    } else {
+      statusMessage.value = response.data.message || `Error loading ${visitType} data`;
+      statusClass.value = 'error';
+    }
+  } catch (error) {
+    console.error('Error loading visit data:', error);
+    statusMessage.value = `Error loading ${visitType} data`;
     statusClass.value = 'error';
-    submitDisabled.value = true;
+  }
+};
+
+// Start new visit (clear form and select visit type)
+const startNewVisit = (visitType) => {
+  // Clear form but keep basic info
+  const basicInfo = {
+    person_dispensing: formData.value.person_dispensing,
+    orw_followup: formData.value.orw_followup,
+    uid: formData.value.uid
+  };
+
+  // Reset all form data
+  Object.keys(formData.value).forEach(key => {
+    if (key in basicInfo) {
+      formData.value[key] = basicInfo[key];
+    } else if (Array.isArray(formData.value[key])) {
+      formData.value[key] = [];
+    } else if (typeof formData.value[key] === 'number') {
+      formData.value[key] = null;
+    } else {
+      formData.value[key] = '';
+    }
+  });
+
+  // Set the new visit type
+  formData.value.medication = visitType;
+  selectedVisitType.value = visitType;
+  isPrefilled.value = false;
+
+  statusMessage.value = `Adding new ${visitType} data`;
+  statusClass.value = 'info';
+
+  updateSignatures();
+};
+
+// Confirm delete action
+const confirmDelete = () => {
+  if (confirm(`Are you sure you want to delete the ${selectedVisitType.value} record for UID: ${formData.value.uid}?\n\nThis action cannot be undone.`)) {
+    deleteRecord();
+  }
+};
+
+// Delete record function
+const deleteRecord = async () => {
+  isDeletingRecord.value = true;
+
+  try {
+    const response = await axios.post(GOOGLE_SCRIPT_URL,
+      new URLSearchParams({
+        action: 'delete',
+        uid: formData.value.uid,
+        visitType: selectedVisitType.value
+      }).toString(),
+      {
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        timeout: 15000
+      }
+    );
+
+    if (response.data.status === 'success') {
+      statusMessage.value = response.data.message || 'Record deleted successfully!';
+      statusClass.value = 'success';
+
+      // Refresh available visits
+      await loadAvailableVisits(formData.value.uid);
+
+      // Clear current form
+      startNewVisit(allVisitTypes[0]); // Reset to first visit type
+      isPrefilled.value = false;
+      selectedVisitType.value = '';
+    } else {
+      statusMessage.value = response.data.message || 'Failed to delete record';
+      statusClass.value = 'error';
+    }
+
+  } catch (error) {
+    console.error('Delete error:', error);
+    statusMessage.value = 'Error deleting record. Please try again.';
+    statusClass.value = 'error';
+  } finally {
+    isDeletingRecord.value = false;
   }
 };
 
@@ -302,11 +419,44 @@ const confirmAndSubmit = async () => {
   isSubmitting.value = true;
   modalErrorMessage.value = '';
   modalSuccessMessage.value = '';
+
   try {
-    const formDataSerialized = new URLSearchParams(formData.value).toString();
-    const response = await axios.post(GOOGLE_SCRIPT_URL, formDataSerialized);
+    const dataToSend = { ...formData.value };
+
+    // Add action parameter if updating
+    if (isPrefilled.value && selectedVisitType.value) {
+      dataToSend.action = 'update';
+    }
+
+    const formDataSerialized = new URLSearchParams(dataToSend).toString();
+    const response = await axios.post(GOOGLE_SCRIPT_URL, formDataSerialized, {
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      timeout: 15000
+    });
+
     if (response.data.status === 'success') {
       modalSuccessMessage.value = response.data.message;
+
+      // After successful submission, refresh the available visits
+      setTimeout(async () => {
+        isReviewModalVisible.value = false;
+        await loadAvailableVisits(formData.value.uid);
+
+        // Clear form but keep UID
+        const uid = formData.value.uid;
+        Object.keys(formData.value).forEach(key => {
+          if (key === 'uid' || key === 'person_dispensing') return;
+          if (Array.isArray(formData.value[key])) formData.value[key] = [];
+          else if (typeof formData.value[key] === 'number') formData.value[key] = null;
+          else formData.value[key] = '';
+        });
+        formData.value.uid = uid;
+
+        isPrefilled.value = false;
+        selectedVisitType.value = '';
+        modalSuccessMessage.value = '';
+      }, 2500);
+
     } else {
       modalErrorMessage.value = response.data.message;
     }
@@ -460,6 +610,115 @@ label>input[type="checkbox"] {
   background-color: #f2dede;
   color: #a94442;
   border-color: #ebccd1;
+}
+
+#status-message.info {
+  background-color: #d9edf7;
+  color: #31708f;
+  border-color: #bce8f1;
+}
+
+/* Visit Type Selection Styles */
+.visit-type-selection {
+  margin: 20px 0;
+  padding: 15px;
+  border: 2px solid #e3f2fd;
+  border-radius: 8px;
+  background-color: #f8f9fa;
+}
+
+.visit-type-selection h4 {
+  margin: 0 0 15px 0;
+  color: #333;
+  font-size: 1.1rem;
+}
+
+.visit-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.visit-btn {
+  padding: 10px 15px;
+  border: 2px solid #007bff;
+  background-color: white;
+  color: #007bff;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  font-size: 0.9rem;
+}
+
+.visit-btn:hover {
+  background-color: #007bff;
+  color: white;
+  transform: translateY(-1px);
+}
+
+.visit-btn.selected {
+  background-color: #007bff;
+  color: white;
+  box-shadow: 0 2px 4px rgba(0, 123, 255, 0.3);
+}
+
+.visit-btn.new-visit {
+  border-color: #28a745;
+  color: #28a745;
+  border-style: dashed;
+}
+
+.visit-btn.new-visit:hover {
+  background-color: #28a745;
+  color: white;
+  border-style: solid;
+}
+
+/* Prefill Status Styles */
+.prefill-status {
+  margin: 15px 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 15px;
+  flex-wrap: wrap;
+}
+
+.update-mode-banner {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background-color: #28a745;
+  color: white;
+  padding: 8px 15px;
+  border-radius: 6px;
+  font-weight: 500;
+  font-size: 0.9rem;
+}
+
+.delete-btn {
+  background-color: #dc3545;
+  color: white;
+  padding: 8px 15px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: background-color 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.delete-btn:hover:not(:disabled) {
+  background-color: #c82333;
+}
+
+.delete-btn:disabled {
+  background-color: #6c757d;
+  cursor: not-allowed;
+  opacity: 0.7;
 }
 
 .uid-spinner {

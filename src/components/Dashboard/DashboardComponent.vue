@@ -123,7 +123,9 @@ const url = `https://docs.google.com/spreadsheets/d/e/${sheetId}/pub?output=csv&
 
 const fetchSheetData = async () => {
   try {
-    const response = await axios.get(url);
+    const response = await axios.get(url, {
+      timeout: 30000 // 30 second timeout for slow server
+    });
     const csvText = response.data;
     allRows.value = parseCsv(csvText);
     filteredRows.value = allRows.value;
@@ -133,6 +135,9 @@ const fetchSheetData = async () => {
   } catch (error) {
     console.error("Error fetching data:", error);
     dataLoaded.value = false;
+    if (error.code === 'ECONNABORTED') {
+      console.error('Request timeout - server may be slow');
+    }
   }
 };
 
@@ -215,7 +220,11 @@ const headerStatsData = computed(() => {
     suitableForPrepIndex === -1 ||
     initiationDateIndex === -1
   ) {
-    console.error("One or more required columns not found");
+    console.error("Missing columns for header stats:");
+    console.error("Available headers:", headers);
+    console.error("Missing - Willing to start PrEP:", interestedPrepIndex === -1);
+    console.error("Missing - Suitable for PrEP:", suitableForPrepIndex === -1);
+    console.error("Missing - initiation_month:", initiationDateIndex === -1);
     return [];
   }
 
@@ -261,7 +270,13 @@ const kpiData = computed(() => {
     statusM9Index === -1 ||
     statusM12Index === -1
   ) {
-    console.error("One or more status columns not found");
+    console.error("Missing KPI status columns:");
+    console.error("Available headers:", headers);
+    console.error("Missing - status_m1:", statusM1Index === -1);
+    console.error("Missing - status_m3:", statusM3Index === -1);
+    console.error("Missing - status_m6:", statusM6Index === -1);
+    console.error("Missing - status_m9:", statusM9Index === -1);
+    console.error("Missing - status_m12:", statusM12Index === -1);
     return [];
   }
 

@@ -10,23 +10,115 @@
 
         <label for="participant_uid">Participant UID:</label>
         <input type="text" v-model="formData.participant_uid" id="participant_uid" name="participant_uid" required
-          pattern="[A-Za-z0-9]{5,}" title="Minimum 5 Alphanumeric characters" />
+          pattern="[A-Za-z0-9]{5,}" title="Minimum 5 Alphanumeric characters" :readonly="editMode" />
         <!-- Status Message for UID Validation -->
         <div v-if="statusMessage" id="status-message" :class="statusClass">
           {{ statusMessage }}
         </div>
         <span v-if="isCheckingUid" class="uid-spinner"><i class="fas fa-spinner fa-spin"></i> Checking...</span>
 
-        <label for="type_of_visit">Type of Visit:</label>
-        <select v-model="formData.type_of_visit" id="type_of_visit" name="type_of_visit" required>
-          <option value="mst" disabled>Select one</option>
-          <option value="Screening Visit MO">Screening Visit MO</option>
-          <option value="End of M1">End of M1</option>
-          <option value="End of M3">End of M3</option>
-          <option value="End of M6">End of M6</option>
-          <option value="End of M9">End of M9</option>
-          <option value="End of M12">End of M12</option>
-        </select>
+        <!-- Prefill Status and Delete Button -->
+        <div v-if="isPrefilled" class="prefill-status">
+          <div class="update-mode-banner">
+            <i class="fas fa-edit"></i> UPDATE MODE
+          </div>
+          <button type="button" class="delete-btn" @click="confirmDelete" :disabled="isDeletingRecord">
+            <i v-if="isDeletingRecord" class="fas fa-spinner fa-spin"></i>
+            <i v-else class="fas fa-trash"></i>
+            {{ isDeletingRecord ? 'Deleting...' : 'Delete Record' }}
+          </button>
+        </div>
+
+        <!-- Visit Type Selection with Available Visits -->
+        <div v-if="formData.participant_uid && validateUid(formData.participant_uid)">
+
+          <!-- Loading check -->
+          <div v-if="isCheckingVisits" style="text-align: center; padding: 1rem; color: #3498db;">
+            <span class="uid-spinner"><i class="fas fa-spinner fa-spin"></i> Checking visits...</span>
+          </div>
+
+          <!-- Visit Selection -->
+          <div v-else>
+            <label style="margin-top: 1rem">TYPE OF VISIT:</label>
+
+            <!-- Show existing visits if any -->
+            <div v-if="hasVisitsWithData" style="margin-bottom: 1rem;">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                <p style="font-size: 0.9em; color: #3498db; margin: 0;">
+                  <strong>UPDATE existing data:</strong> ({{ visitsWithData.length }} visit(s) found)
+                </p>
+                <button 
+                  v-if="formData.type_of_visit && visitDataStatus[formData.type_of_visit] === 'Has Data'"
+                  type="button" 
+                  @click="confirmDeleteVisit(formData.type_of_visit)"
+                  :disabled="isDeletingVisit === formData.type_of_visit" 
+                  class="delete-visit-btn-small"
+                  :title="`Delete ${formData.type_of_visit} record`"
+                >
+                  <span v-if="isDeletingVisit === formData.type_of_visit">
+                    <i class="fas fa-spinner fa-spin"></i>
+                  </span>
+                  <span v-else>
+                    <i class="fas fa-trash"></i>
+                  </span>
+                </button>
+              </div>
+              <div class="radio-group-vertical"
+                style="border: 1px solid #3498db; padding: 10px; background: #f0f8ff; border-radius: 5px;">
+                <label v-for="visit in visitsWithData" :key="'update-' + visit.value" 
+                  style="margin: 0; display: flex; align-items: center; margin-bottom: 5px;">
+                  <input type="radio" v-model="formData.type_of_visit" name="type_of_visit" :value="visit.value"
+                    @click="loadVisitData(visit.value)" required style="margin-right: 8px;" />
+                  {{ visit.label }}
+                  <span style="color: #28a745; font-size: 0.85em; margin-left: 8px;">✓ Has Data</span>
+                  <span v-if="isLoadingVisit === visit.value" style="margin-left: 10px;">
+                    <i class="fas fa-spinner fa-spin"></i>
+                  </span>
+                </label>
+              </div>
+            </div>
+            <!-- Create new visit - show visits that DON'T have data -->
+            <div v-if="hasVisitsWithoutData">
+              <p style="font-size: 0.9em; color: #856404; margin-bottom: 0.5rem;">
+                <strong>CREATE new visit data:</strong>
+              </p>
+              <div class="radio-group-vertical"
+                style="border: 1px solid #ffc107; padding: 10px; background: #fffbf0; border-radius: 5px;">
+                <label v-for="visit in visitsWithoutData" :key="'create-' + visit.value">
+                  <input type="radio" v-model="formData.type_of_visit" name="type_of_visit" :value="visit.value"
+                    @click="createNewVisit(visit.value)" required />
+                  {{ visit.label }}
+                  <span style="color: #ffc107; font-size: 0.85em;">+ New</span>
+                </label>
+              </div>
+            </div>
+
+            <!-- Current mode display -->
+            <div v-if="formData.type_of_visit"
+              style="margin-top: 1rem; padding: 10px 15px; border-radius: 6px; font-size: 0.9em; text-align: center; font-weight: 500;"
+              :style="isPrefilled ? 'background: #d4edda; color: #155724; border: 1px solid #c3e6cb;' : 'background: #fff3cd; color: #856404; border: 1px solid #ffeaa7;'">
+              <i :class="isPrefilled ? 'fas fa-edit' : 'fas fa-plus'"></i>
+              <strong>{{ formData.type_of_visit }}</strong>
+              <span v-if="isPrefilled"> - Update Mode</span>
+              <span v-else> - New Record</span>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- Fallback simple dropdown for invalid UIDs -->
+        <div v-else>
+          <label for="type_of_visit">Type of Visit:</label>
+          <select v-model="formData.type_of_visit" id="type_of_visit" name="type_of_visit" required>
+            <option value="mst" disabled>Select one</option>
+            <option value="Screening Visit MO">Screening Visit MO</option>
+            <option value="End of M1">End of M1</option>
+            <option value="End of M3">End of M3</option>
+            <option value="End of M6">End of M6</option>
+            <option value="End of M9">End of M9</option>
+            <option value="End of M12">End of M12</option>
+          </select>
+        </div>
 
         <label>KP:</label>
         <div style="
@@ -314,10 +406,14 @@
         <input type="text" v-model="formData.bhc_no" name="bmhc_no" readonly />
 
         <!-- Submit Button -->
-        <button type="submit" class="submit-btn" :disabled="submitDisabled || isSubmitting">
-          Review Data
-          <!-- Changed Text -->
-        </button>
+        <div class="button-group">
+          <button type="submit" class="submit-btn" :disabled="submitDisabled || isSubmitting">
+            {{ getSubmitButtonText() }}
+          </button>
+          <button v-if="props.editMode" type="button" class="cancel-btn" @click="cancelEdit">
+            Cancel
+          </button>
+        </div>
       </div>
     </div>
   </form>
@@ -346,15 +442,31 @@
 </template>
 
 <script setup>
-import { ref, onMounted, watch } from "vue";
+import { ref, computed, onMounted, watch, defineProps, defineEmits } from "vue";
 import axios from "axios";
 import { prepSites } from "../location/prepSite";
 // Import the modal component
 import Form1_ConfirmationModal from "./Form1_ConfirmationModal.vue"; // Adjust path if needed
 
-// --- Configuration ---
-const GOOGLE_SCRIPT_URL =
-  "https://script.google.com/macros/s/AKfycbwIZ4yvln-49s0GgXemjmRGHGJ_kiV007OAAEwu44VTrllNA_ovtPTQBDsQCuHxDIsR7w/exec"; // Replace with your actual URL
+// --- Props ---
+const props = defineProps({
+  editMode: {
+    type: Boolean,
+    default: false
+  },
+  initialData: {
+    type: Object,
+    default: () => ({})
+  }
+});
+
+// --- Emits ---
+const emit = defineEmits(['form-updated', 'cancel-edit']);
+// Update this URL to your new Form1 Google Apps Script deployment
+const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwS1F6-Umjj4yQtSkYvh-wawbTi9rZEoHc-0tLWCo-gPA8OapIl3d1ZEZ_lRV6CJOgv0w/exec"
+// // --- Configuration ---
+// const GOOGLE_SCRIPT_URL =
+//   "https://script.google.com/macros/s/AKfycbwIZ4yvln-49s0GgXemjmRGHGJ_kiV007OAAEwu44VTrllNA_ovtPTQBDsQCuHxDIsR7w/exec"; // Replace with your actual URL
 const CSV_DATA_URL =
   "https://docs.google.com/spreadsheets/d/e/2PACX-1vSfG6e5EIcHDaXopn9DxMZnTwVFGi5CiQxmKlEIPsd7uPtZiQIikYb46UdN78UhZlJfocCfl_s0hGGX/pub?gid=0&single=true&output=csv";
 const UID_MIN_LENGTH = 5;
@@ -405,6 +517,17 @@ const finalSubmitClass = ref("");
 // General feedback messages (can be removed if only modal/final messages are used)
 const successMessage = ref("");
 const errorMessage = ref("");
+
+// Prefill and delete state
+const isPrefilled = ref(false);
+const isDeletingRecord = ref(false);
+
+// Available Visits state variables
+const availableVisits = ref([]); // Store which visit types have data for current UID
+const isCheckingVisits = ref(false); // Track when checking for available visits
+const isLoadingVisit = ref(null); // Track which visit is being loaded
+const isDeletingVisit = ref(null); // Track which visit is being deleted
+const visitDataStatus = ref({}); // Track which visits have data
 
 let csvData = []; // To store fetched CSV data
 
@@ -470,6 +593,13 @@ function validateUid(uid) {
 
 // Function called on UID input change
 function validateUidOnInput(newUid) {
+  // Skip validation entirely if in edit mode
+  if (props.editMode) {
+    console.log('Skipping UID validation - in edit mode');
+    return;
+  }
+
+  console.log('validateUidOnInput called with UID:', newUid);
   clearFinalMessage(); // Clear final message when UID changes
   modalErrorMessage.value = "";
   modalSuccessMessage.value = "";
@@ -478,39 +608,58 @@ function validateUidOnInput(newUid) {
     statusMessage.value = "";
     statusClass.value = "";
     submitDisabled.value = true;
+    isPrefilled.value = false;
     return;
   }
+
   const pattern = new RegExp(`^[A-Za-z0-9]{${UID_MIN_LENGTH},}$`);
   if (!pattern.test(newUid)) {
     statusMessage.value = `Participant UID must be at least ${UID_MIN_LENGTH} alphanumeric characters.`;
     statusClass.value = "error";
     submitDisabled.value = true;
-  } else if (isCheckingUid.value) {
+    isPrefilled.value = false;
+    return;
+  }
+
+  // For Suitability Form: First check if UID exists in main registration (CSV)
+  // Then try to load existing suitability data from Google Apps Script
+  if (isCheckingUid.value) {
     statusMessage.value = "Checking UID...";
     statusClass.value = "";
     submitDisabled.value = true;
+    isPrefilled.value = false;
   } else if (csvData.length <= 1 && !isCheckingUid.value) {
-    // Check if fetch failed or is complete but empty
     statusMessage.value = "Validation data not available. Cannot check UID.";
     statusClass.value = "error";
     submitDisabled.value = true;
+    isPrefilled.value = false;
   } else {
+    // Check CSV first (main registration)
     if (validateUid(newUid)) {
-      statusMessage.value = "Participant UID found!";
+      console.log('UID found in main registration, loading suitability data...');
+      statusMessage.value = "UID found in registration! Loading suitability data...";
       statusClass.value = "success";
       submitDisabled.value = false;
+
+      // Check available visits for this UID
+      checkAvailableVisits(newUid);
+
+      loadPrefillData(newUid); // Try to load existing suitability data
     } else {
-      statusMessage.value = "Participant UID not found in records.";
+      statusMessage.value = "UID not found in main registration. Please register participant first.";
       statusClass.value = "error";
       submitDisabled.value = true;
+      isPrefilled.value = false;
     }
   }
 }
 
-// Watch for changes in the participant_uid field
+// Watch for changes in the participant_uid field (only when not in edit mode)
 watch(
   () => formData.value.participant_uid,
   (newUid) => {
+    // Skip validation if in edit mode
+    if (props.editMode) return;
     validateUidOnInput(newUid);
   }
 );
@@ -524,6 +673,219 @@ function checkAge() {
   }
 }
 
+// Get submit button text based on state
+function getSubmitButtonText() {
+  if (props.editMode) return 'Update Record';
+  if (isPrefilled.value) return 'Update Data';
+  return 'Add New';
+}
+
+// Load prefill data from Google Apps Script
+async function loadPrefillData(uid) {
+  console.log(' loadPrefillData called with UID:', uid);
+  console.log(' Using Google Apps Script URL:', GOOGLE_SCRIPT_URL);
+
+  try {
+    statusMessage.value = "Loading existing data...";
+    statusClass.value = "";
+
+    // Try direct request first
+    let response;
+    try {
+      console.log('Attempting direct axios request...');
+      response = await axios.get(GOOGLE_SCRIPT_URL, {
+        params: { action: 'prefill', uid: uid },
+        timeout: 10000
+      });
+      console.log(' Direct request successful:', response.data);
+    } catch (error) {
+      console.log(' Direct request failed, trying JSONP fallback:', error);
+      // JSONP fallback for CORS issues
+      response = await new Promise((resolve, reject) => {
+        const callbackName = 'jsonp_callback_' + Math.round(100000 * Math.random());
+        console.log(' Setting up JSONP with callback:', callbackName);
+
+        window[callbackName] = function (data) {
+          console.log(' JSONP callback received data:', data);
+          delete window[callbackName];
+          document.body.removeChild(script);
+          resolve({ data });
+        };
+
+        const script = document.createElement('script');
+        const jsonpUrl = `${GOOGLE_SCRIPT_URL}?action=prefill&uid=${encodeURIComponent(uid)}&callback=${callbackName}`;
+        console.log(' JSONP URL:', jsonpUrl);
+        script.src = jsonpUrl;
+        script.onerror = () => {
+          console.log(' JSONP script error');
+          delete window[callbackName];
+          document.body.removeChild(script);
+          reject(new Error('JSONP request failed'));
+        };
+        document.body.appendChild(script);
+
+        setTimeout(() => {
+          if (window[callbackName]) {
+            console.log(' JSONP timeout');
+            delete window[callbackName];
+            document.body.removeChild(script);
+            reject(new Error('JSONP request timeout'));
+          }
+        }, 15000);
+      });
+    }
+
+    console.log(' Response status:', response.data.status);
+    console.log(' Response data:', response.data);
+
+    if (response.data.status === 'success') {
+      const prefillData = response.data.data;
+      console.log(' Prefill data received:', prefillData);
+      console.log(' Current form data before prefill:', JSON.stringify(formData.value, null, 2));
+
+      // Populate form fields with prefilled data
+      let fieldsUpdated = 0;
+      Object.keys(prefillData).forEach(key => {
+        if (formData.value.hasOwnProperty(key)) {
+          console.log(` Updating field ${key}: ${formData.value[key]} → ${prefillData[key]}`);
+          formData.value[key] = prefillData[key];
+          fieldsUpdated++;
+        } else {
+          console.log(` Field ${key} not found in formData`);
+        }
+      });
+
+      console.log(` Updated ${fieldsUpdated} form fields`);
+      console.log(' Form data after prefill:', JSON.stringify(formData.value, null, 2));
+
+      isPrefilled.value = true;
+      statusMessage.value = "Data loaded successfully!";
+      statusClass.value = "success";
+      submitDisabled.value = false;
+
+    } else {
+      console.log(' No existing data found, showing add message');
+      // No existing suitability data found - that's OK, they can add new
+      statusMessage.value = `Ready to add suitability assessment for ${uid}`;
+      statusClass.value = "info";
+      isPrefilled.value = false;
+      submitDisabled.value = false;
+    }
+
+  } catch (error) {
+    console.error(' Error loading prefill data:', error);
+    statusMessage.value = `Ready to add suitability assessment for ${uid}`;
+    statusClass.value = "info";
+    isPrefilled.value = false;
+    submitDisabled.value = false;
+  }
+}
+
+// Confirm delete action
+function confirmDelete() {
+  if (confirm(`Are you sure you want to delete the suitability assessment record for UID: ${formData.value.participant_uid}?\n\nThis action cannot be undone.`)) {
+    deleteRecord();
+  }
+}
+
+// Delete record function
+async function deleteRecord() {
+  isDeletingRecord.value = true;
+
+  try {
+    const uid = formData.value.participant_uid;
+
+    // Try direct request first
+    let response;
+    try {
+      response = await axios.post(GOOGLE_SCRIPT_URL,
+        new URLSearchParams({
+          action: 'delete',
+          uid: uid
+        }).toString(),
+        {
+          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+          timeout: 15000
+        }
+      );
+    } catch (error) {
+      console.log('Direct delete request failed, trying JSONP fallback:', error);
+      // JSONP fallback
+      response = await new Promise((resolve, reject) => {
+        const callbackName = 'jsonp_callback_' + Math.round(100000 * Math.random());
+        window[callbackName] = function (data) {
+          delete window[callbackName];
+          document.body.removeChild(script);
+          resolve({ data });
+        };
+
+        const script = document.createElement('script');
+        script.src = `${GOOGLE_SCRIPT_URL}?action=delete&uid=${encodeURIComponent(uid)}&callback=${callbackName}`;
+        script.onerror = () => {
+          delete window[callbackName];
+          document.body.removeChild(script);
+          reject(new Error('JSONP delete request failed'));
+        };
+        document.body.appendChild(script);
+
+        setTimeout(() => {
+          if (window[callbackName]) {
+            delete window[callbackName];
+            document.body.removeChild(script);
+            reject(new Error('JSONP delete request timeout'));
+          }
+        }, 20000);
+      });
+    }
+
+    if (response.data.status === 'success') {
+      setFinalMessage(response.data.message || 'Record deleted successfully!', 'success');
+      clearForm();
+      isPrefilled.value = false;
+      statusMessage.value = '';
+      statusClass.value = '';
+      submitDisabled.value = true;
+    } else {
+      setFinalMessage(response.data.message || 'Failed to delete record', 'error');
+    }
+
+  } catch (error) {
+    console.error('Delete error:', error);
+    setFinalMessage('Error deleting record. Please try again.', 'error');
+  } finally {
+    isDeletingRecord.value = false;
+  }
+}
+
+// --- Cancel Edit Function ---
+const cancelEdit = () => {
+  emit('cancel-edit');
+};
+
+// --- Update Record Function (for edit mode) ---
+const updateRecord = async () => {
+  isSubmitting.value = true;
+
+  try {
+    // Prepare data: Ensure arrays are converted to semicolon-separated strings
+    const dataToSend = { ...formData.value };
+    Object.keys(dataToSend).forEach((key) => {
+      if (Array.isArray(dataToSend[key])) {
+        dataToSend[key] = dataToSend[key].join("; "); // Example: using semicolon
+      }
+    });
+
+    // Emit the updated data to the parent component
+    emit('form-updated', dataToSend);
+
+  } catch (error) {
+    console.error('Update error:', error);
+    modalErrorMessage.value = `Error updating record: ${error.message}`;
+  } finally {
+    isSubmitting.value = false;
+  }
+};
+
 // --- Modal Control ---
 const showReviewModal = () => {
   if (submitDisabled.value) {
@@ -532,6 +894,13 @@ const showReviewModal = () => {
     // Display error message more prominently if needed
     return;
   }
+
+  // If in edit mode, directly update without showing modal
+  if (props.editMode) {
+    updateRecord();
+    return;
+  }
+
   modalSuccessMessage.value = "";
   modalErrorMessage.value = "";
   clearFinalMessage();
@@ -558,11 +927,49 @@ const confirmAndSubmit = async () => {
       }
     });
 
-    const formDataSerialized = new URLSearchParams(dataToSend).toString();
+    // Add action parameter if updating
+    if (isPrefilled.value) {
+      dataToSend.action = 'update';
+    }
 
-    const response = await axios.post(GOOGLE_SCRIPT_URL, formDataSerialized, {
-      headers: { "Content-Type": "application/x-www-form-urlencoded" },
-    });
+    let response;
+    try {
+      const formDataSerialized = new URLSearchParams(dataToSend).toString();
+      response = await axios.post(GOOGLE_SCRIPT_URL, formDataSerialized, {
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        timeout: 15000
+      });
+    } catch (error) {
+      console.log('Direct submission failed, trying JSONP fallback:', error);
+      // JSONP fallback for CORS issues
+      response = await new Promise((resolve, reject) => {
+        const callbackName = 'jsonp_callback_' + Math.round(100000 * Math.random());
+        window[callbackName] = function (data) {
+          delete window[callbackName];
+          document.body.removeChild(script);
+          resolve({ data });
+        };
+
+        // Create query string from dataToSend
+        const queryParams = new URLSearchParams(dataToSend).toString();
+        const script = document.createElement('script');
+        script.src = `${GOOGLE_SCRIPT_URL}?${queryParams}&callback=${callbackName}`;
+        script.onerror = () => {
+          delete window[callbackName];
+          document.body.removeChild(script);
+          reject(new Error('JSONP submission failed'));
+        };
+        document.body.appendChild(script);
+
+        setTimeout(() => {
+          if (window[callbackName]) {
+            delete window[callbackName];
+            document.body.removeChild(script);
+            reject(new Error('JSONP submission timeout'));
+          }
+        }, 20000);
+      });
+    }
 
     console.log("Submission response:", response);
 
@@ -585,11 +992,12 @@ const confirmAndSubmit = async () => {
         statusMessage.value = "";
         statusClass.value = "";
         submitDisabled.value = true;
+        isPrefilled.value = false;
         modalSuccessMessage.value = ""; // Clear modal message
       }, SUBMIT_SUCCESS_DELAY);
     } else {
       modalErrorMessage.value =
-        response.data.message ||
+        response.data?.message ||
         "Submission failed. Unexpected response from server.";
     }
   } catch (error) {
@@ -655,6 +1063,39 @@ const getLoggedInUser = () => {
   }
 };
 
+// --- Data Population Function for Edit Mode ---
+function populateFormData() {
+  if (props.editMode && props.initialData) {
+    console.log('Populating form data for edit mode:', props.initialData);
+
+    // Convert string arrays back to arrays if needed
+    Object.keys(props.initialData).forEach(key => {
+      if (formData.value.hasOwnProperty(key)) {
+        let value = props.initialData[key];
+
+        // Handle arrays that might be stored as semicolon-separated strings
+        if (Array.isArray(formData.value[key]) && typeof value === 'string' && value.includes(';')) {
+          formData.value[key] = value.split(';').map(item => item.trim()).filter(item => item);
+        } else if (Array.isArray(formData.value[key]) && typeof value === 'string' && value) {
+          // Handle single values that should be arrays
+          formData.value[key] = [value];
+        } else if (Array.isArray(formData.value[key]) && !value) {
+          formData.value[key] = [];
+        } else {
+          formData.value[key] = value || (typeof formData.value[key] === 'number' ? null : '');
+        }
+      }
+    });
+
+    // In edit mode, clear any validation messages and enable submit
+    statusMessage.value = "";
+    statusClass.value = "";
+    submitDisabled.value = false;
+
+    console.log('Form data populated successfully for edit mode');
+  }
+}
+
 // --- Utility Functions for Final Message ---
 function setFinalMessage(message, type) {
   finalSubmitMessage.value = message;
@@ -665,25 +1106,321 @@ function clearFinalMessage() {
   finalSubmitClass.value = "";
 }
 
+// === VISIT TYPE OPTIONS ===
+const visitOptions = [
+  { value: "Screening Visit MO", label: "SCREENING VISIT MO", icon: "🩺" },
+  { value: "End of M1", label: "END OF M1", icon: "1️⃣" },
+  { value: "End of M3", label: "END OF M3", icon: "3️⃣" },
+  { value: "End of M6", label: "END OF M6", icon: "6️⃣" },
+  { value: "End of M9", label: "END OF M9", icon: "9️⃣" },
+  { value: "End of M12", label: "END OF M12", icon: "🔚" }
+];
+
+// === ADDITIONAL VALIDATION FUNCTION ===
+const validateUidCheck = (uid) => {
+  return validateUid(uid);
+};
+
+// === COMPUTED PROPERTIES FOR VISIT FILTERING ===
+// Get visits that have data
+const visitsWithData = computed(() => {
+  return visitOptions.filter(visit => visitDataStatus.value[visit.value] === 'Has Data');
+});
+
+// Get visits that don't have data
+const visitsWithoutData = computed(() => {
+  return visitOptions.filter(visit => visitDataStatus.value[visit.value] !== 'Has Data');
+});
+
+// Check if there are any visits with data
+const hasVisitsWithData = computed(() => {
+  return visitsWithData.value.length > 0;
+});
+
+// Check if there are any visits without data
+const hasVisitsWithoutData = computed(() => {
+  return visitsWithoutData.value.length > 0;
+});
+
+// === CHECK AVAILABLE VISITS FOR UID ===
+const checkAvailableVisits = async (uid) => {
+  if (!uid || uid.length < UID_MIN_LENGTH) {
+    availableVisits.value = [];
+    return;
+  }
+
+  isCheckingVisits.value = true;
+  try {
+    // Send request to get all available visit types for this UID
+    const params = new URLSearchParams({
+      uid: uid,
+      action: 'getAvailableVisits'
+    }).toString();
+
+    console.log(`Checking available visits for UID: ${uid}`);
+
+    const response = await fetch(`${GOOGLE_SCRIPT_URL}?${params}`);
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const result = await response.json();
+    console.log('Available visits response:', result);
+
+    if (result.status === "success") {
+      availableVisits.value = result.availableVisits || [];
+      console.log('Set availableVisits.value to:', availableVisits.value);
+
+      // Update visit status - use visitStatus from API if available, otherwise use availableVisits
+      if (result.visitStatus) {
+        visitDataStatus.value = result.visitStatus;
+      } else {
+        visitOptions.forEach(visit => {
+          if (result.availableVisits && result.availableVisits.includes(visit.value)) {
+            visitDataStatus.value[visit.value] = 'Has Data';
+          } else {
+            visitDataStatus.value[visit.value] = 'No Data';
+          }
+        });
+      }
+
+      const dataCount = result.availableVisits ? result.availableVisits.length : 0;
+      statusMessage.value = `Found ${dataCount} visit record(s) for ${uid}`;
+      statusClass.value = "success";
+
+    } else {
+      availableVisits.value = [];
+      statusMessage.value = `No visit records found for ${uid}`;
+      statusClass.value = "";
+    }
+
+  } catch (err) {
+    console.error('Error checking available visits:', err);
+    availableVisits.value = [];
+    statusMessage.value = "Error checking available visits: " + err.message;
+    statusClass.value = "error";
+  } finally {
+    isCheckingVisits.value = false;
+  }
+};
+
+// === LOAD VISIT DATA FUNCTION ===
+// Load data for a specific visit type
+const loadVisitData = async (visitType) => {
+  if (!formData.value.participant_uid || !validateUid(formData.value.participant_uid)) {
+    alert('Please enter a valid UID first');
+    return;
+  }
+
+  isLoadingVisit.value = visitType;
+
+  try {
+    // Send request to get data for specific UID + Visit Type combination
+    const params = new URLSearchParams({
+      uid: formData.value.participant_uid,
+      visit_type: visitType,
+      action: 'prefill'
+    }).toString();
+
+    console.log(`Loading data for ${visitType} - UID: ${formData.value.participant_uid}`);
+
+    const response = await fetch(`${GOOGLE_SCRIPT_URL}?${params}`);
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const result = await response.json();
+    console.log(`${visitType} response:`, result);
+
+    // Set the current visit type
+    formData.value.type_of_visit = visitType;
+
+    if (result.status === "success" && result.data) {
+      // Found existing data for this visit type - PREFILL
+      Object.keys(result.data).forEach(key => {
+        if (key in formData.value && key !== 'participant_uid') {
+          // Don't overwrite UID, but fill everything else
+          if (key.includes('date') && result.data[key]) {
+            const dateValue = new Date(result.data[key]);
+            if (!isNaN(dateValue.getTime())) {
+              formData.value[key] = dateValue.toISOString().split('T')[0];
+            } else {
+              formData.value[key] = result.data[key];
+            }
+          } else {
+            formData.value[key] = result.data[key];
+          }
+        }
+      });
+
+      visitDataStatus.value[visitType] = 'Has Data';
+      statusMessage.value = `Loaded existing ${visitType} data for ${formData.value.participant_uid}`;
+      statusClass.value = "success";
+      isPrefilled.value = true;
+
+    } else {
+      // No existing data for this visit type - CLEAR FORM FOR NEW ENTRY
+      clearFormExceptUID();
+      formData.value.type_of_visit = visitType; // Set the visit type
+
+      visitDataStatus.value[visitType] = 'No Data';
+      statusMessage.value = `Creating new ${visitType} record for ${formData.value.participant_uid}`;
+      statusClass.value = "";
+      isPrefilled.value = false;
+    }
+
+  } catch (err) {
+    console.error(`Error loading ${visitType} data:`, err);
+    statusMessage.value = `Error loading ${visitType} data: ` + err.message;
+    statusClass.value = "error";
+  } finally {
+    isLoadingVisit.value = null;
+  }
+};
+
+// Clear form except UID and visit type
+const clearFormExceptUID = () => {
+  const preserveFields = ['participant_uid', 'type_of_visit', 'prescriber_name', 'prescriber_designation', 'bhc_no', 'date', 'signature_date'];
+
+  Object.keys(formData.value).forEach((key) => {
+    if (!preserveFields.includes(key)) {
+      if (Array.isArray(formData.value[key])) formData.value[key] = [];
+      else if (typeof formData.value[key] === "boolean") formData.value[key] = false;
+      else if (typeof formData.value[key] === "number") formData.value[key] = null;
+      else formData.value[key] = "";
+    }
+  });
+};
+
+// === CREATE NEW VISIT FUNCTION ===
+// Create a new visit record (clear form and set visit type)
+const createNewVisit = async (visitType) => {
+  if (!formData.value.participant_uid || !validateUid(formData.value.participant_uid)) {
+    alert('Please enter a valid UID first');
+    return;
+  }
+
+  // Clear form except UID and system fields
+  clearFormExceptUID();
+
+  // Set the visit type for new record
+  formData.value.type_of_visit = visitType;
+
+  // Set states
+  isPrefilled.value = false;
+  isLoadingVisit.value = null;
+
+  statusMessage.value = `Creating new ${visitType} record for ${formData.value.participant_uid}`;
+  statusClass.value = "";
+
+  console.log(`Creating new visit: ${visitType} for UID: ${formData.value.participant_uid}`);
+};
+
+// === DELETE VISIT FUNCTIONS ===
+// Confirm before deleting a visit record
+const confirmDeleteVisit = (visitType) => {
+  const confirmMessage = `Are you sure you want to DELETE the ${visitType} record for ${formData.value.participant_uid}?\n\n⚠️ This action CANNOT be undone!\n\nThe record will be permanently removed from the database.`;
+
+  if (confirm(confirmMessage)) {
+    deleteVisitRecord(visitType);
+  }
+};
+
+// Delete a specific visit record
+const deleteVisitRecord = async (visitType) => {
+  if (!formData.value.participant_uid || !validateUid(formData.value.participant_uid)) {
+    alert('Invalid UID');
+    return;
+  }
+
+  isDeletingVisit.value = visitType;
+
+  try {
+    // Send delete request to Google Apps Script
+    const params = new URLSearchParams({
+      uid: formData.value.participant_uid,
+      visit_type: visitType,
+      action: 'delete'
+    }).toString();
+
+    console.log(`Deleting ${visitType} record for UID: ${formData.value.participant_uid}`);
+
+    const response = await fetch(`${GOOGLE_SCRIPT_URL}?${params}`, {
+      method: 'POST'
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const result = await response.json();
+    console.log('Delete response:', result);
+
+    if (result.status === "success") {
+      // Remove from available visits
+      availableVisits.value = availableVisits.value.filter(v => v !== visitType);
+
+      // If currently selected visit was deleted, clear form
+      if (formData.value.type_of_visit === visitType) {
+        clearFormExceptUID();
+        formData.value.type_of_visit = "mst";
+        isPrefilled.value = false;
+      }
+
+      statusMessage.value = `${visitType} record deleted successfully for ${formData.value.participant_uid}`;
+      statusClass.value = "success";
+
+      // Show success message briefly
+      setTimeout(() => {
+        if (statusMessage.value.includes('deleted successfully')) {
+          statusMessage.value = availableVisits.value.length > 0
+            ? `${availableVisits.value.length} visit record(s) remaining for ${formData.value.participant_uid}`
+            : `No visit records remaining for ${formData.value.participant_uid}`;
+        }
+      }, 3000);
+
+    } else {
+      statusMessage.value = `Failed to delete ${visitType}: ` + (result.message || 'Unknown error');
+      statusClass.value = "error";
+    }
+
+  } catch (err) {
+    console.error(`Error deleting ${visitType} record:`, err);
+    statusMessage.value = `Error deleting ${visitType}: ` + err.message;
+    statusClass.value = "error";
+  } finally {
+    isDeletingVisit.value = null;
+  }
+};
+
 // --- Lifecycle Hook ---
 onMounted(() => {
-  initializeDate(); // Set the current date on form load
-  fetchCsvData(); // Fetch validation data
-
-  // Populate prescriber details
-  const loggedInUser = getLoggedInUser();
-
-  if (loggedInUser) {
-    formData.value.prescriber_name = loggedInUser.fullname || "";
-    formData.value.prescriber_designation = loggedInUser.designation || "";
-    formData.value.bhc_no = loggedInUser.bhc_no || "";
-  } else {
-    console.warn("Logged in user details not found in localStorage.");
-    // Optionally clear fields if no user found
-    formData.value.prescriber_name = "";
-    formData.value.prescriber_designation = "";
-    formData.value.bmhc_no = "";
+  if (!props.editMode) {
+    initializeDate(); // Set the current date on form load only if not editing
+    fetchCsvData(); // Fetch validation data only if not editing
   }
+
+  // Populate prescriber details (unless editing)
+  if (!props.editMode) {
+    const loggedInUser = getLoggedInUser();
+
+    if (loggedInUser) {
+      formData.value.prescriber_name = loggedInUser.fullname || "";
+      formData.value.prescriber_designation = loggedInUser.designation || "";
+      formData.value.bhc_no = loggedInUser.bhc_no || "";
+    } else {
+      console.warn("Logged in user details not found in localStorage.");
+      // Optionally clear fields if no user found
+      formData.value.prescriber_name = "";
+      formData.value.prescriber_designation = "";
+      formData.value.bmhc_no = "";
+    }
+  }
+
+  // Populate form data if in edit mode
+  populateFormData();
 
   // Removed the direct event listener for UID input - using watch now.
 });
@@ -804,6 +1541,12 @@ label>input[type="checkbox"] {
   border-color: #ebccd1;
 }
 
+#status-message.info {
+  background-color: #d9edf7;
+  color: #31708f;
+  border-color: #bce8f1;
+}
+
 .uid-spinner {
   margin-left: 10px;
   color: #3498db;
@@ -854,5 +1597,116 @@ label>input[type="checkbox"] {
   background-color: #f8d7da;
   color: #842029;
   border: 1px solid #f5c2c7;
+}
+
+/* Button Group Styles */
+.button-group {
+  display: flex;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.cancel-btn {
+  background-color: #6c757d;
+  color: #fff;
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: background-color 0.2s ease;
+}
+
+.cancel-btn:hover {
+  background-color: #5a6268;
+}
+
+/* Prefill Status Styles */
+.prefill-status {
+  margin-bottom: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.update-mode-banner {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background-color: #28a745;
+  color: white;
+  padding: 0.5rem 1rem;
+  border-radius: 5px;
+  font-weight: 500;
+  font-size: 0.9rem;
+}
+
+.delete-btn {
+  background-color: #dc3545;
+  color: #fff;
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: background-color 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.delete-btn:hover:not(:disabled) {
+  background-color: #c82333;
+}
+
+.delete-btn:disabled {
+  background-color: #6c757d;
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+/* Available Visits Styles */
+.radio-group-vertical {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.radio-group-vertical label {
+  display: flex;
+  align-items: center;
+  margin-bottom: 0;
+  font-weight: normal;
+  cursor: pointer;
+  padding: 0.5rem;
+  border-radius: 4px;
+  transition: background-color 0.2s ease;
+}
+
+.radio-group-vertical label:hover {
+  background-color: rgba(0, 0, 0, 0.05);
+}
+
+.delete-visit-btn {
+  background-color: #dc3545;
+  color: #fff;
+  padding: 0.25rem 0.5rem;
+  border: none;
+  border-radius: 3px;
+  cursor: pointer;
+  font-size: 0.75rem;
+  transition: background-color 0.2s ease;
+}
+
+.delete-visit-btn:hover:not(:disabled) {
+  background-color: #c82333;
+}
+
+.delete-visit-btn:disabled {
+  background-color: #6c757d;
+  cursor: not-allowed;
+  opacity: 0.7;
 }
 </style>
