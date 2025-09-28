@@ -33,14 +33,10 @@
                 <p style="font-size: 0.9em; color: #3498db; margin: 0;">
                   <strong>UPDATE existing data:</strong> ({{ visitsWithData.length }} visit(s) found)
                 </p>
-                <button 
-                  v-if="formData.type_of_visit && visitDataStatus[formData.type_of_visit] === 'Has Data'"
-                  type="button" 
-                  @click="confirmDeleteVisit(formData.type_of_visit)"
-                  :disabled="isDeletingVisit === formData.type_of_visit" 
-                  class="delete-visit-btn-small"
-                  :title="`Delete ${formData.type_of_visit} record`"
-                >
+                <button v-if="formData.type_of_visit && visitDataStatus[formData.type_of_visit] === 'Has Data'"
+                  type="button" @click="confirmDeleteVisit(formData.type_of_visit)"
+                  :disabled="isDeletingVisit === formData.type_of_visit" class="delete-visit-btn-small"
+                  :title="`Delete ${formData.type_of_visit} record`">
                   <span v-if="isDeletingVisit === formData.type_of_visit">
                     <i class="fas fa-spinner fa-spin"></i>
                   </span>
@@ -51,7 +47,7 @@
               </div>
               <div class="radio-group-vertical"
                 style="border: 1px solid #3498db; padding: 10px; background: #f0f8ff; border-radius: 5px;">
-                <label v-for="visit in visitsWithData" :key="'update-' + visit.value" 
+                <label v-for="visit in visitsWithData" :key="'update-' + visit.value"
                   style="margin: 0; display: flex; align-items: center; margin-bottom: 5px;">
                   <input type="radio" v-model="formData.type_of_visit" name="type_of_visit" :value="visit.value"
                     @click="loadVisitData(visit.value)" required style="margin-right: 8px;" />
@@ -96,7 +92,7 @@
         <!-- Fallback simple text input for invalid UIDs -->
         <div v-else>
           <label for="type_of_visit">Type of Visit:</label>
-          <input type="text" v-model="formData.type_of_visit" id="type_of_visit" name="type_of_visit" 
+          <input type="text" v-model="formData.type_of_visit" id="type_of_visit" name="type_of_visit"
             placeholder="Enter visit type" />
         </div>
 
@@ -1506,7 +1502,7 @@ import Form2_ConfirmationModal from "./Form2_ConfirmationModal.vue"; // Adjust p
 import { prepSites } from "../location/prepSite";
 // --- Configuration ---
 
-const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwhKwOhzqEr6prEHWANCqMncDFS4ASezLlSbpbz11H2BXKNYyUdcdNniHar1s4-RCIq/exec';
+const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycby87Y2GBLRtIxmk4RWf8rFw-7lcsthrLXU5xmegMaG95id5NmPR0pJBJILPl3lih1lM/exec';
 const CSV_DATA_URL =
   "https://docs.google.com/spreadsheets/d/e/2PACX-1vSfG6e5EIcHDaXopn9DxMZnTwVFGi5CiQxmKlEIPsd7uPtZiQIikYb46UdN78UhZlJfocCfl_s0hGGX/pub?gid=0&single=true&output=csv"; // Same UID validation source
 const UID_MIN_LENGTH = 5;
