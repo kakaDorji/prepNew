@@ -1,4 +1,3 @@
-//cliniform
 <template>
   <!-- Clinical Data Form -->
   <form @submit.prevent="showReviewModal">

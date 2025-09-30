@@ -400,7 +400,7 @@ import { prepSites } from "../location/prepSite";
 
 // --- Configuration ---
 const GOOGLE_SCRIPT_URL =
-  "https://script.google.com/macros/s/AKfycbwLZnBIyR4MDV3PBgmS-93raTN43XAa8YhCl2h5qb-QyDXD4A5jDMu7iXQMj33bhuxtUw/exec"; // FORM 8 URL
+  "https://script.google.com/macros/s/AKfycby8kHrWIuDGEaxkquo2XPl8bpsl1jP3VUR4sT3v-wV9gcEo2KBkFSNgxaeEqrYwNt5B1Q/exec"; // FORM 8 URL
 const CSV_DATA_URL =
   "https://docs.google.com/spreadsheets/d/e/2PACX-1vSfG6e5EIcHDaXopn9DxMZnTwVFGi5CiQxmKlEIPsd7uPtZiQIikYb46UdN78UhZlJfocCfl_s0hGGX/pub?output=csv";
 const UID_MIN_LENGTH = 5;
