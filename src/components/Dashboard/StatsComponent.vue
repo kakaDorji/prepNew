@@ -46,7 +46,7 @@
       <div class="mb-4 text-sm text-gray-600">
         {{ statusMessage }}
         <span v-if="filteredRows.length > 0" class="ml-2 font-semibold">Total entries: {{ filteredRows.length - 1
-        }}</span>
+          }}</span>
       </div>
 
       <!-- Table -->
@@ -238,7 +238,23 @@ const fetchSheetData = async () => {
 
     const response = await axios.get(url);
     const csvText = response.data;
-    const parsedRows = parseCsv(csvText);
+    let parsedRows = parseCsv(csvText);
+
+    // Sort rows by date of referral in descending order to show newest last
+    const header = parsedRows[0];
+    const data = parsedRows.slice(1).sort((a, b) => {
+      const dateA = parseDate(a[COLUMN_INDICES.DATE_OF_REFERRAL]);
+      const dateB = parseDate(b[COLUMN_INDICES.DATE_OF_REFERRAL]);
+      if (dateA && dateB) {
+        return dateB - dateA; // Sorts from newest to oldest
+      } else if (dateA) {
+        return -1;
+      } else if (dateB) {
+        return 1;
+      }
+      return 0;
+    });
+    parsedRows = [header, ...data.reverse()]; // Reverse to show newest at the bottom
 
     // Find the correct column index for "Referral to PrEP site"
     const headerRow = parsedRows[0];

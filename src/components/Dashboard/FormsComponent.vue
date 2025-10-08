@@ -240,22 +240,30 @@ const closeModal = () => {
 onMounted(() => {
   const loggedInUser = JSON.parse(localStorage.getItem("loggedInUser"));
 
-  if (loggedInUser && loggedInUser.role === "L4") {
-    // If the user is L4 (Outreach Worker), show specific forms
-    mainCards.value = allMainCards.filter(
-      (card) => card.title === "BASELINE BEHAVIOUR TOOL" || 
-                card.title === "ORW FIELD FORMAT"
-    );
-    additionalCards.value = allAdditionalCards.filter(
-      (card) => card.title === "MONITORING VIEW",
-    );
-  } else if (loggedInUser && (loggedInUser.role === "L3" || loggedInUser.role === "prep_health_focal")) {
-    // If the user is L3 (PrEP Health Focal), show all forms including drug distribution
+  if (!loggedInUser) {
+    mainCards.value = [];
+    additionalCards.value = [];
+    return;
+  }
+
+  if (loggedInUser.role === "admin") {
+    // Admin sees all forms
     mainCards.value = allMainCards;
     additionalCards.value = allAdditionalCards;
+  } else if (loggedInUser.role === "L4") {
+    // If the user is L4 (Outreach Worker), show specific forms
+    mainCards.value = allMainCards.filter(
+      (card) => card.title === "BASELINE BEHAVIOUR TOOL" ||
+        card.title === "ORW FIELD FORMAT"
+    );
+    additionalCards.value = allAdditionalCards.filter(
+      (card) => card.title === "MONITORING VIEW"
+    );
   } else {
-    // For admin and other roles, show all cards
-    mainCards.value = allMainCards;
+    // For other roles (counselors, etc.), show all cards except the baseline tool
+    mainCards.value = allMainCards.filter(
+      (card) => card.title !== "BASELINE BEHAVIOUR TOOL"
+    );
     additionalCards.value = allAdditionalCards;
   }
 });
