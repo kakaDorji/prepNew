@@ -15,5 +15,12 @@ export const prepSites = [
   "Mongar Regional Hospital",
   "Samtse HISC",
   "Samdrup Jongkhar HISC",
-  "Trashigang Regional Hospital"
+  "Trashigang Regional Hospital",
+
+    // ➕ newly added (from request)
+  "HISC/Lobesa",
+  "HISC/Samdrup Jongkhar",
+  "VCT/Samtse Hospital",
+  "VCT/Trashigang Hospital",
+  "VCT/MRRH"
 ];
